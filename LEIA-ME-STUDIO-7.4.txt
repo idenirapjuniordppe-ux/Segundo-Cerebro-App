@@ -1,0 +1,39 @@
+2º CÉREBRO — STUDIO 7.4 · NOTAS PRO
+================================
+
+IMPORTANTE
+- A instalação deve começar por uma CÓPIA DE TESTE do seu Apps Script e da planilha.
+- Confirme que a fila de operações locais da PWA está vazia antes de atualizar.
+- NÃO apague dados do site, não desinstale a PWA e não recrie a planilha.
+- A versão 7.4 reutiliza a aba 'Notas' e o campo 'pagina_pai', já existentes na 7.3.
+- O Codigo.gs muda apenas o rótulo de distribuição 7.3 -> 7.4; toda a funcionalidade de Notas Pro foi implementada no Index.html.
+
+1) INSTALAR NO GOOGLE APPS SCRIPT (se também utilizar essa interface)
+  - Faça backup de Codigo.gs, Index.html e da planilha.
+  - Substitua o conteúdo de Index.html pelo do pacote.
+  - Substitua Codigo.gs pelo do pacote para alinhar a versão exibida (lógica do servidor preservada).
+  - NÃO modifique PLANILHA_ID, ALLOWED_EMAIL e demais propriedades.
+  - Salve, implante Nova versão e teste na implantação de teste antes da principal.
+
+2) INSTALAR NA PWA DO GITHUB
+  - Faça backup do repositório.
+  - Na raiz de Segundo-Cerebro-App, substitua index.html, sw.js e manifest.webmanifest.
+  - Preserve pwa-transport.js, pwa-install.js, offline.html, os ícones e os CINCO fundos .webp.
+  - Commit na branch main; confirme execução verde em Actions.
+  - Abra a PWA no Android, sem limpar os dados locais.
+  - Confirme visualmente 'Notas' -> 'Biblioteca de conhecimento' e os controles de páginas.
+
+3) TESTES MANUAIS NA IMPLANTAÇÃO REAL
+  a) Criar página raiz e subpágina; verificar que aparecem após recarregar.
+  b) Editar, mover entre pais e testar criar ciclos (deve impedir).
+  c) Favoritar e desfavoritar; conferir sincronização entre celular e computador.
+  d) Inserir [[Título de uma página]] e verificar navegação.
+  e) Excluir uma página que contém subpáginas e usar Desfazer (em cópia de teste).
+  f) Testar busca, modelos, editor e tamanho do texto.
+  g) Verificar se a fila local fica vazia após envio à planilha Google.
+
+LIMITAÇÕES
+- O código não reproduz colaboração, histórico de versões ou bases de dados do Notion.
+- Os rascunhos são locais; sincronização entre aparelhos continua dependendo do servidor.
+- A comunicação direta GitHub Pages -> Apps Script pode ser bloqueada por CORS. Não foi homologada nesta atualização.
+- As capturas incluídas nas respostas do ChatGPT foram geradas com dados fictícios.
