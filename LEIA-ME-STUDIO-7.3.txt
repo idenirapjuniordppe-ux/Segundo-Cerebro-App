@@ -1,0 +1,74 @@
+2º CÉREBRO — STUDIO 7.3 | ESTABILIDADE E SIMPLIFICAÇÃO
+======================================================
+Atualização construída a partir do pacote Studio 7.2.
+Uma única interface-fonte: Index.html. A PWA index.html é gerada por gerar_pwa.py.
+
+IMPORTANTE: não foi publicada automaticamente na sua conta.
+
+ANTES DE ATUALIZAR
+1. Faça backup da planilha Google (Arquivo > Fazer uma cópia).
+2. Faça backup do projeto Apps Script (Codigo.gs e Index.html) e dos arquivos atuais do GitHub.
+3. No celular, confira a fila de operações e a quarentena em Ajustes. Exporte as operações
+   pendentes e NÃO limpe os dados do site, não desinstale a PWA.
+4. Teste primeiro com uma cópia do projeto Apps Script ligada a uma CÓPIA da planilha.
+
+INSTALAÇÃO NO GOOGLE APPS SCRIPT (versão de teste primeiro)
+1. Substitua o conteúdo dos arquivos Codigo.gs e Index.html (I maiúsculo).
+2. Confirme a propriedade ALLOWED_EMAIL. Se faltar, execute protegerAcesso()
+   no editor usando a conta proprietária: SEM ALLOWED_EMAIL, o servidor 7.3 bloqueia acesso.
+3. Se o projeto é independente, confira a propriedade PLANILHA_ID com o ID da planilha REAL.
+   Uma planilha vinculada ao script pode ser usada sem essa propriedade.
+   Não remova PLANILHA_ID: quando o ID existe mas está inacessível, o servidor agora
+   para com erro em vez de criar outra planilha e exibir dados aparentemente vazios.
+4. Salve e vá em Implantar > Gerenciar implantações > Editar > Nova versão > Implantar.
+5. Teste carregamento, salvar nota e tarefa, concluir/excluir e sincronizar.
+6. A nova aba _Operacoes será criada AUTOMATICAMENTE na primeira gravação válida.
+   Ela fica oculta no Google Sheets; guarda apenas ID, hash, estado e datas do comando.
+
+INSTALAÇÃO NO GITHUB (repositório Segundo-Cerebro-App)
+Publique SOMENTE os arquivos listados no ZIP de atualização GitHub, diretamente na raiz:
+  index.html  pwa-transport.js  pwa-install.js  sw.js  manifest.webmanifest
+  offline.html  icon-192.png  icon-512.png
+  segundo-cerebro-fundo.webp  fundo-minimal.webp  fundo-glass.webp
+  fundo-executive.webp  fundo-editorial.webp
+Não envie Codigo.gs, Index.html, propriedades do script, credenciais ou dados da planilha
+para um repositório público.
+Aguarde Actions ficar verde; abra o site, confira os cinco temas e os fundos.
+Se houver fila pendente ou em quarentena, a atualização automática será bloqueada
+até que haja uma solução, por segurança.
+
+CORREÇÕES 7.3
+- Bloqueio de criação silenciosa de planilha; inicialização nova só por ação explícita.
+- Falha fechada se ALLOWED_EMAIL não estiver configurado.
+- Registro durável e deduplicação de comandos com cid (incluindo exclusões/Google).
+- Em falha incerta, não reaplica a operação; exige conferência manual.
+- Um gestor de atualização PWA; aviso acessível e bloqueio com fila/quarentena.
+- Instalação offline resiliente a AUSÊNCIA DE PAPEL DE PAREDE, mas exige shell básico.
+- Manifesto, versões 7.3 e gerador PWA parametrizável por PUBLIC_BASE_URL.
+- Identificador único reforçado para marcação de hábitos.
+- Pequenos ajustes de foco por teclado e redução de movimento.
+- Cinco temas e fundos mantidos, sem alterar a estrutura dos registros existentes.
+
+RECUPERAÇÃO DE OPERAÇÕES INCERTAS
+Quando aparecer OPERACAO_EM_VERIFICACAO, não reenvie repetidamente.
+Execute sc73OperacoesParaVerificar() no editor do Apps Script para listar cids pendentes.
+Confira na planilha se os efeitos foram realizados e faça backup antes de qualquer
+intervenção manual na aba oculta _Operacoes. Não marque como concluído sem conferir.
+As operações locais devem permanecer na fila até a verificação. Exportar em Ajustes.
+
+LIMITES E PENDÊNCIAS
+- Testes automatizados de JavaScript, integridade de recursos, deduplicação e SW
+  passaram com serviços simulados. A conta Google real não foi acessada.
+- Chromium deste ambiente bloqueou a abertura da página completa; as capturas de
+  tela não foram consideradas teste de execução da PWA em produção.
+- NÃO é possível garantir que GitHub Pages --> Apps Script via ContentService funcione
+  sem bloqueios CORS/redirecionamentos na implantação real. Requer homologação no Android.
+- IndexedDB e controle de conflitos de edição entre vários dispositivos NÃO foram
+  implementados nesta atualização. Não apague o backup e não teste sobre a base principal.
+- A marca técnica VERSAO_SERVIDOR = 2026-11-03e foi mantida para compatibilidade.
+  A identificação Studio da interface/servidor é 7.3.
+
+TESTES LOCAIS
+  node testes/teste_estabilidade.cjs
+  node testes/teste_service_worker.cjs
+  python testes/verificar_release.py
