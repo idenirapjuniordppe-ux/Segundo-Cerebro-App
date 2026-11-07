@@ -1,5 +1,5 @@
 /* 2º Cérebro Studio 7.7 — cache isolado da interface; NUNCA armazena respostas Google. */
-const CACHE='segundo-cerebro-7.7-checklist-touch-v6';
+const CACHE='segundo-cerebro-7.7-check-square-v10';
 const PREFIX='segundo-cerebro-';
 const ESSENCIAIS=['./index.html','./pwa-transport.js','./offline.html'];
 const OPCIONAIS=['./','./manifest.webmanifest','./pwa-install.js','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];
@@ -20,7 +20,8 @@ self.addEventListener('fetch',event=>{
  if(r.mode==='navigate'){
   event.respondWith((async()=>{try{
     const response=await fetch(r);
-    if(response.ok){const cache=await caches.open(CACHE);cache.put('./index.html',response.clone()).catch(()=>{});}
+    const start=new URL('./',self.registration.scope);
+    if(response.ok && (url.pathname===start.pathname || url.pathname===start.pathname+'index.html') && (response.headers.get('Content-Type')||'').includes('text/html')){const cache=await caches.open(CACHE);cache.put('./index.html',response.clone()).catch(()=>{});}
     return response;
    }catch(e){return (await caches.match('./index.html'))||(await caches.match('./offline.html'))||Response.error();}})());return;
  }
@@ -33,6 +34,7 @@ self.addEventListener('fetch',event=>{
    return response;
  })());
 });
+
 
 
 
