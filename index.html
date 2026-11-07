@@ -1681,7 +1681,7 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
             <div class="grid grid-cols-2 gap-3"><div><label class="rot">Início do dia</label><input id="cf-ini-dia" type="time" class="input"></div><div><label class="rot">Fim do dia</label><input id="cf-fim-dia" type="time" class="input"></div></div>
             <p class="subt -mt-1">Define as janelas "Livre" no Hoje e as horas mostradas na agenda do dia.</p>
             <div><label class="rot">Ponto de partida (para calcular o trajeto)</label><input id="cf-partida" class="input" placeholder="Ex.: Rua da Aurora, 100, Recife"></div>
-            <div><label class="rot">Como você se desloca</label><select id="cf-modo" class="input"><option value="DRIVING">Carro</option><option value="WALKING">A pé</option><option value="BICYCLING">Bicicleta</option><option value="TRANSIT">Transporte público</option></select></div>
+            <div><label class="rot">Como você se desloca</label><select id="cf-modo" class="input"><option value="DRIVING">Carro</option><option value="MOTORCYCLE">Moto</option><option value="WALKING">A pé</option><option value="BICYCLING">Bicicleta</option><option value="TRANSIT">Transporte público</option></select><p class="subt mt-1">Moto usa a estimativa de trajeto de carro. Confira o percurso no Google Maps.</p></div>
             <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="cf-saida"> Ajustar o lembrete para a hora de sair (ao salvar evento ou tarefa com Local e hora)</label>
             <div><label class="rot">Aviso de tarefa com data e sem hora</label><select id="cf-aviso-dia" class="input"><option value="">Não avisar</option><option value="06:00">06:00 do dia</option><option value="07:00">07:00 do dia</option><option value="08:00">08:00 do dia</option><option value="09:00">09:00 do dia</option><option value="12:00">12:00 do dia</option><option value="18:00">18:00 do dia</option><option value="20:00">20:00 do dia</option></select><p class="subt mt-1">Notificação do Google Agenda no horário escolhido. Tarefas com hora seguem o próprio aviso.</p></div>
             <div><label class="rot">Áreas (separadas por vírgula)</label><input id="cf-areas" class="input"><div id="cf-semarea" class="mt-1"></div></div>
@@ -2088,11 +2088,12 @@ function montarNav(){
     '<button class="nav-m" data-v="mais" onclick="abrirMais()"><i class="fa-solid fa-ellipsis text-lg"></i>Mais</button>';
 }
 function irPara(v){
+  if(!VISTAS.some(function(item){return item[0]===v;}))return;
   vistaAtual = v;
   if(v!=='tarefas' && modoSel){ modoSel = false; selecao = {}; }
   atualizarLote();
   document.querySelectorAll('.vista').forEach(function(s){ s.classList.toggle('hidden', s.id!=='v-'+v); });
-  document.querySelectorAll('.nav-i, .nav-m').forEach(function(b){ var dv = b.getAttribute('data-v'); b.classList.toggle('ativo', dv===v || (dv==='mais' && VISTAS_MOVEL.indexOf(v)<0)); });
+  document.querySelectorAll('.nav-i[data-v], .nav-m[data-v]').forEach(function(b){ var dv = b.getAttribute('data-v'); b.classList.toggle('ativo', dv===v || (dv==='mais' && VISTAS_MOVEL.indexOf(v)<0)); });
   if(v==='agenda') agRolar = true;
   renderVista(true); window.scrollTo(0,0);
 }
@@ -4322,11 +4323,11 @@ function salvarTarefaModal(id, outra){
 }
 
 /* ───────── Local: Google Maps e tempo de trajeto ───────── */
-var MODOS_TRAJETO = [['DRIVING','Carro'],['WALKING','A pé'],['BICYCLING','Bicicleta'],['TRANSIT','Transporte público']];
+var MODOS_TRAJETO = [['DRIVING','Carro'],['MOTORCYCLE','Moto'],['WALKING','A pé'],['BICYCLING','Bicicleta'],['TRANSIT','Transporte público']];
 function modoTrajeto(){ var m = D.config.modo_trajeto; return MODOS_TRAJETO.some(function(p){ return p[0]===m; }) ? m : 'DRIVING'; }
 function urlMapas(local){ return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(local); }
 function urlRota(local){
-  var tm = { DRIVING:'driving', WALKING:'walking', BICYCLING:'bicycling', TRANSIT:'transit' }[modoTrajeto()];
+  var tm = { DRIVING:'driving', MOTORCYCLE:'driving', WALKING:'walking', BICYCLING:'bicycling', TRANSIT:'transit' }[modoTrajeto()];
   var u = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(local) + '&travelmode=' + tm;
   var o = String(D.config.local_partida || '').trim(); if(o) u += '&origin=' + encodeURIComponent(o);
   return u;
@@ -6797,20 +6798,21 @@ function renderSidebar(){var tree=$('np-tree');if(!tree)return;var m=mapNotes(),
 function inline(text){var plain=String(text||''),parts=[],idx=0,re=/\[\[([^\]\n]{1,150})\]\]/g,match;
  while((match=re.exec(plain))){parts.push(markdownText(plain.slice(idx,match.index)));var named=match[1].trim(),n=notes().find(x=>norm(x.titulo)===norm(named));parts.push('<button type="button" class="np-wiki'+(n?'':' np-missing')+'" data-np="'+(n?'open':'missing')+'" data-id="'+esc(n?idOf(n):'')+'" data-title="'+esc(named)+'" title="'+(n?'Abrir página':'Página não encontrada')+'">[['+esc(named)+']]</button>');idx=match.index+match[0].length;}parts.push(markdownText(plain.slice(idx)));return parts.join('');
 }
-function markdownText(txt){return esc(txt).replace(/`([^`]{1,100})`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g,'<em>$1</em>');}
-function markdown(md){var rows=String(md||'').replace(/\r/g,'').split('\n'),html='',code=[],inCode=false;
+function markdownText(txt){return mdInline(String(txt==null?'':txt));}
+function markdown(md,interactive){var rows=String(md||'').replace(/\r/g,'').split('\n'),html='',code=[],inCode=false;
  function flush(){if(code.length){html+='<pre>'+esc(code.join('\n'))+'</pre>';code=[];}}
  rows.forEach((line,lineIndex)=>{if(/^\s*```/.test(line)){if(inCode)flush();inCode=!inCode;return;}if(inCode){code.push(line);return;}
  var m;if(!line.trim()){html+='<div style="height:9px"></div>';return;}
  if((m=/^(#{1,4})\s+(.+)$/.exec(line))){html+='<h'+m[1].length+'>'+inline(m[2])+'</h'+m[1].length+'>';return;}
  if(/^\s*---+\s*$/.test(line)){html+='<hr>';return;}
- if((m=/^\s*[-*]\s*\[([ xX])\]\s?(.*)$/.exec(line))){var done=m[1]!==' ';html+='<div class="np-listline"><button type="button" role="checkbox" aria-checked="'+String(done)+'" class="np-taskbox'+(done?' done':'')+'" data-np="check" data-id="'+esc(state.current)+'" data-line="'+lineIndex+'" aria-label="'+(done?'Desmarcar: ':'Concluir: ')+esc(m[2]||'Item sem texto')+'">'+(done?'✓':'')+'</button><span>'+inline(m[2])+'</span></div>';return;}
+ if((m=/^\s*[-*]\s*\[([ xX])\]\s?(.*)$/.exec(line))){var done=m[1]!==' ';html+='<div class="np-listline"><button type="button" role="checkbox" aria-checked="'+String(done)+'" class="np-taskbox'+(done?' done':'')+'" '+(interactive===false?'disabled ':'data-np="check" ')+'data-id="'+esc(state.current)+'" data-line="'+lineIndex+'" aria-label="'+(done?'Desmarcar: ':'Concluir: ')+esc((m[2]||'Item sem texto').replace(/\[cor=#[0-9a-f]{6}\]|\[\/cor\]/gi,''))+'">'+(done?'✓':'')+'</button><span>'+inline(m[2])+'</span></div>';return;}
  if((m=/^\s*[-*•]\s+(.+)$/.exec(line))){html+='<div class="np-listline"><span aria-hidden="true">•</span><span>'+inline(m[1])+'</span></div>';return;}
  if((m=/^\s*\d+[.)]\s+(.+)$/.exec(line))){html+='<div class="np-listline"><span aria-hidden="true">•</span><span>'+inline(m[1])+'</span></div>';return;}
  if((m=/^>\s?\[!\]\s?(.*)$/.exec(line))){html+='<blockquote>💡 '+inline(m[1])+'</blockquote>';return;}
  if((m=/^>\s?(.*)$/.exec(line))){html+='<blockquote>'+inline(m[1])+'</blockquote>';return;}
  html+='<p>'+inline(line)+'</p>';
  });if(inCode)flush();return html||'<p class="np-empty">Esta página ainda não tem conteúdo. Toque em Editar para começar.</p>';}
+window.sc83RenderNoteMarkdown=markdown;
 function dateLabel(n){var d=stamp(n);return d?new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short',year:'numeric'}).format(d):'Sem data de edição';}
 function crumbs(id){var path=ancestors(id);return '<nav class="np-crumbs" aria-label="Localização da página"><button type="button" data-np="open" data-id="">Início</button>'+path.map(n=>'<span>›</span><button type="button" data-np="open" data-id="'+esc(idOf(n))+'">'+esc(n.titulo||'Sem título')+'</button>').join('')+'</nav>';}
 function backlinkList(note){var named='[['+norm(note.titulo)+']]';return notes().filter(n=>idOf(n)!==idOf(note)&&norm(n.conteudo).includes(named));}
@@ -7006,12 +7008,8 @@ window.sc68AcaoHoje=act;
  function appendMD(txt){if(preview)togglePreview(false);if(typeof window.edSync==='function')edSync();var original=byId('f-cont').value||'';var revised=original+(original.trim()?'\n\n':'')+txt; if(typeof window.edIniciar==='function')edIniciar(revised); else byId('f-cont').value=revised; status('Conteúdo alterado · salve para sincronizar');}
  function status(msg){var s=byId('ne75-sync-text');if(s)s.textContent=msg;}
  function toggleFav(){var cb=byId('f-fix'),btn=byId('ne75-fav');if(!cb)return;cb.checked=!cb.checked;if(btn){btn.setAttribute('aria-pressed',String(cb.checked));btn.title=cb.checked?'Remover dos favoritos':'Adicionar aos favoritos';btn.setAttribute('aria-label',btn.title);}status('Preferência alterada · salve a página');}
- function renderPreview(raw){return textOf(raw).split(/\r?\n/).map(function(line){var esc=escaped(line);if(/^#{1,3} /.test(line)){var match=line.match(/^(#{1,3})\s+(.*)$/),level=match[1].length;return '<h'+level+'>'+escaped(match[2])+'</h'+level+'>';}
- if(/^> /.test(line))return '<blockquote>'+escaped(line.slice(2))+'</blockquote>';
- var tick=line.match(/^\s*- \[([xX ])\] (.*)$/);if(tick)return '<label class="ne75-check"><input type="checkbox" disabled '+(/[xX]/.test(tick[1])?'checked':'')+'> '+escaped(tick[2])+'</label>';
- if(/^\s*[-*] /.test(line))return '<p>• '+escaped(line.replace(/^\s*[-*] /,''))+'</p>';
- if(!line.trim())return '<div style="height:8px"></div>';return '<p>'+esc+'</p>';}).join('');}
- function togglePreview(on){var body=byId('ne75-editor'),pv=byId('ne75-preview'),b=byId('ne75-preview-btn');if(!body||!pv)return;if(on==null)on=!preview;if(on){if(typeof window.edSync==='function')edSync();pv.innerHTML=renderPreview(byId('f-cont').value);body.hidden=true;pv.hidden=false;}else{body.hidden=false;pv.hidden=true;}preview=!!on;if(b){b.setAttribute('aria-pressed',String(preview));b.querySelector('span').textContent=preview?'Voltar à edição':'Pré-visualizar';}}
+ function renderPreview(raw){return window.sc83RenderNoteMarkdown(textOf(raw),false);}
+ function togglePreview(on){var body=byId('ne75-editor'),pv=byId('ne75-preview'),b=byId('ne75-preview-btn');if(!body||!pv)return;if(on==null)on=!preview;if(on){if(typeof window.edSync==='function')edSync();pv.classList.add('np-reader');pv.innerHTML=renderPreview(byId('f-cont').value);body.hidden=true;pv.hidden=false;}else{body.hidden=false;pv.hidden=true;}preview=!!on;if(b){b.setAttribute('aria-pressed',String(preview));b.querySelector('span').textContent=preview?'Voltar à edição':'Pré-visualizar';}}
  function templates(){var opts=[['Reunião','## Objetivo\n\n## Participantes\n\n## Decisões\n\n## Próximos passos\n- [ ] '],['Atendimento','## Resumo do atendimento\n\n## Documentos\n\n## Pendências\n- [ ] \n\n## Próximo contato'],['Estudo','## Tema\n\n## Ideias principais\n\n## Referências\n\n## Revisão\n- [ ] ']];
  var box=byId('ne75-template-options');if(!box)return;box.hidden=!box.hidden;if(box.hidden)return;box.innerHTML='';opts.forEach(function(it){var b=button(it[0],'fa-file-lines',function(){appendMD(it[1]);box.hidden=true;});box.appendChild(b);});}
  function insertReference(){var url=prompt('Cole o endereço HTTPS do arquivo ou documento no Google Drive:');if(url==null)return;url=url.trim();if(!/^https:\/\/[^\s<>"']+$/i.test(url)){alert('Informe um link HTTPS válido. O arquivo não é enviado ao aplicativo; será guardado somente o link.');return;}var name=prompt('Nome para exibição do arquivo:','Documento relacionado');if(name==null)return;name=name.trim().slice(0,100)||'Documento';name=name.replace(/[\[\]]/g,'');appendMD('📎 ['+name+']('+url.replace(/[)]/g,'%29')+')');}
@@ -7286,7 +7284,22 @@ html:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editor
 .np-reader .np-listline:has(button.np-taskbox){gap:12px;padding:8px 0;align-items:flex-start}
 .np-reader button.np-taskbox.done+span{text-decoration:line-through}
 </style>
+<style id="sc84-square-checklist">
+html[data-sc-theme] body :is(#np-document,#ne75-preview) .np-reader button.np-taskbox,
+html[data-sc-theme] body .np-reader button.np-taskbox{
+ box-sizing:border-box!important;display:inline-flex!important;
+ width:1em!important;height:1em!important;min-width:1em!important;min-height:1em!important;
+ max-width:1em!important;max-height:1em!important;aspect-ratio:1 / 1!important;
+ flex:0 0 1em!important;align-self:flex-start!important;padding:0!important;
+ font-size:inherit!important;line-height:1!important;margin:0.25em 0 0!important;
+ border-radius:4px!important;align-items:center!important;justify-content:center!important;
+}
+html[data-sc-theme] body .np-reader button.np-taskbox::before{
+ content:"";position:absolute;inset:calc((1em - max(44px, 1em)) / 2)!important;
+}
+</style>
 </body></html>
+
 
 
 
