@@ -1674,6 +1674,14 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
             <div class="sc69-heading"><span class="sc69-heading-icon" aria-hidden="true"><i class="fa-solid fa-palette"></i></span><div><h2 id="sc69-title">Escolher tema</h2><p>Selecione um dos cinco estilos. A mudança é imediata e não altera seus dados.</p></div></div>
             <div class="sc69-theme-grid" id="sc69-theme-options" role="group" aria-label="Temas do aplicativo"></div>
             <p class="sc69-theme-caption" id="sc69-theme-status" aria-live="polite">O tema fica salvo neste aparelho.</p>
+            <div class="sc76-reading-control">
+              <label for="cf-celebracao"><strong>Comemoração de tarefas</strong></label>
+              <select id="cf-celebracao" class="input" onchange="Celebracao.alterarModo(this.value)">
+                <option value="discreta">Discreta</option>
+                <option value="confetes">Com confetes</option>
+                <option value="desativada">Desativada</option>
+              </select>
+            </div>
             <div class="sc76-reading-control"><div class="sc76-reading-copy"><strong>Leitura reforçada</strong><small>Amplia os textos pequenos, mantém o contraste alto e preserva o tema escolhido.</small></div><button type="button" id="sc76-reading-toggle" aria-pressed="false" title="Ativar ou desativar leitura reforçada">Ativar</button></div>
           </section>
           <div class="card p-5 space-y-3"><h2 class="font-bold">Geral</h2>
@@ -1732,7 +1740,7 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
 <script src="./pwa-transport.js"></script>
 <script>
-var VERSAO_TELA = '2026-11-07b';
+var VERSAO_TELA = '2026-11-07c';
 var VERSAO_STUDIO = '7.5'; // Notas Pro | editor profissional em cinco temas
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], config:{}, ia:{} };
@@ -1776,6 +1784,138 @@ function hhmm(min){ return pad2(Math.floor(min/60))+':'+pad2(min%60); }
 function duracaoTxt(min){ var hh = Math.floor(min/60), mm = min%60; return (hh ? hh+'h' : '') + (mm ? (hh ? pad2(mm) : mm+'min') : ''); }
 
 // aviso com ação opcional (ex.: Desfazer)
+var Celebracao = (function(){
+  'use strict';
+  var chaveModo = 'sc_celebracao_v1', chaveMarcos = 'sc_marcos_celebracao_v1';
+  var lote = null, versoes = new Map(), numero = 0, chuvaAtual = null;
+
+  function modo(){
+    var v = lsGet(chaveModo);
+    return v === 'confetes' || v === 'desativada' ? v : 'discreta';
+  }
+  function atualizarAjuste(){
+    var campo = el('cf-celebracao');
+    if(campo) campo.value = modo();
+  }
+  function alterarModo(valor){
+    if(['discreta','confetes','desativada'].indexOf(valor) < 0) return;
+    lsSet(chaveModo, valor);
+    if(valor !== 'confetes' && chuvaAtual){ chuvaAtual.remove(); chuvaAtual = null; }
+  }
+  function concluidaHoje(t, dia){
+    return t.status === 'feita' && dataConcl(t) === dia;
+  }
+  function resumoDia(dia){
+    var tarefas = D.tarefas, prioridades = tarefas.filter(function(t){ return t.top3 === dia; });
+    return {
+      feitas:tarefas.filter(function(t){ return concluidaHoje(t, dia); }).length,
+      prioridades:prioridades.length >= 3 && prioridades.every(function(t){ return concluidaHoje(t, dia); })
+    };
+  }
+  function captura(tabela, itens){
+    if(tabela !== 'tarefas') return null;
+    var antes = new Map();
+    itens.forEach(function(item){
+      if(!item.id || !Object.prototype.hasOwnProperty.call(item, 'status')) return;
+      var id = String(item.id), t = obter('tarefas',id);
+      if(!antes.has(id) && t.id) antes.set(id,t.status);
+    });
+    if(!antes.size) return null;
+    var dia = hojeISO();
+    return {dia:dia, antes:antes, resumo:resumoDia(dia)};
+  }
+  function aposSalvar(estado){
+    if(!estado) return;
+    var concluidas = [];
+    estado.antes.forEach(function(anterior,id){
+      var tarefa = obter('tarefas',id);
+      if(!tarefa.id || anterior === tarefa.status) return;
+      var versao = ++numero;
+      versoes.set(id,versao);
+      if(anterior !== 'feita' && tarefa.status === 'feita'){
+        concluidas.push({id:id, status:anterior || 'aberta', versao:versao});
+      }
+    });
+    if(!concluidas.length) return;
+    if(lote){ lote.itens.push.apply(lote.itens,concluidas); return; }
+    comemorar(estado.dia,estado.resumo,concluidas);
+  }
+  function emLote(acao){
+    if(lote) return acao();
+    var dia = hojeISO();
+    lote = {dia:dia, resumo:resumoDia(dia), itens:[]};
+    try { return acao(); }
+    finally {
+      var resultado = lote;
+      lote = null;
+      if(resultado.itens.length) comemorar(resultado.dia,resultado.resumo,resultado.itens);
+    }
+  }
+  function marcos(dia, antes, depois){
+    var armazenado;
+    try { armazenado = JSON.parse(lsGet(chaveMarcos) || 'null'); } catch(e) {}
+    var guardados = armazenado && armazenado.dia === dia && Array.isArray(armazenado.ids) ? armazenado.ids : [];
+    var novos = [];
+    if(antes.feitas < 5 && depois.feitas >= 5 && !guardados.includes('cinco')) novos.push('cinco');
+    if(antes.feitas < 10 && depois.feitas >= 10 && !guardados.includes('dez')) novos.push('dez');
+    if(!antes.prioridades && depois.prioridades && !guardados.includes('prioridades')) novos.push('prioridades');
+    if(novos.length) lsSet(chaveMarcos,JSON.stringify({dia:dia,ids:guardados.concat(novos)}));
+    return novos;
+  }
+  function desfazer(concluidas){
+    var reabrir = concluidas.filter(function(x){
+      return versoes.get(x.id) === x.versao && obter('tarefas',x.id).status === 'feita';
+    });
+    if(!reabrir.length){ toast('Essas tarefas já foram alteradas.'); return; }
+    salvar('tarefas',reabrir.map(function(x){return {id:x.id,status:x.status};}));
+    toast(reabrir.length === 1 ? 'Conclusão desfeita.' : reabrir.length + ' conclusões desfeitas.');
+  }
+  function comemorar(dia, antes, concluidas){
+    var estilo = modo();
+    var novos = marcos(dia,antes,resumoDia(dia));
+    if(estilo === 'desativada') return;
+    var n = concluidas.length, nivel = n > 1 ? 2 : 1;
+    var mensagem = n === 1 ? 'Tarefa concluída' : n + ' tarefas concluídas';
+    if(novos.includes('cinco')){ nivel=2; mensagem += ' · 5 feitas hoje!'; }
+    if(novos.includes('dez')){ nivel=3; mensagem += ' · 10 feitas hoje!'; }
+    if(novos.includes('prioridades')){
+      nivel=4;
+      mensagem += ' · As 3 prioridades do dia estão feitas!';
+    }
+    var reduzido = semMov();
+    var aviso = toast((nivel > 1 && !reduzido ? '🎉 ' : '✓ ') + mensagem,false,{
+      rotulo:'Desfazer',fn:function(){desfazer(concluidas);}
+    });
+    if(aviso){
+      aviso.setAttribute('role','status');
+      if(!reduzido) aviso.classList.add('sc-celebracao','sc-celebracao-'+nivel);
+    }
+    if(estilo === 'confetes' && !reduzido && nivel >= 2) confetes(nivel);
+  }
+  function confetes(nivel){
+    if(chuvaAtual) chuvaAtual.remove();
+    var caixa = document.createElement('div');
+    caixa.className = 'sc-confetes';
+    caixa.setAttribute('aria-hidden','true');
+    var quantidade = nivel === 4 ? 40 : nivel === 3 ? 28 : 14;
+    var cores = ['#6b7ff8','#e69b32','#10a580','#ef6293','#8c55d9'];
+    for(var i=0;i<quantidade;i++){
+      var peca = document.createElement('i');
+      peca.style.setProperty('--x',(12+Math.random()*76)+'%');
+      peca.style.setProperty('--giro',Math.round(Math.random()*400-200)+'deg');
+      peca.style.setProperty('--atraso',Math.round(Math.random()*220)+'ms');
+      peca.style.setProperty('--cor',cores[i%cores.length]);
+      caixa.appendChild(peca);
+    }
+    document.body.appendChild(caixa);
+    chuvaAtual = caixa;
+    setTimeout(function(){ caixa.remove(); if(chuvaAtual===caixa) chuvaAtual=null; },1450);
+  }
+  function animaLinha(){ return !lote && modo() !== 'desativada' && !semMov(); }
+  return {captura:captura, aposSalvar:aposSalvar, emLote:emLote, animaLinha:animaLinha,
+    atualizarAjuste:atualizarAjuste, alterarModo:alterarModo};
+})();
+
 function toast(msg, erro, acao){
   var t = document.createElement('div');
   t.className = 'toast '+(erro?'bg-red-600':'bg-purple-700')+' px-4 py-2 text-white rounded shadow text-sm max-w-xs flex items-center gap-3';
@@ -1783,6 +1923,7 @@ function toast(msg, erro, acao){
   if(acao){ var b = document.createElement('button'); b.className = 'font-bold underline shrink-0'; b.textContent = acao.rotulo; b.onclick = function(){ t.remove(); acao.fn(); }; t.appendChild(b); }
   el('toasts').appendChild(t);
   setTimeout(function(){ t.remove(); }, acao ? 7000 : (erro ? 6000 : 3000));
+  return t;
 }
 
 /* ───────── dados / cache / sincronização ───────── */
@@ -2007,9 +2148,11 @@ function salvar(tabela, itens, extra){
   itens.forEach(function(o){
     if(!o.id) o.id = tabela.charAt(0) + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
   });
+  var antesCelebracao = Celebracao.captura(tabela,itens);
   var cmd = Object.assign({ tipo:'SALVAR', tabela:tabela, itens:itens }, extra||{});
   efeitoLocal(cmd); renderTudo();
   enviar(cmd);
+  Celebracao.aposSalvar(antesCelebracao);
 }
 
 function excluir(tabela, ids, extra){
@@ -2481,7 +2624,7 @@ function alternarTarefa(id, forcar){
   if(concluindo && etiquetasDe(t.etiquetas).indexOf('revisar')>=0){
     var rvs = criarRevisoes(t); if(rvs.length){ rvs.forEach(function(x){ itens.push(x); }); toast('Revisões agendadas: +1, +7 e +30 dias.'); }
   }
-  if(concluindo){ vibra(12); fantasmaConcluir(id); }
+  if(concluindo && Celebracao.animaLinha()){ vibra(12); fantasmaConcluir(id); }
   salvar('tarefas', itens);
 }
 function concluirForcado(id){ fecharModal(); alternarTarefa(id, true); }
@@ -5110,6 +5253,7 @@ function atualizarBtnDens(){ var b = el('btn-dens'); if(b){ b.textContent = '↕
 function atualizarCorTema(){ var m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', document.documentElement.classList.contains('dark') ? (estiloNotion() ? '#191919' : '#0d0c13') : (estiloNotion() ? '#ffffff' : '#f8fafc')); }
 function vibra(n){ try { if(navigator.vibrate && !semMov()) navigator.vibrate(n); } catch(e){} }
 function renderAparencia(){
+  Celebracao.atualizarAjuste();
   var a = acentoAtual();
   var ac = el('cf-acento'); if(!ac) return;
   ac.innerHTML = ACENTOS.map(function(x){ var on = x[0]===a; return '<button class="w-9 h-9 rounded-full" style="background:'+x[2]+';box-shadow:'+(on?'0 0 0 3px #fff,0 0 0 5px '+x[2]:'none')+'" aria-label="'+h(x[1])+'" aria-pressed="'+on+'" title="'+h(x[1])+'" onclick="'+C('definirAcento',x[0])+'"></button>'; }).join('');
@@ -5175,7 +5319,9 @@ function atualizarLote(){
 }
 function loteConcluir(){
   var ids = idsSel().filter(function(id){ return obter('tarefas', id).status!=='feita'; });
-  ids.forEach(function(id){ alternarTarefa(id, true); }); encerrarSelecao(); toast(ids.length + ' tarefa(s) concluída(s).');
+  if(!ids.length){ encerrarSelecao(); return; }
+  Celebracao.emLote(function(){ ids.forEach(function(id){ alternarTarefa(id, true); }); });
+  encerrarSelecao();
 }
 function loteData(k){ var ids = idsSel(); if(!ids.length) return; var d = dataRapida(k); salvar('tarefas', ids.map(function(id){ return { id:id, data:d }; })); encerrarSelecao(); toast(ids.length + ' tarefa(s) para ' + dataBonita(d) + '.'); }
 function loteAreaJanela(){
@@ -7002,13 +7148,10 @@ function act(node,direction){
  var item=obter('tarefas',id);if(!item||!item.id||item.status==='feita')return false;
  recent[id]=now;
  if(direction==='right'){
-  var old=item.status;
   // Conclusão explícita: evita uma segunda alternância de estado por controladores antigos.
   // Mantém o recurso de recorrências e revisões do alternarTarefa original.
   if(typeof alternarTarefa==='function') alternarTarefa(id,true);
   else salvar('tarefas',{id:id,status:'feita'});
-  if(typeof obter==='function' && obter('tarefas',id).status==='feita' && typeof toast==='function')
-   toast('Tarefa concluída.',false,{rotulo:'Desfazer',fn:function(){salvar('tarefas',{id:id,status:old});}});
  } else {
   // Usa a exclusão com desfazer existente; a tarefa sai imediatamente da lista e do estado local.
   excluirComDesfazer('tarefas',id,'Tarefa excluída.');
@@ -7664,6 +7807,17 @@ html[data-sc-theme] body .np-reader button.np-taskbox::before{
   };
 })();
 </script>
+<style id="sc-celebracao-css">
+.sc-celebracao{animation:sc-celebracao-entrada .25s ease-out}
+#toasts .sc-celebracao-2{border-inline-start:4px solid #a6ebce!important}
+#toasts .sc-celebracao-3{border-inline-start:5px solid #ffd677!important}
+#toasts .sc-celebracao-4{border:2px solid #ffd677!important;box-shadow:0 4px 20px #f2b84166}
+.sc-confetes{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:99970}
+.sc-confetes i{position:absolute;top:-12px;left:var(--x);width:7px;height:10px;border-radius:2px;background:var(--cor);animation:sc-confete-cair 1.15s ease-in var(--atraso) both}
+@keyframes sc-celebracao-entrada{from{opacity:.25;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes sc-confete-cair{from{opacity:1;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(65vh) rotate(var(--giro))}}
+@media(prefers-reduced-motion:reduce){.sc-celebracao{animation:none!important}.sc-confetes{display:none!important}}
+</style>
 </body></html>
 
 
