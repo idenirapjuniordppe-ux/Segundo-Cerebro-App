@@ -40,7 +40,7 @@
 /* visual simples: só o essencial (botão "Simples/Completo" no topo) */
 html.simples #hoje-proxima, html.simples #hoje-ritual, html.simples #hoje-foco, html.simples #hoje-top3-card, html.simples #hoje-feitas-card, html.simples #hoje-habitos-card, html.simples #hoje-semana-card,
 html.simples .jan-livre, html.simples .cap-aviso, html.simples .linha .rapido, html.simples .btn-top3, html.simples .tf-barra, html.simples #tf-projetos, html.simples #tf-areas, html.simples #btn-sel, html.simples #btn-dens, html.simples #btn-triagem,
-html.simples #v-tarefas [onclick^="abrirProjeto("], html.simples #nt-etiquetas, html.simples #nt-trilha, html.simples #mt-heat-card, html.simples #v-metas [onclick="abrirRevisao()"], html.simples #cap-pwa{display:none!important}
+html.simples #v-tarefas [onclick^="abrirProjeto("], html.simples #nt-etiquetas, html.simples #nt-trilha, html.simples #mt-heat-card, html.simples #v-metas [onclick="abrirReflexaoSemanal()"], html.simples #cap-pwa{display:none!important}
 html.simples .t-meta > :not(.keep){display:none!important}
 html.simples .t-meta:not(:has(.keep)){display:none!important}
 html.simples #modal-corpo .subt.ms-oculto{display:none!important}
@@ -1624,6 +1624,7 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
           <div class="min-w-0"><div class="studio-kicker"></div><h1 class="text-2xl font-extrabold" id="hoje-saudacao"></h1><p class="subt" id="hoje-data"></p></div>
           <div class="studio-mark" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
         </div>
+        <div id="sc-prioridades-progresso" hidden></div>
         <div class="studio-metrics" aria-label="Resumo das atividades">
           <div class="studio-metric"><div><div class="studio-metric-label">Para hoje</div><div class="studio-metric-num" id="studio-pendentes">–</div></div><div class="studio-metric-icon"><i class="fa-solid fa-list-check"></i></div></div>
           <div class="studio-metric"><div><div class="studio-metric-label">Atrasadas</div><div class="studio-metric-num" id="studio-atrasadas">–</div></div><div class="studio-metric-icon"><i class="fa-regular fa-clock"></i></div></div>
@@ -1664,7 +1665,7 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
         <div id="nt-trilha" class="trilha"></div><div id="nt-etiquetas" class="flex gap-1.5 flex-wrap mb-4"></div><div id="nt-lista" class="grid sm:grid-cols-2 gap-3"></div>
       </section>
       <section id="v-metas" class="vista hidden">
-        <div class="flex items-end justify-between gap-3 flex-wrap mb-4"><div><h1 class="text-2xl font-extrabold">Metas e hábitos</h1></div><div class="flex gap-2 flex-wrap"><button onclick="abrirRevisao()" class="btn btn-s">Revisão semanal</button><button onclick="abrirHabito({})" class="btn btn-s">Hábito</button><button onclick="abrirMeta({})" class="btn btn-p">Meta</button></div></div>
+        <div class="flex items-end justify-between gap-3 flex-wrap mb-4"><div><h1 class="text-2xl font-extrabold">Metas e hábitos</h1></div><div class="flex gap-2 flex-wrap"><button onclick="abrirReflexaoSemanal()" class="btn btn-s">Reflexão semanal</button><button onclick="abrirHabito({})" class="btn btn-s">Hábito</button><button onclick="abrirMeta({})" class="btn btn-p">Meta</button></div></div>
         <div class="card p-4 mb-5 overflow-x-auto"><div id="mt-habitos"></div></div><div id="mt-heat-card" class="card p-4 mb-5 hidden"><h2 class="font-bold mb-2"><i class="fa-solid fa-fire text-orange-500 mr-1.5"></i>Constância <span class="subt font-normal">· últimas 12 semanas</span></h2><div id="mt-heat" class="overflow-x-auto"></div></div><div id="mt-metas" class="grid md:grid-cols-2 gap-4"></div>
       </section>
       <section id="v-config" class="vista hidden">
@@ -1674,14 +1675,6 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
             <div class="sc69-heading"><span class="sc69-heading-icon" aria-hidden="true"><i class="fa-solid fa-palette"></i></span><div><h2 id="sc69-title">Escolher tema</h2><p>Selecione um dos cinco estilos. A mudança é imediata e não altera seus dados.</p></div></div>
             <div class="sc69-theme-grid" id="sc69-theme-options" role="group" aria-label="Temas do aplicativo"></div>
             <p class="sc69-theme-caption" id="sc69-theme-status" aria-live="polite">O tema fica salvo neste aparelho.</p>
-            <div class="sc76-reading-control">
-              <label for="cf-celebracao"><strong>Comemoração de tarefas</strong></label>
-              <select id="cf-celebracao" class="input" onchange="Celebracao.alterarModo(this.value)">
-                <option value="discreta">Discreta</option>
-                <option value="confetes">Com confetes</option>
-                <option value="desativada">Desativada</option>
-              </select>
-            </div>
             <div class="sc76-reading-control"><div class="sc76-reading-copy"><strong>Leitura reforçada</strong><small>Amplia os textos pequenos, mantém o contraste alto e preserva o tema escolhido.</small></div><button type="button" id="sc76-reading-toggle" aria-pressed="false" title="Ativar ou desativar leitura reforçada">Ativar</button></div>
           </section>
           <div class="card p-5 space-y-3"><h2 class="font-bold">Geral</h2>
@@ -1737,10 +1730,20 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
 </div>
 <div id="lote" class="hidden fixed inset-x-0 bottom-16 lg:bottom-4 z-40 px-3"></div>
 <div id="ptr">Puxe para atualizar</div>
+<dialog id="sc-conquista" aria-labelledby="sc-conquista-titulo" aria-describedby="sc-conquista-descricao">
+  <div id="sc-conquista-icone" aria-hidden="true"></div>
+  <h2 id="sc-conquista-titulo"></h2>
+  <p id="sc-conquista-descricao"></p>
+  <div id="sc-conquista-passos" aria-hidden="true"></div>
+  <form method="dialog" class="sc-conquista-acoes">
+    <button type="button" class="btn btn-s" id="sc-conquista-desfazer" hidden>Desfazer</button>
+    <button class="btn btn-p" autofocus>Continuar</button>
+  </form>
+</dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
 <script src="./pwa-transport.js"></script>
 <script>
-var VERSAO_TELA = '2026-11-07c';
+var VERSAO_TELA = '2026-11-07h';
 var VERSAO_STUDIO = '7.5'; // Notas Pro | editor profissional em cinco temas
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], config:{}, ia:{} };
@@ -1786,31 +1789,27 @@ function duracaoTxt(min){ var hh = Math.floor(min/60), mm = min%60; return (hh ?
 // aviso com ação opcional (ex.: Desfazer)
 var Celebracao = (function(){
   'use strict';
-  var chaveModo = 'sc_celebracao_v1', chaveMarcos = 'sc_marcos_celebracao_v1';
+  var chaveMarcos = 'sc_marcos_celebracao_v1';
   var lote = null, versoes = new Map(), numero = 0, chuvaAtual = null;
 
-  function modo(){
-    var v = lsGet(chaveModo);
-    return v === 'confetes' || v === 'desativada' ? v : 'discreta';
-  }
-  function atualizarAjuste(){
-    var campo = el('cf-celebracao');
-    if(campo) campo.value = modo();
-  }
-  function alterarModo(valor){
-    if(['discreta','confetes','desativada'].indexOf(valor) < 0) return;
-    lsSet(chaveModo, valor);
-    if(valor !== 'confetes' && chuvaAtual){ chuvaAtual.remove(); chuvaAtual = null; }
-  }
   function concluidaHoje(t, dia){
     return t.status === 'feita' && dataConcl(t) === dia;
   }
   function resumoDia(dia){
-    var tarefas = D.tarefas, prioridades = tarefas.filter(function(t){ return t.top3 === dia; });
+    var p = progresso(dia);
     return {
-      feitas:tarefas.filter(function(t){ return concluidaHoje(t, dia); }).length,
-      prioridades:prioridades.length >= 3 && prioridades.every(function(t){ return concluidaHoje(t, dia); })
+      feitas:D.tarefas.filter(function(t){ return concluidaHoje(t, dia); }).length,
+      prioridades:p.total > 0 && p.total === p.feitas ? p.total : 0
     };
+  }
+  function progresso(dia){
+    var prioridades = D.tarefas.filter(function(t){ return t.top3 === dia; });
+    var feitas = prioridades.filter(function(t){ return t.status === 'feita'; }).length;
+    return {total:prioridades.length, feitas:feitas};
+  }
+  function projetosPendentes(){
+    return new Set(D.tarefas.filter(function(t){ return t.projeto && t.status !== 'feita'; })
+      .map(function(t){ return String(t.projeto); }));
   }
   function captura(tabela, itens){
     if(tabela !== 'tarefas') return null;
@@ -1822,7 +1821,7 @@ var Celebracao = (function(){
     });
     if(!antes.size) return null;
     var dia = hojeISO();
-    return {dia:dia, antes:antes, resumo:resumoDia(dia)};
+    return {dia:dia, antes:antes, resumo:resumoDia(dia), projetos:lote ? lote.projetos : projetosPendentes()};
   }
   function aposSalvar(estado){
     if(!estado) return;
@@ -1838,17 +1837,17 @@ var Celebracao = (function(){
     });
     if(!concluidas.length) return;
     if(lote){ lote.itens.push.apply(lote.itens,concluidas); return; }
-    comemorar(estado.dia,estado.resumo,concluidas);
+    comemorar(estado.dia,estado.resumo,concluidas,estado.projetos);
   }
   function emLote(acao){
     if(lote) return acao();
     var dia = hojeISO();
-    lote = {dia:dia, resumo:resumoDia(dia), itens:[]};
+    lote = {dia:dia, resumo:resumoDia(dia), itens:[], projetos:projetosPendentes()};
     try { return acao(); }
     finally {
       var resultado = lote;
       lote = null;
-      if(resultado.itens.length) comemorar(resultado.dia,resultado.resumo,resultado.itens);
+      if(resultado.itens.length) comemorar(resultado.dia,resultado.resumo,resultado.itens,resultado.projetos);
     }
   }
   function marcos(dia, antes, depois){
@@ -1858,7 +1857,10 @@ var Celebracao = (function(){
     var novos = [];
     if(antes.feitas < 5 && depois.feitas >= 5 && !guardados.includes('cinco')) novos.push('cinco');
     if(antes.feitas < 10 && depois.feitas >= 10 && !guardados.includes('dez')) novos.push('dez');
-    if(!antes.prioridades && depois.prioridades && !guardados.includes('prioridades')) novos.push('prioridades');
+    var total = depois.prioridades;
+    var marcoPrioridades = 'prioridades-' + total;
+    if(total && antes.prioridades !== total && !guardados.includes(marcoPrioridades) &&
+       !(total === 3 && guardados.includes('prioridades'))) novos.push(marcoPrioridades);
     if(novos.length) lsSet(chaveMarcos,JSON.stringify({dia:dia,ids:guardados.concat(novos)}));
     return novos;
   }
@@ -1870,17 +1872,83 @@ var Celebracao = (function(){
     salvar('tarefas',reabrir.map(function(x){return {id:x.id,status:x.status};}));
     toast(reabrir.length === 1 ? 'Conclusão desfeita.' : reabrir.length + ' conclusões desfeitas.');
   }
-  function comemorar(dia, antes, concluidas){
-    var estilo = modo();
-    var novos = marcos(dia,antes,resumoDia(dia));
-    if(estilo === 'desativada') return;
+  var conquistas = Object.create(null), filaConquistas = [];
+  function registrar(chave, nivel){
+    var anterior = Math.max(Number(lsGet(chave)) || 0, conquistas[chave] || 0);
+    if(anterior >= nivel) return false;
+    conquistas[chave] = nivel;
+    lsSet(chave,String(nivel));
+    return true;
+  }
+  function mostrarConquista(){
+    var painel = el('sc-conquista');
+    if(!filaConquistas.length || painel.open) return;
+    var item = filaConquistas.shift();
+    if(typeof painel.showModal !== 'function'){
+      toast(item.titulo + ' ' + item.descricao);
+      mostrarConquista();
+      return;
+    }
+    painel.dataset.tipo = item.tipo;
+    el('sc-conquista-icone').textContent = item.icone;
+    el('sc-conquista-titulo').textContent = item.titulo;
+    el('sc-conquista-descricao').textContent = item.descricao;
+    var passos = el('sc-conquista-passos');
+    passos.textContent = item.passos ? Array(item.passos).fill('✓').join(' ') : '';
+    var voltar = el('sc-conquista-desfazer');
+    voltar.hidden = !item.desfazer;
+    voltar.onclick = item.desfazer ? function(){ painel.close(); item.desfazer(); } : null;
+    painel.onclose = mostrarConquista;
+    painel.showModal();
+    if(!semMov()) confetes(item.confetes,painel);
+  }
+  function anunciar(item){
+    filaConquistas.push(item);
+    // Deixa o editor concluir o próprio fechamento antes de mover o foco.
+    setTimeout(mostrarConquista,0);
+  }
+  function habito(hab, anterior, atual){
+    var nivel = [30,14,7].find(function(n){ return anterior < n && atual >= n; });
+    if(!nivel || !registrar('sc_selo_habito_v1_' + hab.id,nivel)) return;
+    anunciar({tipo:'habito', icone:'★ ' + nivel, titulo:'Parabéns pela constância!',
+      descricao:hab.nome + ' · ' + nivel + ' dias programados cumpridos em sequência',
+      passos:nivel === 7 ? 7 : 0, confetes:nivel === 7 ? 16 : nivel === 14 ? 28 : 40});
+  }
+  function comemorarProjetos(antes, concluidas){
+    var porProjeto = new Map();
+    concluidas.forEach(function(item){
+      var id = String(obter('tarefas',item.id).projeto || '');
+      if(!antes.has(id)) return;
+      if(!porProjeto.has(id)) porProjeto.set(id,[]);
+      porProjeto.get(id).push(item);
+    });
+    var ganhou = false;
+    porProjeto.forEach(function(itens,id){
+      var projeto = obter('projetos',id);
+      if(!projeto.id) return;
+      var tarefas = D.tarefas.filter(function(t){ return String(t.projeto) === id; });
+      if(!tarefas.length || tarefas.some(function(t){ return t.status !== 'feita'; })) return;
+      if(!registrar('sc_trofeu_projeto_v1_' + id,1)) return;
+      ganhou = true;
+      anunciar({tipo:'projeto', icone:'🏆', titulo:'Parabéns! Projeto concluído',
+        descricao:projeto.nome + ' · ' + tarefas.length + ' de ' + tarefas.length + ' tarefas',
+        confetes:56, desfazer:function(){ desfazer(itens); }});
+    });
+    return ganhou;
+  }
+  function comemorar(dia, antes, concluidas, projetos){
+    var depois = resumoDia(dia);
+    var novos = marcos(dia,antes,depois);
     var n = concluidas.length, nivel = n > 1 ? 2 : 1;
-    var mensagem = n === 1 ? 'Tarefa concluída' : n + ' tarefas concluídas';
+    var mensagem = n === 1 ? 'Parabéns por concluir a tarefa!' : n + ' tarefas concluídas';
     if(novos.includes('cinco')){ nivel=2; mensagem += ' · 5 feitas hoje!'; }
     if(novos.includes('dez')){ nivel=3; mensagem += ' · 10 feitas hoje!'; }
-    if(novos.includes('prioridades')){
-      nivel=4;
-      mensagem += ' · As 3 prioridades do dia estão feitas!';
+    var total = depois.prioridades;
+    if(novos.includes('prioridades-' + total)){
+      nivel = Math.max(nivel, Math.min(4, total + 1));
+      mensagem += ' · ' + total + '/' + total + (total === 1 ? ' prioridade concluída!' : ' prioridades concluídas!');
+      var anel = el('sc-prioridades-progresso');
+      if(anel && !semMov()) anel.classList.add('sc-anel-brilho');
     }
     var reduzido = semMov();
     var aviso = toast((nivel > 1 && !reduzido ? '🎉 ' : '✓ ') + mensagem,false,{
@@ -1890,14 +1958,14 @@ var Celebracao = (function(){
       aviso.setAttribute('role','status');
       if(!reduzido) aviso.classList.add('sc-celebracao','sc-celebracao-'+nivel);
     }
-    if(estilo === 'confetes' && !reduzido && nivel >= 2) confetes(nivel);
+    var trofeu = comemorarProjetos(projetos,concluidas);
+    if(!reduzido && !trofeu) confetes([0,8,16,28,40][nivel]);
   }
-  function confetes(nivel){
+  function confetes(quantidade, destino){
     if(chuvaAtual) chuvaAtual.remove();
     var caixa = document.createElement('div');
     caixa.className = 'sc-confetes';
     caixa.setAttribute('aria-hidden','true');
-    var quantidade = nivel === 4 ? 40 : nivel === 3 ? 28 : 14;
     var cores = ['#6b7ff8','#e69b32','#10a580','#ef6293','#8c55d9'];
     for(var i=0;i<quantidade;i++){
       var peca = document.createElement('i');
@@ -1907,13 +1975,12 @@ var Celebracao = (function(){
       peca.style.setProperty('--cor',cores[i%cores.length]);
       caixa.appendChild(peca);
     }
-    document.body.appendChild(caixa);
+    (destino || document.body).appendChild(caixa);
     chuvaAtual = caixa;
     setTimeout(function(){ caixa.remove(); if(chuvaAtual===caixa) chuvaAtual=null; },1450);
   }
-  function animaLinha(){ return !lote && modo() !== 'desativada' && !semMov(); }
-  return {captura:captura, aposSalvar:aposSalvar, emLote:emLote, animaLinha:animaLinha,
-    atualizarAjuste:atualizarAjuste, alterarModo:alterarModo};
+  function animaLinha(){ return !lote && !semMov(); }
+  return {captura:captura, aposSalvar:aposSalvar, emLote:emLote, animaLinha:animaLinha, progresso:progresso, habito:habito};
 })();
 
 function toast(msg, erro, acao){
@@ -1940,8 +2007,9 @@ function aplicarDados(r, deCache){
   ['tarefas','projetos','eventos','notas','metas','habitos','registros'].forEach(function(k){ if(r[k]) D[k] = r[k]; });
   if(r.config) D.config = r.config;
   D.versaoServidor = r.versaoServidor; D.usuario = r.usuario; D.protegido = r.protegido;
-  fila.forEach(efeitoLocal);   // gravações ainda não confirmadas continuam visíveis por cima do que veio do servidor
+  // Cache guarda a base confirmada; a fila é reaplicada sobre ela ao reabrir o app.
   if(!deCache) salvarCache();
+  fila.forEach(efeitoLocal);
 }
 function rotuloSync(){
   if(!ultimaSync) return 'ainda não sincronizado';
@@ -2040,7 +2108,10 @@ function efeitoLocal(cmd){
       if(i>=0){
         var anterior=l[i], mudouData=t==='tarefas'&&anterior.data&&o.data&&o.data>anterior.data;
         l[i] = Object.assign({}, anterior, o);
-        if(mudouData) l[i].adiada_em=hojeISO();
+        if(mudouData){
+          l[i].adiada_em = hojeISO();
+          l[i].adiamentos = Math.max(0, parseInt(anterior.adiamentos, 10) || 0) + 1;
+        }
       } else l.push(Object.assign({}, o));
       if(t==='tarefas'){ var rr = i>=0 ? l[i] : l[l.length-1]; if(rr.status==='feita'){ if(!rr.concluida_em) rr.concluida_em = carimboLocal(); } else rr.concluida_em = ''; }
     });
@@ -2758,13 +2829,29 @@ function renderHoje(){
   seguro('Seu dia', renderTimelineHoje, 'hoje-agenda');
   seguro('Pergunta do hábito', perguntaHabito, 'hoje-pergunta');
 
+  var progresso = Celebracao.progresso(dia), painel = el('sc-prioridades-progresso');
+  var chave = dia + ':' + progresso.feitas + '/' + progresso.total;
+  if(painel.dataset.progresso !== chave){
+    painel.dataset.progresso = chave;
+    painel.classList.remove('sc-anel-brilho');
+    painel.hidden = !progresso.total;
+    var circulo = '<svg viewBox="0 0 48 48" aria-hidden="true">';
+    for(var i=0;i<progresso.total;i++){
+      var arco = 100 / progresso.total, espaco = progresso.total > 1 ? 4 : 0;
+      circulo += '<circle class="' + (i<progresso.feitas?'sc-anel-preenchido':'') + '" cx="24" cy="24" r="20" pathLength="100" stroke-dasharray="' +
+        (arco-espaco) + ' ' + (100-arco+espaco) + '" stroke-dashoffset="' + (-arco*i) + '"/>';
+    }
+    painel.innerHTML = '<span class="sc-anel">' + circulo + '</svg><b aria-hidden="true">' + progresso.feitas + '/' + progresso.total +
+      '</b></span><div><strong>' + (progresso.feitas === progresso.total ? 'Prioridades concluídas' : 'Progresso das prioridades') +
+      '</strong><span>' + progresso.feitas + ' de ' + progresso.total + ' concluídas hoje</span></div>';
+  }
   seguro('Tarefas de hoje', function(){
   var abertas = D.tarefas.filter(function(t){ return t.status!=='feita'; });
   var pend = ordenarTarefas(abertas.filter(function(t){ return t.data && t.data<=dia; }));
   var top = pend.filter(ehTop3), resto = pend.filter(function(t){ return !ehTop3(t); });
   var nAtr = atrasadasAbertas().length;
   var bannerAtr = (nAtr >= 2 && simples()) ? '<div class="atr-linha"><span><b>'+nAtr+' atrasadas</b></span><button class="chip chip-f" onclick="abrirReplanejar()">Replanejar</button></div>' : nAtr >= 2 ? '<div class="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-2.5 text-xs mb-2 flex items-center justify-between gap-2"><span><b>'+nAtr+' tarefas atrasadas.</b> Replaneje de uma vez e comece limpo.</span><button class="btn btn-p shrink-0" onclick="abrirReplanejar()">Replanejar</button></div>' : '';
-  el('hoje-top3').innerHTML = top.length ? top.map(htmlTarefa).join('') : '<p class="subt py-1">Escolha até 3 tarefas que tornam o dia um sucesso: toque no alfinete ao lado da tarefa, ou em "Sugerir".</p>';
+  el('hoje-top3').innerHTML = top.length ? top.map(htmlTarefa).join('') : progresso.total ? '<p class="subt py-1">Todas as prioridades escolhidas estão concluídas.</p>' : '<p class="subt py-1">Escolha até 3 tarefas que tornam o dia um sucesso: toque no alfinete ao lado da tarefa, ou em "Sugerir".</p>';
   el('hoje-tarefas').innerHTML = bannerAtr + (simples() ? '' : htmlCapacidade()) + (resto.length ? resto.map(htmlTarefa).join('') : '<div class="py-2"><p class="subt">'+(top.length ? 'Nada além das prioridades.' : 'Nenhuma tarefa para hoje.')+'</p><button class="btn btn-s mt-2" onclick="abrirTarefa({data: hojeISO()})"><i class="fa-solid fa-plus"></i>Adicionar tarefa</button></div>');
   var semData = abertas.filter(function(t){ return !t.data; }).length;
   el('hoje-entrada').innerHTML = semData ? '<button class="text-xs text-purple-700 dark:text-purple-300 font-semibold mt-2" onclick="abrirTriagem(\'entrada\')"><i class="fa-solid fa-inbox mr-1"></i>'+semData+' tarefa(s) sem data na caixa de entrada</button>' : '';
@@ -4362,8 +4449,11 @@ function sequencia(hab){
 function marcarHabito(hid, dia){ vibra(10);
   var cmd = { tipo:'MARCAR_HABITO', habito_id:hid, data:dia, feito:!habitoFeito(hid, dia) };
   cmd.cid = Date.now().toString(36) + Math.random().toString(36).slice(2,10);
+  var hab = obter('habitos',hid);
+  var anterior = cmd.feito && hab.id ? sequencia(hab) : 0;
   efeitoLocal(cmd); renderTudo();
   enviar(cmd);
+  if(cmd.feito && hab.id) Celebracao.habito(hab,anterior,sequencia(hab));
 }
 function renderMetas(){
   var hoje = hojeISO(), dias = [];
@@ -4690,8 +4780,8 @@ function salvarHabitoModal(id){
   salvar('habitos', o); fecharModal();
 }
 
-function abrirRevisao(){
-  abrirModal('Revisão semanal estóica',
+function abrirReflexaoSemanal(){
+  abrirModal('Reflexão semanal estóica',
     '<div class="space-y-1.5"><p class="rot mt-2">Deveres e foco</p><label class="flex items-start gap-2 text-sm"><input type="checkbox" id="rv-c1"> Esvaziar caixa de entrada</label><label class="flex items-start gap-2 text-sm"><input type="checkbox" id="rv-c2"> Validar aderência ao ciclo de 5 dias de treino e cardios</label></div>' +
     campo('O que estava sob meu controle e funcionou?', '<textarea id="rv-1" rows="2" class="input"></textarea>') +
     campo('Ação virtuosa (3 prioridades para a semana)', '<textarea id="rv-3" rows="3" class="input" placeholder="1.\n2.\n3."></textarea>'),
@@ -4701,7 +4791,7 @@ function salvarRevisao(){
   var d = new Date();
   var txt = '[' + (marcado('rv-c1')?'x':' ') + '] Caixa de entrada esvaziada\n[' + (marcado('rv-c2')?'x':' ') + '] Treino/cardio em dia\n\nFuncionou:\n' + val('rv-1') + '\n\nPrioridades da semana:\n' + val('rv-3');
   salvar('notas', { titulo:'Revisão semanal — ' + pad2(d.getDate()) + '/' + pad2(d.getMonth()+1), conteudo:txt, tipo:'revisao', area:'Pessoal', etiquetas:'revisao' });
-  fecharModal(); toast('Revisão salva em Notas.');
+  fecharModal(); toast('Reflexão salva em Notas.');
 }
 
 /* ───────── busca ───────── */
@@ -5253,7 +5343,6 @@ function atualizarBtnDens(){ var b = el('btn-dens'); if(b){ b.textContent = '↕
 function atualizarCorTema(){ var m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', document.documentElement.classList.contains('dark') ? (estiloNotion() ? '#191919' : '#0d0c13') : (estiloNotion() ? '#ffffff' : '#f8fafc')); }
 function vibra(n){ try { if(navigator.vibrate && !semMov()) navigator.vibrate(n); } catch(e){} }
 function renderAparencia(){
-  Celebracao.atualizarAjuste();
   var a = acentoAtual();
   var ac = el('cf-acento'); if(!ac) return;
   ac.innerHTML = ACENTOS.map(function(x){ var on = x[0]===a; return '<button class="w-9 h-9 rounded-full" style="background:'+x[2]+';box-shadow:'+(on?'0 0 0 3px #fff,0 0 0 5px '+x[2]:'none')+'" aria-label="'+h(x[1])+'" aria-pressed="'+on+'" title="'+h(x[1])+'" onclick="'+C('definirAcento',x[0])+'"></button>'; }).join('');
@@ -5757,7 +5846,7 @@ function renderRituais(){
   var it = [
     ['☀️ Planejar o dia', 'abrirPlanejarDia()', hr<13 && !ritFeito('plan')],
     ['🌙 Encerrar o dia', 'abrirEncerrarDia()', hr>=17 && !ritFeito('enc')],
-    ['📅 Revisão da semana', 'abrirRevisaoSemanal()', ((dow===5 && hr>=14) || dow===6 || dow===0) && !ritFeito('sem')],
+    ['📅 Revisão semanal', 'Planner.revisao()', ((dow===5 && hr>=14) || dow===6 || dow===0) && !ritFeito('sem')],
     ['🗓 Propor plano', 'abrirPropostaPlano()', false],
     ['⚖️ Prazos', 'abrirPrazos()', false]
   ];
@@ -6015,22 +6104,6 @@ function abrirEncerrarDia(){
 }
 function encerrarAcao(id, a){ if(a==='feita') alternarTarefa(id); else salvar('tarefas', { id:id, data:somaDias(hojeISO(),1), top3:'' }); abrirEncerrarDia(); }
 function encerrarTodas(){ var l = pendentesDeHoje(); if(!l.length) return; salvar('tarefas', l.map(function(t){ return { id:t.id, data:somaDias(hojeISO(),1), top3:'' }; })); ritMarcar('enc'); fecharModal(); toast(l.length + ' tarefa(s) para amanhã.'); }
-
-/* — revisão semanal — */
-function abrirRevisaoSemanal(){
-  var hoje = hojeISO(), abertas = D.tarefas.filter(function(t){ return t.status!=='feita'; });
-  var nEnt = abertas.filter(function(t){ return !t.data; }).length, nAtr = atrasadasAbertas().length;
-  var metas = D.metas.filter(function(m){ return m.status!=='concluida' && m.status!=='pausada'; });
-  var dias = []; for(var k=1; k<=7; k++){ var d = somaDias(hoje, k), cp = capacidadeDia(d), cheio = cp.demanda > cp.livre; dias.push('<span class="chip chip-f'+(cheio?'':(cp.demanda?'':' opacity-60'))+'">'+DIAS_CURTO[deISO(d).getDay()]+' '+(cheio ? '⚠ sobrecarregado' : (cp.livre ? duracaoTxt(cp.livre)+' livres' : 'sem folga'))+'</span>'); }
-  var linha = function(ok, txt, btn){ return '<div class="flex items-center gap-2 py-1.5"><span>'+(ok?'✅':'⬜')+'</span><span class="flex-1 text-sm">'+txt+'</span>'+(btn||'')+'</div>'; };
-  abrirModal('📅 Revisão da semana',
-    linha(!nEnt, nEnt ? '<b>'+nEnt+'</b> na caixa de entrada (sem data)' : 'Caixa de entrada vazia', nEnt ? '<button class="btn btn-s text-xs" onclick="abrirTriagem(\'entrada\')">Processar</button>' : '') +
-    linha(!nAtr, nAtr ? '<b>'+nAtr+'</b> tarefa(s) atrasada(s)' : 'Nada atrasado', nAtr ? '<button class="btn btn-s text-xs" onclick="abrirReplanejar()">Replanejar</button>' : '') +
-    '<div class="py-1.5"><p class="rot">Metas</p>' + (metas.length ? metas.slice(0,6).map(function(m){ var sem = !metaDiaria(m) && !tarefasDaMeta(m).length; return '<div class="flex justify-between gap-2 text-sm"><span class="truncate">'+h(m.titulo)+'</span><span class="text-xs shrink-0 '+(sem?'text-amber-600':'text-slate-400')+'">'+pct(m)+'%'+(sem?' · sem tarefa ligada':'')+'</span></div>'; }).join('') : '<p class="subt">Nenhuma meta ativa.</p>') + '<p class="subt mt-1">Cada meta precisa de pelo menos uma tarefa ligada para andar.</p></div>' +
-    '<div class="py-1.5"><p class="rot">Próximos 7 dias (horas livres e carga)</p><div class="flex flex-wrap gap-1.5">' + dias.join('') + '</div><p class="subt mt-1">Dias com mais horas livres são bons para encaixar o que está sem data; ⚠ indica mais tarefas do que tempo.</p></div>' +
-    linha(false, 'Ver o resumo da semana que passou', '<button class="btn btn-s text-xs" onclick="abrirResumo()">Abrir</button>'),
-    '<div></div><div class="flex gap-2"><button onclick="fecharModal()" class="btn btn-s">Fechar</button><button onclick="ritMarcar(\'sem\');fecharModal();toast(\'Revisão concluída.\')" class="btn btn-p">Concluir revisão</button></div>');
-}
 
 /* — rotina: mudar só um dia — */
 function rotChave(r){ return r.id || (r.titulo + '|' + r.inicio); }
@@ -6343,7 +6416,7 @@ function renderDecision(){
  '<div class="s4-panel"><div class="s4-grid"><div class="s4-stat"><strong>'+x.overdue.length+'</strong><span>Em atraso</span></div><div class="s4-stat"><strong>'+x.noDate.length+'</strong><span>Na entrada</span></div><div class="s4-stat"><strong>'+Math.round(x.planned/60*10)/10+'h</strong><span>Tempo definido</span></div></div>'+
  '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:16px;font-size:12px"><strong>Capacidade estimada do dia</strong>'+chip(x.planned+' / '+x.capacity+' min',critical?'s4-warn':'s4-good')+'</div><div class="s4-bar"><i style="width:'+ratio+'%;background:'+(x.planned>x.capacity?'#e77840':'')+'"></i></div>'+
  (configFlag('s4_rule_capacity')&&x.planned>x.capacity?'<p class="s4-empty" style="color:#b45309">Planejamento acima da capacidade estimada em '+(x.planned-x.capacity)+' min. Revise prioridades ou reagende tarefas.</p>':'<p class="s4-empty">Somente tarefas com duração definida por você entram neste cálculo.</p>')+
- '<div class="s4-toolbar" style="margin-top:13px"><button type="button" class="s4-action" onclick="s4OpenInsights()">Ver riscos e sugestões</button><button type="button" class="s4-action" onclick="s4OpenReview()">Revisão inteligente</button></div></div>'+
+ '<div class="s4-toolbar" style="margin-top:13px"><button type="button" class="s4-action" onclick="s4OpenInsights()">Ver riscos e sugestões</button><button type="button" class="s4-action" onclick="Planner.revisao()">Revisão semanal</button></div></div>'+
  '<div class="s4-layout" style="margin-top:13px"><div class="s4-panel"><div class="s4-heading"><h2>Próximos compromissos</h2>'+chip(x.next.length+' para hoje')+'</div>'+(lead||textEmpty('Nenhuma tarefa datada para hoje.'))+'</div><div class="s4-panel"><div class="s4-heading"><h2>Atenção necessária</h2></div>'+
  (configFlag('s4_rule_deadlines')&&x.overdue.length?'<div class="s4-row"><div class="s4-row-main"><strong>'+x.overdue.length+' tarefa(s) atrasada(s)</strong><small>Considere reagendar ou concluir</small></div><button type="button" class="s4-action" onclick="abrirReplanejar()">Replanejar</button></div>':'')+
  (configFlag('s4_rule_projects')&&x.blocked.length?'<div class="s4-row"><div class="s4-row-main"><strong>'+x.blocked.length+' projeto(s) sem próxima tarefa</strong><small>Defina uma próxima ação objetiva</small></div><button type="button" class="s4-action" onclick="s4OpenProjects()">Examinar</button></div>':'')+
@@ -6379,8 +6452,18 @@ function linkTokens(s){var m=String(s||'').match(/\[\[([^\]\n]{1,120})\]\]/g)||[
 function linkTarget(label){var t=label.toLocaleLowerCase('pt-BR');return arr(D.notas).find(function(n){return String(n.titulo||'').toLocaleLowerCase('pt-BR')===t;})||null;}
 function renderKnowledge(){var root=$s('s4-knowledge');if(!root)return;var notes=arr(D.notas),links=notes.reduce(function(n,x){return n+linkTokens(x.conteudo).length;},0);root.innerHTML='<div class="s4-panel"><div class="s4-heading"><div><div class="s4-eyebrow">BASE DE CONHECIMENTO</div><h2>Notas conectadas</h2></div><button type="button" class="s4-action" onclick="s4OpenKnowledge()">Explorar conexões</button></div><p class="s4-empty">'+notes.length+' nota(s) e '+links+' referência(s) no formato <b>[[Título da nota]]</b>. Vincule projetos usando <b>[[Nome do projeto]]</b>.</p></div>';}
 function s4OpenKnowledge(){var ns=arr(D.notas),all=[];ns.forEach(function(n){linkTokens(n.conteudo).forEach(function(t){all.push({src:n,target:t,match:linkTarget(t)});});});var body='<p class="subt">Para conectar notas, escreva [[Título da outra nota]] no conteúdo. As conexões abaixo são descobertas automaticamente, sem modificar seus documentos.</p><div class="s4-modal-list">'+(all.length?all.slice(0,100).map(function(l){return '<div class="s4-row"><div class="s4-row-main"><strong>'+esc(l.src.titulo)+' → '+esc(l.target)+'</strong><small>'+(l.match?'Referência encontrada':'Referência sem nota correspondente')+'</small></div><button class="s4-action" onclick="abrirNota('+arg(l.src.id)+')">Origem</button>'+(l.match?'<button class="s4-action" onclick="abrirNota('+arg(l.match.id)+')">Destino</button>':'')+'</div>';}).join(''):textEmpty('Nenhuma referência encontrada.'))+'</div>';abrirModal('Mapa de conhecimento',body,'<button class="btn btn-s" onclick="fecharModal()">Fechar</button>');}
-function renderReports(){var root=$s('s4-reports');if(!root)return;var done=arr(D.tarefas).filter(function(t){return t.status==='feita';}).length,all=arr(D.tarefas).length;root.innerHTML='<div class="s4-panel"><div class="s4-heading"><div><div class="s4-eyebrow">ANÁLISE E RECUPERAÇÃO</div><h2>Relatórios e exportação</h2></div>'+chip(all?Math.round(done/all*100)+'% concluídas':'Sem dados')+'</div><div class="s4-toolbar"><button class="s4-action" onclick="s4OpenReview()">Revisão semanal</button><button class="s4-action" onclick="s4ExportCsv()">Exportar tarefas CSV</button><button class="s4-action" onclick="s4ExportJson()">Backup JSON</button><button class="s4-action" onclick="s4OpenRules()">Regras de alerta</button></div><p class="s4-empty" style="margin-top:11px">Exports incluem os dados carregados e podem conter informações pessoais. Guarde os arquivos em local protegido.</p></div>';}
-function s4OpenReview(){var x=summarize(),week=somaDias(x.day,-7),done=arr(D.tarefas).filter(function(t){return t.status==='feita'&&String(t.concluida_em||'').slice(0,10)>=week;});var more=arr(D.projetos).filter(function(p){return p.status==='ativo';});var rows=more.map(function(p){var s=s4ProjectInfo(p);return '<tr><td>'+esc(p.nome)+'</td><td>'+s.percentage+'%</td><td>'+s.open.length+'</td></tr>';}).join('');abrirModal('Revisão semanal · indicadores','<div class="s4-grid"><div class="s4-stat"><strong>'+done.length+'</strong><span>Concluídas em 7 dias*</span></div><div class="s4-stat"><strong>'+x.overdue.length+'</strong><span>Em atraso</span></div><div class="s4-stat"><strong>'+more.length+'</strong><span>Projetos ativos</span></div></div><div class="s4-report" style="margin-top:12px"><table><thead><tr><th>Projeto</th><th>Progresso</th><th>Em aberto</th></tr></thead><tbody>'+rows+'</tbody></table></div><p class="subt mt-2">*Indicador depende do campo de conclusão disponível no registro. Não mede tempo de trabalho.</p>','<button class="btn btn-s" onclick="s4ExportCsv()">Exportar CSV</button><button class="btn btn-p" onclick="fecharModal()">Fechar</button>');}
+function renderReports(){var root=$s('s4-reports');if(!root)return;var done=arr(D.tarefas).filter(function(t){return t.status==='feita';}).length,all=arr(D.tarefas).length;root.innerHTML='<div class="s4-panel"><div class="s4-heading"><div><div class="s4-eyebrow">ANÁLISE E RECUPERAÇÃO</div><h2>Relatórios e exportação</h2></div>'+chip(all?Math.round(done/all*100)+'% concluídas':'Sem dados')+'</div><div class="s4-toolbar"><button class="s4-action" onclick="Planner.revisao()">Revisão semanal</button><button class="s4-action" onclick="s4ExportCsv()">Exportar tarefas CSV</button><button class="s4-action" onclick="s4ExportJson()">Backup JSON</button><button class="s4-action" onclick="s4OpenRules()">Regras de alerta</button></div><p class="s4-empty" style="margin-top:11px">Exports incluem os dados carregados e podem conter informações pessoais. Guarde os arquivos em local protegido.</p></div>';}
+function s4IndicadoresSemanais(hoje){
+ var inicio = somaDias(hoje,-6);
+ var feitas = D.tarefas.filter(function(t){return t.status==='feita' && dataConcl(t)>=inicio && dataConcl(t)<=hoje;}).length;
+ var projetos = D.projetos.filter(function(p){return p.status==='ativo';});
+ var linhas = projetos.map(function(p){
+   var info = s4ProjectInfo(p);
+   return '<tr><td>'+esc(p.nome)+'</td><td>'+info.percentage+'%</td><td>'+info.open.length+'</td></tr>';
+ }).join('');
+ return '<p class="subt">'+feitas+' tarefas concluídas nos últimos 7 dias · '+projetos.length+' projetos ativos</p>'+
+   (linhas ? '<div class="s4-report"><table><thead><tr><th>Projeto</th><th>Progresso</th><th>Em aberto</th></tr></thead><tbody>'+linhas+'</tbody></table></div>' : '');
+}
 function csvCell(x){return '"'+String(x==null?'':x).replace(/[\r\n]+/g,' ').replace(/"/g,'""')+'"';}
 function downloadFile(name,type,content){var blob=new Blob([content],{type:type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},20000);}
 function s4ExportCsv(){var fields=['id','titulo','status','data','hora','prioridade','projeto','area','duracao','concluida_em'];var lines=[fields.map(csvCell).join(';')].concat(arr(D.tarefas).map(function(t){return fields.map(function(f){return csvCell(t[f]);}).join(';');}));downloadFile('segundo-cerebro-tarefas-'+hojeISO()+'.csv','text/csv;charset=utf-8','\ufeff'+lines.join('\r\n'));toast('CSV gerado no dispositivo.');}
@@ -6388,9 +6471,9 @@ function s4ExportJson(){var payload={app:'Segundo Cerebro',exportado_em:new Date
 function s4OpenRules(){abrirModal('Regras de atenção','<p class="subt mb-2">As regras são verificadas ao abrir a central. Elas mostram alertas no aplicativo, sem enviar notificações externas.</p>'+[['s4_rule_deadlines','Avisar sobre tarefas atrasadas'],['s4_rule_capacity','Avisar quando o dia superar a capacidade'],['s4_rule_projects','Avisar sobre projetos sem próxima ação']].map(function(r){return '<label class="s4-toggle"><input type="checkbox" id="'+r[0]+'" '+(configFlag(r[0])?'checked':'')+'><span>'+r[1]+'</span></label>';}).join(''),'<button class="btn btn-p" onclick="s4SaveRules()">Salvar regras</button>');}
 function s4SaveRules(){var d={};['s4_rule_deadlines','s4_rule_capacity','s4_rule_projects'].forEach(function(k){d[k]=$s(k)&&$s(k).checked?'sim':'nao';});salvarConfig(d);fecharModal();toast('Regras registradas para sincronização.');}
 function updateUI(){try{renderDecision();renderProjects();renderKnowledge();renderReports();}catch(e){console.warn('Studio 4: painel indisponível',e);}}
-function install(){addStyles();addPanels();var original=window.renderTudo;window.renderTudo=function(){original.apply(this,arguments);updateUI();};var old=window.renderVista;window.renderVista=function(){old.apply(this,arguments);updateUI();};
- var oldMore=window.abrirMais;window.abrirMais=function(){oldMore.apply(this,arguments);var body=$s('modal-corpo');if(body){body.insertAdjacentHTML('beforeend','<div class="s4-toolbar" style="margin-top:14px"><button class="s4-action" onclick="s4OpenProjects()">Espaços de projetos</button><button class="s4-action" onclick="s4OpenReview()">Relatórios</button></div>');}};
- window.s4OpenPlanning=s4OpenPlanning;window.s4MoveTask=s4MoveTask;window.s4OpenInsights=s4OpenInsights;window.s4OpenProjects=s4OpenProjects;window.s4OpenProject=s4OpenProject;window.s4NewProjectTask=s4NewProjectTask;window.s4OpenKnowledge=s4OpenKnowledge;window.s4OpenReview=s4OpenReview;window.s4ExportCsv=s4ExportCsv;window.s4ExportJson=s4ExportJson;window.s4OpenRules=s4OpenRules;window.s4SaveRules=s4SaveRules;
+function install(){addStyles();addPanels();var old=window.renderVista;window.renderVista=function(){old.apply(this,arguments);updateUI();};
+ var oldMore=window.abrirMais;window.abrirMais=function(){oldMore.apply(this,arguments);var body=$s('modal-corpo');if(body){body.insertAdjacentHTML('beforeend','<div class="s4-toolbar" style="margin-top:14px"><button class="s4-action" onclick="s4OpenProjects()">Espaços de projetos</button><button class="s4-action" onclick="Planner.revisao()">Revisão semanal</button></div>');}};
+ window.s4OpenPlanning=s4OpenPlanning;window.s4MoveTask=s4MoveTask;window.s4OpenInsights=s4OpenInsights;window.s4OpenProjects=s4OpenProjects;window.s4OpenProject=s4OpenProject;window.s4NewProjectTask=s4NewProjectTask;window.s4OpenKnowledge=s4OpenKnowledge;window.s4IndicadoresSemanais=s4IndicadoresSemanais;window.s4ExportCsv=s4ExportCsv;window.s4ExportJson=s4ExportJson;window.s4OpenRules=s4OpenRules;window.s4SaveRules=s4SaveRules;
  updateUI();
 }
 install();
@@ -6797,7 +6880,8 @@ $('sc60-retry').onclick=function(){if(typeof retentarFila==='function')retentarF
 $('sc60-export').onclick=function(){var pending=lerFila(),dead=storageArray('sc_fila_mortos_v1');
 
 var backup={app:'Segundo Cerebro',tipo:'exportacao-de-emergencia',data:new Date().toISOString(),fila:pending,quarentena:dead};
-var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='segundo-cerebro-pendencias-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);};
+downloadFile('segundo-cerebro-pendencias-'+new Date().toISOString().slice(0,10)+'.json',
+  'application/json',JSON.stringify(backup,null,2));};
 $('sc60-search').onclick=function(){if(typeof abrirBusca==='function')abrirBusca();};render();}
 function render(){var node=$('sc60-diagnostic-content');if(!node)return;
 var pending=typeof fila!=='undefined'?fila.length:lerFila().length;
@@ -7777,13 +7861,45 @@ html[data-sc-theme] body .np-reader button.np-taskbox::before{
   function abrirRevisao(){
     var hoje=hojeISO(), inicio=somaDias(segundaDe(hoje),7), fim=somaDias(inicio,6);
     var ok=agendaDisponivel(inicio,fim,abrirRevisao);
-    var atrasadas=D.tarefas.filter(function(t){return aberto(t)&&((t.data&&t.data<hoje)||t.adiada_em>=somaDias(hoje,-7));});
+    var limite = somaDias(hoje,-7);
+    var atrasadas = D.tarefas.filter(function(t){
+      return aberto(t) && ((t.data && t.data < hoje) || t.adiada_em >= limite);
+    });
+    atrasadas.sort(function(a,b){
+      return (Number(b.adiamentos) || 0) - (Number(a.adiamentos) || 0) ||
+        (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31');
+    });
     var metas=D.metas.filter(function(m){return m.status!=='concluida'&&m.status!=='pausada'&&!D.tarefas.some(function(t){return aberto(t)&&t.meta_id===m.id&&t.data>=hoje;});});
     var compromissos=dias.map(function(d,i){var dia=somaDias(inicio,i),it=itensDoDia(dia,false);return it.length?'<p class="rot">'+h(d)+'</p><div class="pp-stack">'+it.map(itemAgenda).join('')+'</div>':'';}).join('');
-    abrirModal('Revisão semanal com decisões',
-      card('Tarefas atrasadas ou adiadas',atrasadas.length?atrasadas.map(function(t){return '<div class="pp-row"><span>'+h(t.titulo)+'</span><div class="pp-actions">'+botao('Reagendar','Planner.mover',[t.id,'revisao'])+botao('Simplificar','Planner.simplificar',[t.id])+botao('Arquivar','Planner.arquivar',[String(t.id),false,'revisao'])+'</div></div>';}).join(''):vazio('Nenhuma tarefa atrasada ou adiada recentemente.'))+
+    var semData = D.tarefas.filter(function(t){return aberto(t) && !t.data;}).length;
+    var capacidade = dias.map(function(_,i){
+      var dia = somaDias(hoje,i+1), c = capacidadeDia(dia);
+      var situacao = c.demanda > c.livre ? 'sobrecarregado' : c.livre ? duracaoTxt(c.livre)+' livres' : 'sem folga';
+      return '<span class="chip chip-f">'+h(DIAS_CURTO[deISO(dia).getDay()]+' · '+situacao)+'</span>';
+    }).join(' ');
+    var progressoMetas = D.metas.filter(function(m){return m.status!=='concluida' && m.status!=='pausada';}).slice(0,6).map(function(m){
+      return '<div class="pp-row"><span>'+h(m.titulo)+'</span><strong>'+pct(m)+'%</strong></div>';
+    }).join('');
+    abrirModal('Revisão semanal',
+      card('Tarefas atrasadas ou adiadas',atrasadas.length?atrasadas.map(function(t){
+        var n = Number(t.adiamentos) || 0, detalhes = [];
+        if(t.data && t.data < hoje) detalhes.push('Em atraso');
+        if(n > 0) detalhes.push(n === 1 ? 'Adiada 1 vez' : 'Adiada ' + n + ' vezes');
+        else if(t.adiada_em) detalhes.push('Adiada anteriormente');
+        return '<div class="pp-row"><div><strong>'+h(t.titulo)+'</strong><div class="subt">'+h(detalhes.join(' · '))+'</div></div><div class="pp-actions">'+
+          botao('Reagendar','Planner.mover',[t.id,'revisao'])+botao('Simplificar','Planner.simplificar',[t.id])+
+          botao('Arquivar','Planner.arquivar',[String(t.id),false,'revisao'])+'</div></div>';
+      }).join(''):vazio('Nenhuma tarefa atrasada ou adiada recentemente.'))+
       card('Metas sem próxima ação',metas.length?metas.map(function(m){return '<div class="pp-row"><span>'+h(m.titulo)+'</span>'+botao('Planejar sessão','Planner.metas')+'</div>';}).join(''):vazio('Todas as metas ativas têm próxima ação.'))+
-      card('Compromissos da próxima semana',(ok?'':statusAgenda(inicio,fim))+(compromissos||vazio('Nenhum compromisso na agenda local.'))+botao('Abrir semana','Planner.semana',[inicio])),
+      card('Caixa de entrada',vazio(semData ? semData+' tarefa(s) sem data.' : 'Caixa de entrada vazia.')+
+        (semData ? botao('Processar entrada','Planner.entrada') : ''))+
+      card('Compromissos da próxima semana',(ok?'':statusAgenda(inicio,fim))+(compromissos||vazio('Nenhum compromisso na agenda local.'))+botao('Abrir semana','Planner.semana',[inicio]))+
+      '<details class="pp-card card"><summary class="font-bold">Capacidade, metas e indicadores</summary>'+
+        '<h3 class="mt-3">Capacidade dos próximos 7 dias</h3>'+capacidade+
+        (progressoMetas ? '<h3 class="mt-3">Progresso das metas</h3>'+progressoMetas : '')+
+        '<h3 class="mt-3">Indicadores da semana</h3>'+s4IndicadoresSemanais(hoje)+
+        '<div class="pp-actions mt-3">'+botao('Resumo da semana','abrirResumo')+
+        botao('Reflexão semanal','abrirReflexaoSemanal')+botao('Exportar CSV','s4ExportCsv')+'</div></details>',
       botao('Voltar','Planner.menu')+botao('Concluir revisão','Planner.concluir',[],true));
   }
   function simplificar(id){
@@ -7808,12 +7924,36 @@ html[data-sc-theme] body .np-reader button.np-taskbox::before{
 })();
 </script>
 <style id="sc-celebracao-css">
+#sc-prioridades-progresso:not([hidden]){display:flex;align-items:center;gap:14px;padding:12px 16px;margin:0 0 16px;border:1px solid var(--sc77-edge,#cbd5e1);border-radius:16px;background:var(--sc77-soft,#edf2ff);color:var(--sc77-ink,#172554)}
+#sc-prioridades-progresso strong,#sc-prioridades-progresso div>span{display:block}
+#sc-prioridades-progresso div>span{color:var(--sc77-muted,#475569);font-size:.875rem}
+.sc-anel{position:relative;display:grid;place-items:center;width:54px;height:54px;flex:none}
+.sc-anel svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);fill:none;stroke:currentColor;stroke-width:4}
+.sc-anel circle{opacity:.22}.sc-anel circle.sc-anel-preenchido{stroke:var(--sc77-ink,#4338ca);opacity:1}
+.sc-anel b{font-size:.75rem}
+.sc-anel-brilho .sc-anel{animation:sc-anel-brilho .85s ease-out}
+@keyframes sc-anel-brilho{50%{transform:scale(1.13);filter:drop-shadow(0 0 7px #f5b542)}}
+#sc-conquista{position:fixed;inset:auto 0 max(12px,env(safe-area-inset-bottom));margin:0 auto;width:min(420px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:24px;text-align:center;border:1px solid var(--sc77-edge,#cbd5e1);border-radius:22px;color:var(--sc77-ink,#172554);background:var(--sc77-top,#fff);box-shadow:0 14px 60px #0005;overflow-wrap:anywhere}
+#sc-conquista::backdrop{background:#09132699}
+#sc-conquista-icone{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 12px;border-radius:24px;background:#ffe7a3;color:#583400;font-size:2.35rem;font-weight:800}
+#sc-conquista[data-tipo="habito"] #sc-conquista-icone{background:#e9ddff;color:#49228d;font-size:1.7rem}
+#sc-conquista-titulo{font-weight:800;font-size:1.25rem}
+#sc-conquista-descricao{margin-top:6px}
+#sc-conquista-passos:not(:empty){margin-top:10px;letter-spacing:.25em;font-weight:700}
+.sc-conquista-acoes{margin-top:18px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+#sc-conquista-desfazer[hidden]{display:none}
+@media(min-width:768px){#sc-conquista{inset:0;margin:auto}}
+@media(prefers-reduced-motion:reduce){.sc-anel-brilho .sc-anel{animation:none}}
+
 .sc-celebracao{animation:sc-celebracao-entrada .25s ease-out}
 #toasts .sc-celebracao-2{border-inline-start:4px solid #a6ebce!important}
 #toasts .sc-celebracao-3{border-inline-start:5px solid #ffd677!important}
 #toasts .sc-celebracao-4{border:2px solid #ffd677!important;box-shadow:0 4px 20px #f2b84166}
 .sc-confetes{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:99970}
 .sc-confetes i{position:absolute;top:-12px;left:var(--x);width:7px;height:10px;border-radius:2px;background:var(--cor);animation:sc-confete-cair 1.15s ease-in var(--atraso) both}
+.sc-confetes:where(#sc-conquista *){position:absolute}
+.sc-confetes:where(#sc-conquista *) i{animation-name:sc-confete-cartao}
+@keyframes sc-confete-cartao{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(220px) rotate(var(--giro))}}
 @keyframes sc-celebracao-entrada{from{opacity:.25;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes sc-confete-cair{from{opacity:1;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(65vh) rotate(var(--giro))}}
 @media(prefers-reduced-motion:reduce){.sc-celebracao{animation:none!important}.sc-confetes{display:none!important}}
