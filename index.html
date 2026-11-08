@@ -1595,6 +1595,17 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
 <link rel="apple-touch-icon" href="./icon-192.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="2º Cérebro"><meta name="theme-color" content="#07192f">
+<style>.voz-rascunhos{display:grid;gap:.65rem;padding:.75rem;margin-top:.5rem;max-height:min(55vh,34rem);overflow:auto;background:var(--card,#fff);color:var(--ink,#162033);border:1px solid #9aa8ba;border-radius:12px}
+.voz-rascunhos article{display:grid;gap:.55rem;border:1px solid #a8b4c5;border-radius:9px;padding:.65rem}
+.voz-campos{display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+.voz-campos label,.voz-correcao label{display:grid;gap:.2rem;min-width:0}
+.voz-campos input,.voz-campos select,.voz-correcao input{min-width:0;width:100%}
+.voz-original{font-size:.875rem;overflow-wrap:anywhere}
+.voz-correcao,.voz-acoes{display:flex;gap:.45rem;flex-wrap:wrap;align-items:end}
+.voz-correcao label{flex:1 1 220px}
+html:not(.w-lg) #topo.min #captura-prev.voz-em-revisao{display:block}
+.dark .voz-rascunhos{background:#182337;color:#f1f5f9}
+</style>
 </head><body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen">
 <div id="carregando" class="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-900 p-4 overflow-hidden" aria-live="polite"><div class="max-w-xl mx-auto space-y-4 pt-2"><div class="esq" style="height:46px"></div><div class="esq" style="height:30px;width:60%"></div><div class="esq" style="height:150px"></div><div class="esq" style="height:110px"></div><div class="esq" style="height:110px"></div><p class="text-center text-xs text-slate-400 pt-2">Abrindo o seu 2° Cérebro…</p></div></div>
 <div class="flex min-h-screen">
@@ -1744,7 +1755,7 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
 <script src="./pwa-transport.js"></script>
 <script>
-var VERSAO_TELA = '2026-11-07p';
+var VERSAO_TELA = '2026-11-08b';
 var VERSAO_STUDIO = '7.5'; // Notas Pro | editor profissional em cinco temas
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], config:{}, ia:{} };
@@ -2509,11 +2520,11 @@ function inserirToken(t){
 function abrirNovo(){
   var chips = ['hoje','amanhã','10h','15h','!alta'].concat(simples() ? [] : areas().filter(function(a){ return /^[A-Za-zÀ-ÿ0-9_-]+$/.test(a); }).slice(0,4).map(function(a){ return '#'+a; }));
   abrirModal('Capturar',
-    '<div class="relative"><i class="fa-solid fa-bolt text-purple-700 absolute left-3 top-1/2 -translate-y-1/2 text-sm"></i><input id="captura-m" oninput="prevCaptura(\'-m\')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();capturar(event.shiftKey,\'-m\');}" class="input pl-9 pr-3 py-2.5" placeholder="Ex.: audiência sexta 10h #TJPE" autocomplete="off" enterkeyhint="send"><button type="button" class="btn-mic hidden" data-mic="-m" onclick="ditar(\'-m\')" aria-label="Ditar por voz"><i class="fa-solid fa-microphone"></i></button></div>' +
+    '<div class="relative"><i class="fa-solid fa-bolt text-purple-700 absolute left-3 top-1/2 -translate-y-1/2 text-sm"></i><input id="captura-m" oninput="prevCaptura(\'-m\')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();capturar(event.shiftKey,\'-m\');}" class="input pl-9 pr-3 py-2.5" placeholder="Ex.: audiência sexta 10h #TJPE" autocomplete="off" enterkeyhint="go"><button type="button" class="btn-mic hidden" data-mic="-m" onclick="ditar(\'-m\')" aria-label="Ditar por voz"><i class="fa-solid fa-microphone"></i></button></div>' +
     '<div id="captura-prev-m" class="hidden"></div>' +
     '<div class="flex gap-1.5 flex-wrap">' + chips.map(function(c){ return '<button class="chip chip-f" onclick="'+C('inserirToken',c)+'">'+h(c)+'</button>'; }).join('') + '</div>' +
     '<div class="grid grid-cols-3 gap-2"><button class="btn btn-s" onclick="abrirTarefa({data: hojeISO()})"><i class="fa-solid fa-list-check"></i>Tarefa</button><button class="btn btn-s" onclick="abrirEvento({data: hojeISO()})"><i class="fa-regular fa-calendar"></i>Evento</button><button class="btn btn-s" onclick="abrirNota({})"><i class="fa-solid fa-note-sticky"></i>Nota</button></div>',
-    (simples() ? '<span></span>' : '<button class="btn btn-s" onclick="capturar(true,\'-m\')">Salvar como nota</button>') + '<button class="btn btn-p" onclick="capturar(false,\'-m\')">Salvar</button>');
+    (simples() ? '<span></span>' : '<button class="btn btn-s" onclick="capturar(true,\'-m\')">Revisar como nota</button>') + '<button class="btn btn-p" onclick="capturar(false,\'-m\')">Revisar captura</button>');
   setTimeout(function(){ var c = el('captura-m'); if(c) c.focus(); }, 80);
 }
 /* Cada bloco da tela roda protegido: um erro esconde só aquele bloco (com aviso) e o resto do app abre normal. */
@@ -5218,6 +5229,276 @@ function ajustarLembrete(data, inicio, lemb, agora){
 }
 
 // prévia ao vivo do que será criado
+var vozRascunhos = new WeakMap();
+var vozTipos = {tarefa:'Tarefa', evento:'Evento', nota:'Nota', habito:'Hábito', meta:'Meta', alarme:'Alarme'};
+var vozNumeros = {zero:0,um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,onze:11,doze:12,treze:13,catorze:14,quatorze:14,quinze:15,dezesseis:16,dezessete:17,dezoito:18,dezenove:19,vinte:20,trinta:30,quarenta:40,cinquenta:50};
+var vozPalavras = Object.keys(vozNumeros).concat(['três']).join('|');
+var vozNumeroComposto = '(?:vinte|trinta|quarenta|cinquenta)\\s+e\\s+(?:um|dois|tr[eê]s|quatro|cinco|seis|sete|oito|nove)';
+function vozNumero(texto){
+  if(/^\d+$/.test(texto)) return +texto;
+  return norm(texto).split(/\s+e\s+/).reduce(function(total,palavra){return total+vozNumeros[palavra];},0);
+}
+
+function vozDataValida(data){
+  return /^\d{4}-\d{2}-\d{2}$/.test(data) && iso(deISO(data)) === data;
+}
+function vozHoraValida(hora){ return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(hora); }
+
+function vozLocal(texto, nota){
+  var original = texto.trim(), textoData = original, pergunta = '', opcoes = [], dataInvalida = false;
+  var link = /^\s*(?:t|e)\s*:/i.test(original) ? '' : urlDe(original);
+  if(link){
+    var notaLink = interpretar(original.replace(link,' ').trim(),true);
+    if(!notaLink.titulo) notaLink.titulo=link.replace(/^https?:\/\/(?:www\.)?/i,'').split(/[\/?#]/)[0];
+    return {item:notaLink,texto:original,pergunta:'',opcoes:[],bloqueio:'',incerto:false};
+  }
+  var barra = original.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{4}|\d{2}))?\b/);
+  var meses = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  var porExtenso = original.match(/\b(\d{1,2})\s+de\s+(janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+(\d{4}))?\b/i);
+  var dataDita = barra || porExtenso;
+  if(dataDita && !nota && !urlDe(original)){
+    var ano = dataDita[3] ? +dataDita[3] : +hojeISO().slice(0,4);
+    if(ano < 100 && dataDita[3] && dataDita[3].length === 2) ano += 2000;
+    var mes = barra ? +barra[2] : meses.indexOf(norm(porExtenso[2]))+1;
+    var data = String(ano).padStart(4,'0')+'-'+pad2(mes)+'-'+pad2(+dataDita[1]);
+    var proximoAno = String(ano+1).padStart(4,'0')+data.slice(4);
+    if(!vozDataValida(data) || (!dataDita[3] && data < hojeISO() && !vozDataValida(proximoAno))){
+      dataInvalida = true;
+      pergunta = 'A data dita é inválida. Qual é a data correta?';
+      textoData = original.replace(dataDita[0],' ');
+    } else if(porExtenso){
+      textoData = original.replace(dataDita[0],pad2(+dataDita[1])+'/'+pad2(mes)+(porExtenso[3] ? '/'+porExtenso[3] : ''));
+    }
+  }
+  var bruto = textoData;
+  var semLembrete = /\bsem lembrete\b/i.test(bruto) && !nota && !/^\s*(?:n\s*:|nota\s*:)/i.test(bruto);
+  if(semLembrete) bruto = bruto.replace(/[, ]*\bsem lembrete\b/i,' ');
+  var horaInvalida = /(?:^|\s)(\d{1,2}):(\d{2})(?!\d)/.exec(bruto);
+  if(!nota && horaInvalida && (+horaInvalida[1]>23 || +horaInvalida[2]>59) && !urlDe(original)){
+    if(!pergunta) pergunta = 'O horário dito é inválido. Qual é a hora correta?';
+    bruto = bruto.replace(horaInvalida[0],' ');
+  }
+  if(!nota && !urlDe(original) && !/^\s*(?:n\s*:|nota\s*:)/i.test(original)){
+    bruto = bruto.replace(/\bmeia hora antes\b/ig,'30 minutos antes');
+    bruto = bruto.replace(new RegExp('(?:[àa]s|pelas)\\s+(\\d{1,2}|'+vozNumeroComposto+'|'+vozPalavras+')(?![\\w:])(?:\\s+e\\s+(meia|\\d{1,2}|'+vozNumeroComposto+'|'+vozPalavras+')(?![\\w:]))?(?:\\s*(?:da|de)\\s+(manh[ãa]|tarde|noite|madrugada))?','ig'),
+      function(trecho, h0, m0, periodo){
+        var hora = vozNumero(h0);
+        var minuto = !m0 ? 0 : norm(m0)==='meia' ? 30 : vozNumero(m0);
+        if(hora > 23 || minuto > 59){
+          if(!pergunta) pergunta = 'O horário dito é inválido. Qual é a hora correta?';
+          return ' ';
+        }
+        var alterna = hora > 0 && hora < 12 ? hora+12 : 0;
+        if(!periodo && alterna && (!pergunta || dataInvalida)){
+          opcoes = [pad2(hora)+':'+pad2(minuto),pad2(alterna)+':'+pad2(minuto)];
+          if(!dataInvalida) pergunta = 'Você quis dizer '+opcoes.join(' ou ')+'?';
+        }
+        if(periodo && /tarde|noite/i.test(periodo) && alterna) hora = alterna;
+        return ' às '+pad2(hora)+':'+pad2(minuto);
+      });
+    bruto = bruto.replace(/\b(?:anota|anote|anotar)\s+(?!(?:uma\s+)?nota\b)/i,function(m, pos){ return pos===0 ? 't: ' : m; });
+    bruto = bruto.replace(/^(?:marca|marque|marcar|agende|agendar)\s+/i,'');
+    bruto = bruto.replace(/^(?:crie|criar|adicione|adicionar)\s+(?:uma?\s+)?(tarefa|evento|nota)\s+(?:de\s+|para\s+)?/i,function(_,tipo){ return ({tarefa:'t',evento:'e',nota:'n'})[norm(tipo)]+': '; });
+  }
+  var textoParse = bruto.replace(/\s*(?:,?\s*me\s+avis[ae]\s+)?(\d{1,3})\s+minutos?\s+antes\b/ig,' ');
+  var lemb = bruto.match(/\b(\d{1,3})\s+minutos?\s+antes\b/i);
+  var temAlarme = /\balarme\b/i.test(bruto);
+  if(temAlarme || nota || /^\s*n\s*:/i.test(bruto)) textoParse = bruto;
+  var item = interpretar(textoParse,nota);
+  if(lemb && !temAlarme && !nota && (item.tipo==='tarefa'||item.tipo==='evento')) item.lembrete = String(+lemb[1]);
+  var acao = /^(?:comprar|pagar|enviar|ligar|estudar|ler|revisar|buscar|levar|entregar|fazer|lavar|limpar|resolver|preparar|escrever|responder|pedir|retirar|imprimir|conferir|terminar|tomar)\b/i;
+  var compromisso = /\b(?:dentista|reuni[aã]o|consulta|entrevista|aula|sess[aã]o|encontro|exame|viagem|evento)\b/i;
+  var verbo = /^(?:marca|marque|marcar|agende|agendar)\b/i.test(original);
+  if(!nota && !/^\s*(t|n|e)\s*:/i.test(bruto) && item.tipo!=='alarme'){
+    if(acao.test(item.titulo) && !verbo && item.tipo==='evento') item.tipo = 'tarefa';
+    if(verbo && item.tipo==='tarefa') item.tipo = 'evento';
+  }
+  if(item.tipo==='tarefa' && item.inicio && !item.data && !dataInvalida){
+    var agora = new Date(), horaAgora = pad2(agora.getHours())+':'+pad2(agora.getMinutes());
+    item.data = item.inicio > horaAgora ? hojeISO() : somaDias(hojeISO(),1);
+  }
+  if(dataInvalida) item.data = '';
+  if(semLembrete && item.tipo!=='nota') item.lembrete='';
+  if(item.lembrete==null && item.inicio) item.lembrete=({tarefa:'10',evento:'30',alarme:'0'})[item.tipo];
+  if(nota || item.tipo==='nota' || urlDe(original)){ pergunta=''; opcoes=[]; }
+  return {item:item, texto:original, pergunta:pergunta, opcoes:opcoes, bloqueio:pergunta ? (dataInvalida ? 'data' : 'inicio') : '',
+    incerto:!item.titulo || (item.tipo==='evento' && (!item.inicio || !item.data || (!verbo && !/^\s*e\s*:/i.test(bruto) && !compromisso.test(item.titulo)))) || (!nota && /\be\s+(?:também|depois)\b/i.test(original))};
+}
+
+function vozSeparar(texto){
+  if(urlDe(texto) || /^\s*(?:n\s*:|nota\s*:)/i.test(texto)) return [texto];
+  return texto.split(/\s*(?:[;\n]+|,?\s+e\s+(?=(?:anot[ae](?:r)?|marc[ae](?:r)?|agend[ae](?:r)?|crie|criar|adicion[ae]r?|comprar|pagar|enviar|ligar|estudar|buscar|entregar|resolver)\b))\s*/i)
+    .map(function(p){return p.trim();}).filter(Boolean);
+}
+
+function vozCorrigir(cartao, texto){
+  var comando = texto.replace(/^\s*(?:na verdade|corrigindo|quer dizer)\s*[,.:]?\s*/i,'').trim();
+  var r = cartao.item, normal = norm(comando);
+  var titulo = comando.match(/^(?:t[íi]tulo|nome)\s*(?::|para)\s*(.+)$/i);
+  if(titulo){ vozEditar(cartao,'titulo',titulo[1]); return true; }
+  if(/^(?:sem|tir[ae]r?|remov[ae]r?)\s+(?:o\s+)?lembrete\.?$/.test(normal)){ vozEditar(cartao,'lembrete',''); return true; }
+  var tipo = normal.match(/^(?:coloc[ae]r?|mud[ae]r?|troc[ae]r?)\s+(?:como|para)\s+(tarefa|evento|nota|alarme|habito|meta)\.?$/);
+  if(tipo){ vozEditar(cartao,'tipo',tipo[1]); return true; }
+  var lemb = normal.match(/^(?:(?:me\s+)?(?:avis[ae]|lembr[ae])\s+|lembrete\s+(?:de\s+)?)?(\d{1,3}|meia)\s+(?:min(?:utos?)?|hora)\s+antes\.?$/);
+  if(lemb){ vozEditar(cartao,'lembrete',lemb[1]==='meia' ? '30' : lemb[1]); return true; }
+  var ajustado = comando.replace(/\s+(?:as|às|[aà])?\s*(uma|duas|três|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze)(?=\s+(?:da|de)\s+|\s*$)/i,' às $1');
+  if(/^(?:\d{1,2}:\d{2}|\d{1,2}h\d{0,2})(?:\s|$)/i.test(ajustado)) ajustado = 'às '+ajustado;
+  var comData = /\b(?:hoje|amanh[ãa]|domingo|segunda|ter[çc]a|quarta|quinta|sexta|s[áa]bado|dia\s+\d+|\d{1,2}\/\d{1,2}|\d{1,2}\s+de\s+[a-zç]+)\b/i.test(ajustado);
+  var comHora = /\b\d{1,2}(?:h\d{0,2}|:\d{2})\b|(?:^|\s)[àa]s\s+|\b(?:meio.dia|meia.noite)\b/i.test(ajustado);
+  if(!comData && !comHora) return false;
+  var novo = vozLocal('t: ajuste '+ajustado,false), antes = r.inicio;
+  if(comData) vozEditar(cartao,'data',novo.item.data || '');
+  if(comHora){
+    vozEditar(cartao,'inicio',novo.item.inicio || '');
+    if(novo.item.fim) r.fim = novo.item.fim;
+    if(antes !== r.inicio && r.fim && r.fim <= r.inicio) r.fim='';
+  }
+  if(novo.pergunta){ cartao.pergunta=novo.pergunta; cartao.opcoes=novo.opcoes; cartao.bloqueio=novo.bloqueio; }
+  return true;
+}
+
+function vozEditar(cartao,campo,valor){
+  if(campo==='tipo' && !Object.prototype.hasOwnProperty.call(vozTipos,valor)) return;
+  cartao.item[campo] = valor;
+  if(campo==='tipo' && ['nota','habito','meta'].includes(valor)){
+    if(valor!=='meta') cartao.item.data='';
+    cartao.item.inicio=''; cartao.item.fim=''; cartao.item.lembrete=undefined;
+    if(valor!=='meta' || cartao.bloqueio!=='data'){cartao.bloqueio='';cartao.pergunta='';cartao.opcoes=[];}
+  }
+  if(campo==='tipo' && valor==='habito' && !cartao.item.dias) cartao.item.dias=[1,2,3,4,5];
+  var resolvido = campo==='data' ? vozDataValida(valor) :
+    campo==='lembrete' ? /^(?:\d{1,3})?$/.test(valor) :
+    campo==='tipo' ? true : vozHoraValida(valor);
+  if(campo===cartao.bloqueio && resolvido){
+    if(campo==='data' && cartao.opcoes.length){
+      cartao.bloqueio='inicio'; cartao.pergunta='Você quis dizer '+cartao.opcoes.join(' ou ')+'?';
+    } else { cartao.bloqueio=''; cartao.pergunta=''; cartao.opcoes=[]; }
+  }
+  cartao.revisao=(cartao.revisao||0)+1;
+}
+
+function vozErro(cartao){
+  var r=cartao.item;
+  if(!r.titulo.trim()) return 'Preencha o título.';
+  if(cartao.bloqueio) return cartao.pergunta;
+  if(r.data && !vozDataValida(r.data)) return 'Informe uma data válida.';
+  if(r.inicio && !vozHoraValida(r.inicio)) return 'Informe uma hora válida.';
+  if((r.tipo==='evento'||r.tipo==='alarme'||(r.tipo==='tarefa'&&r.inicio)) && !r.data) return 'Informe a data.';
+  if((r.tipo==='evento'||r.tipo==='alarme') && !r.inicio) return 'Informe a hora.';
+  if(r.fim && (!vozHoraValida(r.fim) || r.fim<=r.inicio)) return 'O fim deve ser depois do início.';
+  if(r.lembrete && !/^\d{1,3}$/.test(r.lembrete)) return 'Informe o lembrete em minutos.';
+  if(r.lembrete && !r.inicio) return 'Informe a hora para usar o lembrete.';
+  return '';
+}
+
+function vozPainel(suf){
+  var campo=el('captura'+suf), caixa=el('captura-prev'+suf), sessao=campo && vozRascunhos.get(campo);
+  if(!caixa || !sessao) return;
+  var html = '<section class="voz-rascunhos" aria-label="Rascunhos da captura"><strong>Confira antes de salvar</strong>';
+  sessao.cartoes.forEach(function(c,i){
+    var r=c.item;
+    var campoHtml=function(nome,rotulo,tipo,valor){
+      return '<label>'+rotulo+'<input class="input" type="'+tipo+'" data-campo="'+nome+'" value="'+h(valor||'')+'"'+(tipo==='number'?' min="0" max="999"':'')+'></label>';
+    };
+    html += '<article data-cartao="'+i+'"><p class="voz-original">'+h(c.texto)+'</p><div class="voz-campos">'+campoHtml('titulo','Título','text',r.titulo)+
+      '<label>Tipo<select class="input" data-campo="tipo">'+Object.keys(vozTipos).map(function(k){
+        return '<option value="'+k+'"'+(r.tipo===k?' selected':'')+'>'+vozTipos[k]+'</option>';
+      }).join('')+'</select></label>';
+    if(['tarefa','evento','alarme','meta'].includes(r.tipo)){
+      html+=campoHtml('data','Data','date',r.data);
+      html+=' <small data-data-exata></small>';
+    }
+    if(['tarefa','evento','alarme'].includes(r.tipo)){
+      html+=campoHtml('inicio','Hora','time',r.inicio);
+      if(r.tipo==='evento') html+=campoHtml('fim','Fim (opcional)','time',r.fim);
+      html+=campoHtml('lembrete','Lembrete (minutos)','number',r.lembrete);
+    }
+    html+='</div>';
+    if(c.pergunta) html+='<p role="status" data-pergunta>'+h(c.pergunta)+'</p>';
+    if(c.bloqueio==='inicio' && c.opcoes.length) html+='<div class="voz-acoes">'+c.opcoes.map(function(hora){return '<button type="button" class="btn btn-s" data-hora="'+hora+'">'+hora+'</button>';}).join('')+'</div>';
+    html+='<form class="voz-correcao"><label>Corrigir por texto ou pelo microfone do teclado<input class="input" name="correcao" autocomplete="off" placeholder="Ex.: na verdade, quinta às nove"></label><button class="btn btn-s" type="submit">Aplicar</button></form>'+
+      '<div class="voz-acoes"><button type="button" class="btn btn-p" data-voz="salvar">Confirmar e salvar</button><button type="button" class="btn btn-s" data-voz="descartar">Descartar</button>'+
+      ((c.incerto||c.pergunta) ? '<button type="button" class="btn btn-s" data-voz="ia">Revisar com Gemini</button><small>Envia o texto deste cartão ao Google.</small>' : '')+'</div></article>';
+  });
+  caixa.innerHTML=html+'</section>';
+  caixa.classList.add('voz-em-revisao');
+  caixa.classList.remove('hidden');
+  caixa.querySelectorAll('[data-cartao]').forEach(function(bloco){
+    var i=+bloco.dataset.cartao, c=sessao.cartoes[i];
+    var dataExata=bloco.querySelector('[data-data-exata]');
+    function atualizarData(){
+      if(dataExata) dataExata.textContent=vozDataValida(c.item.data) ?
+        deISO(c.item.data).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '';
+    }
+    atualizarData();
+    bloco.querySelectorAll('[data-campo]').forEach(function(elCampo){
+      elCampo.addEventListener('input',function(){vozEditar(c,elCampo.dataset.campo,elCampo.value); atualizarData();
+        var pergunta=bloco.querySelector('[data-pergunta]');
+        if(pergunta) pergunta.textContent=c.pergunta;});
+      elCampo.addEventListener('change',function(){
+        if(elCampo.dataset.campo==='tipo') vozPainel(suf);
+      });
+    });
+    bloco.querySelectorAll('[data-hora]').forEach(function(botao){
+      botao.onclick=function(){vozEditar(c,'inicio',botao.dataset.hora);vozPainel(suf);};
+    });
+    bloco.querySelector('form').onsubmit=function(ev){
+      ev.preventDefault();
+      if(vozCorrigir(c,ev.currentTarget.elements.correcao.value)){ c.revisao=(c.revisao||0)+1; vozPainel(suf); }
+      else toast('Não entendi a correção. Edite o campo ou diga, por exemplo, “sem lembrete”.',true);
+    };
+    bloco.querySelector('[data-voz="salvar"]').onclick=function(){
+      var erro=vozErro(c);
+      if(erro){toast(erro,true);return;}
+      gravarCaptura(c.item,c.texto);
+      vozRemover(suf,campo,sessao,i);
+    };
+    bloco.querySelector('[data-voz="descartar"]').onclick=function(){vozRemover(suf,campo,sessao,i);};
+    var ia=bloco.querySelector('[data-voz="ia"]');
+    if(ia) ia.onclick=function(){vozGemini(campo,sessao,c,suf,ia);};
+  });
+}
+
+function vozRemover(suf,campo,sessao,i){
+  sessao.cartoes.splice(i,1);
+  if(sessao.cartoes.length){vozPainel(suf);return;}
+  vozRascunhos.delete(campo); campo.value=''; capOv[suf]=''; prevCaptura(suf);
+}
+
+function vozPreparar(shift,suf){
+  suf=suf||'';
+  var campo=el('captura'+suf), texto=textoCaptura(suf);
+  if(!campo || !texto) return;
+  var atual=vozRascunhos.get(campo);
+  if(atual && atual.texto===texto && !shift){vozPainel(suf);return;}
+  var partes=shift ? [texto] : vozSeparar(texto);
+  if(partes.length>12){toast('Divida a captura em até 12 itens por vez.',true);return;}
+  vozRascunhos.set(campo,{texto:texto,cartoes:partes.map(function(p){return vozLocal(p,shift);})});
+  vozPainel(suf);
+}
+
+function vozGemini(campo,sessao,cartao,suf,botao){
+  var revisao=cartao.revisao;
+  botao.disabled=true;
+  google.script.run.withSuccessHandler(function(res){
+    botao.disabled=false;
+    if(vozRascunhos.get(campo)!==sessao || !sessao.cartoes.includes(cartao) || cartao.revisao!==revisao) return;
+    if(!res || !res.ok){toast(res && res.mensagem || 'Gemini indisponível. O rascunho pode ser editado.',true);return;}
+    var proposta=res.item;
+    if(!proposta) return;
+    if(proposta.pergunta && !cartao.bloqueio){cartao.pergunta=proposta.pergunta;cartao.bloqueio=proposta.campo || 'data';cartao.opcoes=[];}
+    ['tipo','titulo','data','inicio','fim','lembrete'].forEach(function(chave){
+      var valor=proposta[chave];
+      if(!valor || chave===cartao.bloqueio || (chave==='data' && !vozDataValida(valor)) ||
+        ((chave==='inicio'||chave==='fim') && !vozHoraValida(valor))) return;
+      vozEditar(cartao,chave,valor);
+    });
+    vozPainel(suf);
+    toast('Sugestão aplicada ao rascunho. Confira antes de salvar.');
+  }).withFailureHandler(function(){botao.disabled=false;toast('Gemini indisponível. O rascunho foi preservado.',true);})
+    .interpretarCapturaGemini(cartao.texto,hojeISO());
+}
+
 var capOv = {};   // troca manual de tipo por campo de captura: 't' | 'n' | ''
 function textoCaptura(suf){
   suf = suf || ''; var txt = el('captura'+suf).value.trim();
@@ -5231,8 +5512,13 @@ function alternarTipoCap(suf){
 function prevCaptura(suf){
   suf = suf || '';
   var box = el('captura-prev'+suf), txt = el('captura'+suf).value.trim();
-  if(!txt){ capOv[suf] = ''; box.innerHTML = ''; box.classList.add('hidden'); return; }
-  var r = interpretar(textoCaptura(suf), false), troca = !/^\s*(t|n|e)\s*:/i.test(txt);
+  var campo = el('captura'+suf);
+      var sessao = vozRascunhos.get(campo);
+      if(sessao && sessao.texto===textoCaptura(suf)){ vozPainel(suf); return; }
+      vozRascunhos.delete(campo);
+      box.classList.remove('voz-em-revisao');
+      if(!txt){ capOv[suf] = ''; box.innerHTML = ''; box.classList.add('hidden'); return; }
+  var r = vozLocal(textoCaptura(suf), false).item, troca = !/^\s*(t|n|e)\s*:/i.test(txt);
   var rot = { tarefa:['Tarefa','fa-list-check'], evento:['Evento','fa-calendar'], nota:['Nota','fa-note-sticky'], alarme:['Alarme','fa-clock'], habito:['Hábito','fa-repeat'], meta:['Meta','fa-bullseye'] }[r.tipo];
   var d = r.data ? deISO(r.data) : null;
   var chips = '<button type="button" class="chip" style="background:#6d28d91a;color:#6d28d9"'+(troca?' onclick="alternarTipoCap(\''+suf+'\')" title="Toque para trocar o tipo"':'')+'><i class="fa-solid '+rot[1]+'"></i>'+rot[0]+(troca?' ⇄':'')+'</button>' +
@@ -5245,16 +5531,19 @@ function prevCaptura(suf){
     (r.feito ? '<span class="chip" style="background:#10b9811a;color:#047857"><i class="fa-solid fa-check"></i>já feito</span>' : '') +
     r.etiquetas.map(function(e){ return '<span class="text-xs text-slate-400">#'+h(e)+'</span>'; }).join('') + (r.tipo==='habito' ? '<span class="chip chip-f"><i class="fa-solid fa-repeat"></i>'+h(cmNomeDias(r.dias))+(r.diasDitos?'':' (padrão)')+'</span>' : '') + (r.tipo==='alarme' ? '<span class="chip chip-f"><i class="fa-solid fa-clock"></i>aviso '+h(r.alarme||r.inicio)+(r.alarme&&r.alarme!==r.inicio?' · compromisso '+h(r.inicio):'')+'</span><span class="text-xs text-slate-400">notificação do Google Agenda</span>' : (r.lembrete && r.inicio ? '<span class="text-xs text-slate-400">aviso '+(r.lembrete==='0'?'no horário':h(r.lembrete)+' min antes')+'</span>' : ''));
   box.innerHTML = '<div class="flex items-center gap-1.5 flex-wrap">'+chips+'</div><p class="text-[11px] text-slate-400 mt-1">'+(r.motivo && !capOv[suf] ? 'Nota porque: '+h(r.motivo)+'. ' : capOv[suf] ? 'Tipo trocado por você. ' : '')+'Toque no tipo para trocar · Enter salva · Shift+Enter salva como nota</p>';
-  box.classList.remove('hidden');
-}
+  var revisar = document.createElement('button');
+      revisar.type='button'; revisar.className='btn btn-s'; revisar.textContent='Revisar captura';
+      revisar.onclick=function(){vozPreparar(false,suf);};
+      box.appendChild(revisar);
+      box.classList.remove('hidden');
+    }
 
-function capturar(shift, suf){
-  suf = suf || '';
-  var campoCap = el('captura'+suf), txt = campoCap.value.trim(); if(!txt) return;
-  txt = textoCaptura(suf); capOv[suf] = '';
-  var url = /^\s*(t|e)\s*:/i.test(txt) ? '' : urlDe(txt), resto = url ? txt.replace(url, ' ').replace(/\s+/g, ' ').trim() : '';
-  var r = url ? (resto ? interpretar(resto, true) : { titulo:'', area:'', etiquetas:[] }) : interpretar(txt, shift);
-  if(url && !r.titulo) r.titulo = url.replace(/^https?:\/\/(www\.)?/i,'').split(/[\/?#]/)[0] || 'Link';
+    function capturar(shift, suf){ vozPreparar(shift,suf); }
+
+    function gravarCaptura(r, txt){
+      var url = r.tipo==='nota' && !/^\s*(t|e)\s*:/i.test(txt) ? urlDe(txt) : '';
+      var resto = url ? txt.replace(url,' ').replace(/\s+/g,' ').trim() : '';
+      if(url && !r.titulo) r.titulo = url.replace(/^https?:\/\/(www\.)?/i,'').split(/[\/?#]/)[0] || 'Link';
   if(!r.titulo){ toast('Não entendi o título.', true); return; }
   var o, tabela, extra = null, msg, alarmeNovo = null;
   if(url){
@@ -5272,26 +5561,26 @@ function capturar(shift, suf){
     msg = 'Meta criada: ' + r.titulo + (r.data ? ' · prazo ' + dataBonita(r.data) : '') + (alvoC ? ' · ' + alvoC + ' min por dia, zera todo dia' : '');
   } else if(r.tipo==='alarme'){
     if(!r.inicio){ toast('Diga o horário, ex.: alarme às 16:00 para ir ao shopping.', true); return; }
-    var ajA = ajustarLembrete(r.data, r.inicio, r.lembrete || '0');
+    var ajA = ajustarLembrete(r.data, r.inicio, r.lembrete==='' ? '-1' : r.lembrete || '0');
     tabela = 'tarefas'; o = { titulo:r.titulo, area:r.area, prioridade:r.prioridade, data:r.data, hora:r.inicio, lembrete:ajA.lembrete, etiquetas:r.etiquetas.concat(['alarme']).join(','), status:'aberta' };
-    if(r.antes && OPCOES_LEMBRETE.indexOf(r.antes) < 0 && r.alarme){ o.hora = r.alarme; o.data = r.alarmeData; o.lembrete = '0'; o.titulo = r.titulo + ' (' + r.inicio + ')'; }
+    if(r.lembrete!=='' && r.antes && OPCOES_LEMBRETE.indexOf(r.antes) < 0 && r.alarme){ o.hora = r.alarme; o.data = r.alarmeData; o.lembrete = '0'; o.titulo = r.titulo + ' (' + r.inicio + ')'; }
     msg = 'Aviso às ' + (r.alarme || r.inicio) + ': ' + r.titulo + (r.alarme && r.alarme !== r.inicio ? ' (compromisso ' + r.inicio + ')' : '') + ' · ' + dataBonita(r.alarmeData || r.data) + ' · notificação do Agenda';
   } else if(r.tipo==='evento'){
     var fim = calcularFim(r.inicio, r.fim, r.duracao);
-    var aj = ajustarLembrete(r.data, r.inicio, r.lembrete || '30');
+    var aj = ajustarLembrete(r.data, r.inicio, r.lembrete==='' ? '-1' : r.lembrete || '30');
     tabela = 'eventos'; o = { titulo:r.titulo, data:r.data, inicio:r.inicio, fim:fim, area:r.area, local:r.local || '', lembrete:aj.lembrete };
     if(cfgSim('google_criar')) extra = { google:true };
     msg = 'Evento criado: ' + r.titulo + ' · ' + dataBonita(r.data) + (r.inicio?' '+r.inicio:'') + (r.local ? ' · ' + r.local : '') + (aj.aviso ? ' · ' + aj.aviso : '');
   } else {
     tabela = 'tarefas'; o = { titulo:r.titulo, area:r.area, prioridade:r.prioridade, data:r.data, hora:r.inicio, local:r.local || '', etiquetas:r.etiquetas.join(','), status:r.feito ? 'feita' : 'aberta' };
-    if(r.inicio){ var ajC = ajustarLembrete(r.data, r.inicio, r.lembrete || '10'); o.lembrete = ajC.lembrete; if(ajC.aviso) toast(ajC.aviso); }
+    if(r.lembrete==='') o.lembrete='-1';
+        else if(r.inicio){ var ajC = ajustarLembrete(r.data, r.inicio, r.lembrete || '10'); o.lembrete = ajC.lembrete; if(ajC.aviso) toast(ajC.aviso); }
     msg = r.feito ? 'Registrado como feito hoje: ' + r.titulo : 'Tarefa criada: ' + r.titulo + (r.data?' · '+dataBonita(r.data):' (caixa de entrada)');
   }
   salvar(tabela, o, extra);   // salvar() preenche o.id no próprio objeto
   if(tabela==='eventos' || tabela==='tarefas') saidaAuto(tabela, o, extra);
   var criado = o;
   toast(msg, false, { rotulo:'Desfazer', fn:function(){ excluir(tabela, criado.id, (tabela==='eventos' && extra) ? { google:true } : null); toast('Desfeito.'); } });
-  campoCap.value = ''; prevCaptura(suf); if(suf) fecharModal();
 }
 
 /* ───────── ajustes ───────── */
@@ -5885,10 +6174,36 @@ function ditar(suf){
   suf = suf || '';
   var campoCap = el('captura'+suf), btn = document.querySelector('[data-mic="'+suf+'"]');
   if(reconhecimento){ try { reconhecimento.stop(); } catch(e){} return; }
-  var rec = new SR(); rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+  var rec = new SR(); rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 3;
   var base = campoCap.value ? campoCap.value.trim() + ' ' : '';
   rec.onstart = function(){ if(btn) btn.classList.add('ouvindo'); toast('Ouvindo… fale a captura.'); };
-  rec.onresult = function(ev){ var txt = ''; for(var i=0;i<ev.results.length;i++) txt += ev.results[i][0].transcript; campoCap.value = base + txt; prevCaptura(suf); };
+  rec.onresult = function(ev){
+        var segmentos = Array.from(ev.results);
+        var txt = segmentos.map(function(s){return s[0].transcript.trim();}).join(' ');
+        campoCap.value = base + txt;
+        prevCaptura(suf);
+        if(!segmentos.every(function(s){return s.isFinal;}) || !segmentos.length) return;
+        var ultimo = segmentos[segmentos.length-1];
+        var caixa = el('captura-prev'+suf);
+        var prefixo = segmentos.slice(0,-1).map(function(s){return s[0].transcript.trim();}).join(' ');
+        var sugestoes = new Set();
+        for(var i=1;i<ultimo.length;i++){
+          var alterna = ultimo[i].transcript.trim();
+          if(alterna && alterna!==ultimo[0].transcript.trim()) sugestoes.add(alterna);
+        }
+        if(!sugestoes.size) return;
+        var opcoes = document.createElement('div');
+        opcoes.className = 'voz-acoes';
+        opcoes.setAttribute('aria-label','Outras transcrições');
+        sugestoes.forEach(function(alterna){
+          var escolha = document.createElement('button');
+          escolha.type='button'; escolha.className='btn btn-s';
+          escolha.textContent='Ouviu: '+alterna;
+          escolha.onclick=function(){campoCap.value=base+[prefixo,alterna].filter(Boolean).join(' ');prevCaptura(suf);};
+          opcoes.appendChild(escolha);
+        });
+        caixa.appendChild(opcoes);
+      };
   rec.onerror = function(ev){
     if(ev.error==='not-allowed' || ev.error==='service-not-allowed'){
       // Se o Chrome não marcou o microfone como "negado" para o site, quem bloqueia é a página embutida do Google (Apps Script): não tem conserto aqui.
@@ -6136,6 +6451,7 @@ function verificarPWA(){
 
 /* ───────── Hora de sair automática ao salvar evento/tarefa com Local ───────── */
 function saidaAuto(tabela, o, extra){
+  if(o.lembrete==='-1') return;
   try {
     if(!cfgSim('saida_auto')) return;
     var orig = String(D.config.local_partida || '').trim(), loc = String(o.local || '').trim();
