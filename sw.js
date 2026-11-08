@@ -1,5 +1,5 @@
 /* 2º Cérebro Studio 7.7 — cache isolado da interface; NUNCA armazena respostas Google. */
-const CACHE='segundo-cerebro-2026-11-07p';
+const CACHE='segundo-cerebro-2026-11-08b';
 const PREFIX='segundo-cerebro-';
 const ESSENCIAIS=['./index.html','./pwa-transport.js','./offline.html'];
 const OPCIONAIS=['./','./manifest.webmanifest','./pwa-install.js','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];
