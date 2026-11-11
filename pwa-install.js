@@ -1,4 +1,4 @@
-/* 2º Cérebro Studio 9.0.2 — registro seguro do Service Worker.
+/* 2º Cérebro Studio 9.1.0 — registro seguro do Service Worker.
  * Não apaga caches nem registros locais; não força a ativação ou o recarregamento.
  * Permite que a atualização aguardando ativação entre em vigor quando as abas forem fechadas.
  */
