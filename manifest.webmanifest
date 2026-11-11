@@ -2,12 +2,12 @@
   "id": "./",
   "name": "2º Cérebro — Organizador Pessoal",
   "short_name": "2º Cérebro",
-  "description": "Organizador pessoal com Dia Vivo, Mapa do Conhecimento, Captura por Intenção e Linha do Tempo",
+  "description": "Agenda, tarefas, notas, estudos e finanças em uma interface adaptativa e minimalista",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#071d40",
-  "theme_color": "#163e7c",
+  "background_color": "#f4f6fb",
+  "theme_color": "#f4f6fb",
   "icons": [
     {
       "src": "./icon-192.png",
