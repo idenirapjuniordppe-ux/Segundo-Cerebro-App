@@ -2187,10 +2187,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-12k-sc11150"></script>
+<script src="./pwa-transport.js?v=2026-11-12l-sc11151"></script>
 <script>
-var VERSAO_TELA = '2026-11-12k';
-var VERSAO_STUDIO = '11.15.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-12l';
+var VERSAO_STUDIO = '11.15.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12112,7 +12112,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-12k-sc11150"></script>
+<script src="./pwa-install.js?v=2026-11-12l-sc11151"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12284,6 +12284,7 @@ function consume(suf,text,result,field){const s=state(suf);
 function live(field){return field&&field.isConnected&&document.visibilityState!=='hidden'&&(!field.getClientRects||field.getClientRects().length>0);}
 function send(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);if(!live(field))return;
  const text=field.value.trim();if(!text||s.composing||!s.armed)return;
+ if(s.blockedUntil>Date.now()){paint(suf,s.answer);return;}
  if(typeof reconhecimento!=='undefined'&&reconhecimento)return;
  if(s.busy){schedule(suf);return;}if(s.last===text)return;
  clearTimeout(s.timer);s.seq++;const seq=s.seq;s.last=text;
@@ -12301,7 +12302,8 @@ function send(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);if(!li
  google.script.run.withSuccessHandler(result=>{
   s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}
   consume(suf,text,result,field);
- }).withFailureHandler(error=>{s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}s.last='';s.armed=false;s.answer='Não consegui acessar a IA: '+String(error&&error.message||error)+'. Sua mensagem foi mantida.';paint(suf,s.answer);}).capturaInteligente(text,ctx);
+ }).withFailureHandler(error=>{s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}s.last='';s.armed=false;const message=String(error&&error.message||error),quota=/SC116_429\[(\d+)\]\s*(.*)/.exec(message);
+ if(quota){s.blockedUntil=Date.now()+Number(quota[1])*1000;s.answer=quota[2]+' Sua mensagem foi mantida.';}else{s.answer='Não consegui acessar a IA: '+message+'. Sua mensagem foi mantida.';}paint(suf,s.answer);}).capturaInteligente(text,ctx);
 }
 function schedule(suf){const s=state(suf);clearTimeout(s.timer);if(!s.armed||s.composing)return;s.timer=setTimeout(()=>send(suf),PAUSE);}
 window.prevCaptura=function(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);s.seq++;clearTimeout(s.timer);
