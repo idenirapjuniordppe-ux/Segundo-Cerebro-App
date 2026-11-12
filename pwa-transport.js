@@ -15,7 +15,7 @@ function trocarConfiguracao(){
     telaConfig('Confira o ID com o botão de copiar do Google Cloud. A troca não apaga tarefas, notas nem operações pendentes.',antiga);
   });
 }
-function diagnostico(){return ['Origem da PWA: '+location.origin,'Caminho: '+location.pathname,'ID OAuth em uso: '+idResumo(cfg&&cfg.cid),'Endereço Apps Script: '+(cfg?cfg.url:'não configurado'),'Contexto: '+(window.matchMedia&&matchMedia('(display-mode: standalone)').matches?'PWA instalada':'navegador'),'Versão transporte: 2026-11-12h'].join('\n');}
+function diagnostico(){return ['Origem da PWA: '+location.origin,'Caminho: '+location.pathname,'ID OAuth em uso: '+idResumo(cfg&&cfg.cid),'Endereço Apps Script: '+(cfg?cfg.url:'não configurado'),'Contexto: '+(window.matchMedia&&matchMedia('(display-mode: standalone)').matches?'PWA instalada':'navegador'),'Versão transporte: 2026-11-12i'].join('\n');}
 window.scPwaDiagnostico=diagnostico;
 window.scPwaEditarConexao=trocarConfiguracao;
 function hashCfg(){
