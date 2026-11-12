@@ -1958,9 +1958,9 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-11o-sc1160"></script>
+<script src="./pwa-transport.js?v=2026-11-11p-sc1170"></script>
 <script>
-var VERSAO_TELA = '2026-11-11o';
+var VERSAO_TELA = '2026-11-11p';
 var VERSAO_STUDIO = '11.6.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
@@ -6715,7 +6715,7 @@ document.addEventListener('touchstart', function(e){
   if(e.touches.length !== 1 || !navMovelVisivel() || !el('modal').classList.contains('hidden') || foco.rodando) return;
   var t = e.touches[0], a = e.target;
   if(t.clientX < 20 || t.clientX > window.innerWidth - 20) return;
-  if(a.closest('.linha-swipe, .ag-sw, .sc68-home-item, input, textarea, select, [contenteditable="true"], .bloco, [data-drag], .fantasma-dnd, pre') || rolaNaHorizontal(a)) return;   // [data-drag]: bandeja, quadro e calendário (segurar e arrastar)
+  if(a.closest('.linha-swipe, .ag-sw, .sc68-home-item, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-drag], .fantasma-dnd, pre') || rolaNaHorizontal(a)) return;   // [data-drag]: bandeja, quadro e calendário (segurar e arrastar)
   abaSw = { x:t.clientX, y:t.clientY, t:Date.now() };
 }, { passive:true });
 document.addEventListener('touchmove', function(e){
@@ -6945,7 +6945,7 @@ function ptrOcultar(){ var p = el('ptr'); p.classList.remove('on'); p.style.tran
 document.addEventListener('touchstart', function(e){
   ptr = null;
   if(e.touches.length !== 1 || !navMovelVisivel() || !el('modal').classList.contains('hidden') || foco.rodando || (window.scrollY||0) > 0) return;
-  if(e.target.closest('.linha-swipe, .ag-sw, .sc68-home-item, input, textarea, select, [contenteditable="true"], .bloco, [data-ini], #nav-movel, #lote')) return;
+  if(e.target.closest('.linha-swipe, .ag-sw, .sc68-home-item, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-ini], #nav-movel, #lote')) return;
   ptr = { y:e.touches[0].clientY, x:e.touches[0].clientX, d:0 };
 }, { passive:true });
 document.addEventListener('touchmove', function(e){
@@ -8937,7 +8937,7 @@ html[data-sc-theme] :is(#v-agenda,#v-tarefas,#v-metas,#v-config,#modal:not(.sc75
 html[data-sc-theme] ::selection{color:var(--sc77-on-active);background:var(--sc77-active-bg)}
 @media(forced-colors:active){html[data-sc-theme] :is(button,input,select,textarea,a):focus-visible{outline:3px solid Highlight!important}html[data-sc-theme] :is(input,select,textarea){border-color:ButtonText!important}}
 </style>
-<script src="./pwa-install.js?v=2026-11-11o-sc1160"></script>
+<script src="./pwa-install.js?v=2026-11-11p-sc1170"></script>
 
 <style id="sc80-dark-panels">
 /* Compatibilidade dos painéis antigos com os tokens atuais dos cinco temas. */
@@ -11038,17 +11038,18 @@ html.sc11-active #nav-movel .sc11-nav-create .sc11-icon{width:52px!important;hei
   const paths={home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',notes:'<path d="M5 3h14a2 2 0 0 1 2 2v10l-6 6H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 21v-6h6M7 8h10M7 12h6"/>',tasks:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 1.5 1.5L11 8M14 9h4m-11 6 1.5 1.5L11 14M14 15h4"/>',more:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',plus:'<path d="M12 5v14M5 12h14"/>'};
   return '<svg class="sc11-icon" viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[name]+'</svg>';
  }
- function navMarkup(){const s=prefs.atalho==='tarefas'?'tarefas':'notas',label=s==='tarefas'?'Tarefas':'Notas';
-  return '<button type="button" class="nav-m" data-v="hoje" onclick="irPara(\'hoje\')">'+svg('home')+'<span>Hoje</span></button>'+
-   '<button type="button" class="nav-m" data-v="agenda" onclick="irPara(\'agenda\')">'+svg('calendar')+'<span>Agenda</span></button>'+
-   '<button type="button" class="nav-m sc11-nav-create" data-v="criar" onclick="abrirNovo()" aria-label="Criar novo registro">'+svg('plus')+'<span>Criar</span></button>'+
-   '<button type="button" class="nav-m" data-v="'+s+'" onclick="irPara(\''+s+'\')">'+svg(s==='tarefas'?'tasks':'notes')+'<span>'+label+'</span></button>'+
+ function navMarkup(){
+  return '<button type="button" class="nav-m" data-v="hoje" onclick="irPara(\'hoje\')">'+svg('home')+'<span>Hoje</span></button>'+ 
+   '<button type="button" class="nav-m" data-v="agenda" onclick="irPara(\'agenda\')">'+svg('calendar')+'<span>Agenda</span></button>'+ 
+   '<button type="button" class="nav-m" data-v="tarefas" onclick="irPara(\'tarefas\')">'+svg('tasks')+'<span>Tarefas</span></button>'+ 
+   '<button type="button" class="nav-m" data-v="notas" onclick="irPara(\'notas\')">'+svg('notes')+'<span>Notas</span></button>'+ 
    '<button type="button" class="nav-m" data-v="mais" onclick="SC11.menu()">'+svg('more')+'<span>Mais</span></button>';
  }
- function active(){let current=typeof window.vistaAtual==='string'?window.vistaAtual:'hoje';document.querySelectorAll('#nav-movel .nav-m').forEach(e=>{let v=e.dataset.v,here=v===current||(v==='mais'&&!['hoje','agenda',prefs.atalho==='tarefas'?'tarefas':'notas'].includes(current));e.classList.toggle('ativo',here);if(here)e.setAttribute('aria-current','page');else e.removeAttribute('aria-current')})}
+ function active(){let current=typeof window.vistaAtual==='string'?window.vistaAtual:'hoje';document.querySelectorAll('#nav-movel .nav-m').forEach(e=>{let v=e.dataset.v,here=v===current||(v==='mais'&&!['hoje','agenda','tarefas','notas'].includes(current));e.classList.toggle('ativo',here);if(here)e.setAttribute('aria-current','page');else e.removeAttribute('aria-current')})}
  let navObserver=null;
- function patchNav(){let nav=document.getElementById('nav-movel');if(!nav)return;let marker=nav.querySelector('.sc11-nav-create');let label=nav.querySelector('[data-v="notas"],[data-v="tarefas"]');let expected=prefs.atalho==='tarefas'?'tarefas':'notas';if(!marker||!label||label.dataset.v!==expected){nav.innerHTML=navMarkup()}active()}
- function navObserve(){let el=document.getElementById('nav-movel');if(!el)return;patchNav();navObserver=new MutationObserver(()=>{if(!el.querySelector('.sc11-nav-create'))patchNav()});navObserver.observe(el,{childList:true});}
+ function patchNav(){let nav=document.getElementById('nav-movel');if(!nav)return;
+   if(!nav.querySelector('[data-v="tarefas"]')||!nav.querySelector('[data-v="notas"]')||nav.querySelector('.sc11-nav-create')||nav.querySelectorAll('.nav-m').length!==5){nav.innerHTML=navMarkup()}active()}
+ function navObserve(){let el=document.getElementById('nav-movel');if(!el)return;patchNav();navObserver=new MutationObserver(()=>{if(el.querySelector('.sc11-nav-create')||!el.querySelector('[data-v="tarefas"]')||!el.querySelector('[data-v="notas"]'))patchNav()});navObserver.observe(el,{childList:true});}
  function modalClose(){if(typeof window.fecharModal==='function')window.fecharModal()}
  function go(id){modalClose();if(['hoje','agenda','tarefas','notas','metas','config'].includes(id)){if(typeof window.irPara==='function')window.irPara(id);active();return}if(['postits','estudos','financas'].includes(id)&&window.SC10&&typeof window.SC10.open==='function'){window.SC10.open(id);return}if(id==='busca'&&typeof window.abrirBusca==='function'){window.abrirBusca();return}if(id==='captura'&&typeof window.abrirNovo==='function'){window.abrirNovo()}}
  function menu(){if(typeof window.abrirModal!=='function')return;
@@ -11057,9 +11058,8 @@ html.sc11-active #nav-movel .sc11-nav-create .sc11-icon{width:52px!important;hei
   window.abrirModal('Seus espaços',html,'<button type="button" class="btn btn-s" onclick="fecharModal()">Fechar</button>')}
  function settings(){let parent=document.getElementById('v-config');if(!parent)return;let root=document.getElementById('sc11-settings');if(!root){root=document.createElement('section');root.id='sc11-settings';root.className='sc11-settings';let old=document.getElementById('sc100-settings');if(old&&old.parentNode===parent)old.insertAdjacentElement('afterend',root);else parent.appendChild(root)}
   let p=ALLOWED.includes(prefs.paleta)?prefs.paleta:'padrao';let a=prefs.atalho==='tarefas'?'tarefas':'notas';
-  root.innerHTML='<h3>Personalização do aplicativo</h3><label for="sc11-colors">Paleta de cores<select id="sc11-colors"><option value="padrao"'+(p==='padrao'?' selected':'')+'>Equilibrada</option><option value="azul"'+(p==='azul'?' selected':'')+'>Azul suave</option><option value="lavanda"'+(p==='lavanda'?' selected':'')+'>Lavanda</option></select></label><label for="sc11-shortcut">Atalho inferior<select id="sc11-shortcut"><option value="notas"'+(a==='notas'?' selected':'')+'>Notas</option><option value="tarefas"'+(a==='tarefas'?' selected':'')+'>Tarefas</option></select></label>';
+  root.innerHTML='<h3>Personalização do aplicativo</h3><label for="sc11-colors">Paleta de cores<select id="sc11-colors"><option value="padrao"'+(p==='padrao'?' selected':'')+'>Equilibrada</option><option value="azul"'+(p==='azul'?' selected':'')+'>Azul suave</option><option value="lavanda"'+(p==='lavanda'?' selected':'')+'>Lavanda</option></select></label>';
   root.querySelector('#sc11-colors').addEventListener('change',e=>{prefs.paleta=ALLOWED.includes(e.target.value)?e.target.value:'padrao';persist();applyPalette()});
-  root.querySelector('#sc11-shortcut').addEventListener('change',e=>{prefs.atalho=e.target.value==='tarefas'?'tarefas':'notas';persist();patchNav()});
  }
  function init(){applyPalette();navObserve();settings();
   if(typeof window.irPara==='function'&&!window.irPara.sc11Hook){let orig=window.irPara;let wrapped=function(){let out=orig.apply(this,arguments);active();if(arguments[0]==='config')settings();return out};wrapped.sc11Hook=true;window.irPara=wrapped}
@@ -11222,6 +11222,125 @@ html.sc11-active #nav-movel .sc11-nav-create .sc11-icon{width:52px!important;hei
   }
   window.SC116={toggle:toggle,pin:pin,render:schedule,unpin:function(id){pin(id,false)},_test:{num:num,fractions:fractions,bounds:bounds}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
+<style id="sc117-fab-style">
+/* Studio 11.7 — criação flutuante, independente da navegação. */
+#sc117-fab {
+  position: fixed !important;
+  z-index: 47 !important;
+  display: grid !important;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  min-height: 58px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 20px;
+  background: linear-gradient(135deg,#3777ed,#7641d6) !important;
+  box-shadow: 0 9px 22px rgba(44,53,128,.28);
+  color: #fff !important;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none !important;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow .18s ease, opacity .15s ease;
+  left: auto;
+  top: auto;
+  right: 20px;
+  bottom: 106px;
+}
+html.sc11-active #sc5-fab, html.sc11-active #fab { display:none!important; }
+#sc117-fab svg { width: 28px; height: 28px; stroke: currentColor; fill: none; pointer-events: none; }
+#sc117-fab.sc117-dragging { cursor: grabbing; box-shadow: 0 13px 28px rgba(44,53,128,.38); }
+#sc117-fab:focus-visible { outline: 3px solid #ffd782; outline-offset: 3px; }
+/* A captura não obstrui formulários, avisos modais nem a barra inferior. */
+html:has(#modal:not(.hidden)) #sc117-fab { opacity: 0; pointer-events: none; }
+html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
+@media (prefers-reduced-motion: reduce) { #sc117-fab { transition:none!important; } }
+</style>
+<script id="sc117-floating-create">
+/* Studio 11.7: botão independente, arrastável e acessível. */
+(function(){'use strict';
+ const KEY='sc117_fab_position_v1';
+ const buttonId='sc117-fab';
+ let button=null, gesture=null, ignoreClickUntil=0;
+ const limit=(v,a,b)=>Math.max(a,Math.min(b,v));
+ function safeRead(){try{let s=JSON.parse(localStorage.getItem(KEY)||'null');
+   return s&&Number.isFinite(s.x)&&Number.isFinite(s.y)?{x:limit(s.x,0,1),y:limit(s.y,0,1)}:null;
+ }catch(_){return null}}
+ function safeWrite(x,y){try{localStorage.setItem(KEY,JSON.stringify({x,y}));}catch(_){}}
+ function bounds(){
+   let w=button?.offsetWidth||58,h=button?.offsetHeight||58;
+   const vw=document.documentElement.clientWidth||innerWidth;
+   const vh=innerHeight;
+   let nav=document.getElementById('nav-movel');
+   let bottom=vh-14;
+   if(nav&&getComputedStyle(nav).display!=='none'){
+     const r=nav.getBoundingClientRect();
+     if(r.height>0&&r.top>0)bottom=Math.min(bottom,r.top-12);
+   }
+   return {minX:18,maxX:Math.max(18,vw-w-18),minY:12,maxY:Math.max(12,bottom-h)};
+ }
+ function setXY(x,y,save){if(!button)return;
+   const b=bounds(); x=limit(x,b.minX,b.maxX); y=limit(y,b.minY,b.maxY);
+   button.style.setProperty('left',Math.round(x)+'px','important');
+   button.style.setProperty('top',Math.round(y)+'px','important');
+   button.style.setProperty('right','auto','important');
+   button.style.setProperty('bottom','auto','important');
+   if(save)safeWrite(b.maxX>b.minX?(x-b.minX)/(b.maxX-b.minX):1,b.maxY>b.minY?(y-b.minY)/(b.maxY-b.minY):1);
+ }
+ function setRatio(s){let b=bounds();let p=s||{x:1,y:.91};
+   setXY(b.minX+p.x*(b.maxX-b.minX),b.minY+p.y*(b.maxY-b.minY),false);
+ }
+ function open(){if(typeof window.abrirNovo==='function')window.abrirNovo();}
+ function mount(){
+   if(document.getElementById(buttonId))return;
+   button=document.createElement('button');button.type='button';button.id=buttonId;
+   button.setAttribute('aria-label','Criar novo registro. Arraste para mover o botão.');
+   button.setAttribute('title','Toque para criar; arraste para mover');
+   button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" stroke-width="2.3" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg>';
+   document.body.appendChild(button);
+   setRatio(safeRead());
+   button.addEventListener('pointerdown',function(e){
+     if(gesture||e.pointerType==='mouse'&&e.button!==0)return;
+     const rect=button.getBoundingClientRect();
+     gesture={id:e.pointerId,startX:e.clientX,startY:e.clientY,x:rect.left,y:rect.top,drag:false};
+     try{button.setPointerCapture(e.pointerId)}catch(_){}
+   });
+   button.addEventListener('pointermove',function(e){
+     let g=gesture;if(!g||g.id!==e.pointerId)return;
+     let dx=e.clientX-g.startX,dy=e.clientY-g.startY;
+     if(!g.drag&&Math.hypot(dx,dy)>8){g.drag=true;button.classList.add('sc117-dragging');}
+     if(g.drag){e.preventDefault();setXY(g.x+dx,g.y+dy,false);}
+   },{passive:false});
+   function finish(e){let g=gesture;if(!g||g.id!==e.pointerId)return;
+     gesture=null;button.classList.remove('sc117-dragging');
+     if(g.drag){let r=button.getBoundingClientRect();setXY(r.left,r.top,true);ignoreClickUntil=Date.now()+550;}
+     else if(e.type==='pointercancel')setRatio(safeRead());
+   }
+   button.addEventListener('pointerup',finish);
+   button.addEventListener('pointercancel',finish);
+   button.addEventListener('click',function(e){
+     if(Date.now()<ignoreClickUntil){e.preventDefault();e.stopImmediatePropagation();return;}
+     open();
+   });
+   button.addEventListener('keydown',function(e){
+     const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+     if(!d)return;e.preventDefault();
+     const r=button.getBoundingClientRect(),step=e.shiftKey?36:16;
+     setXY(r.left+d[0]*step,r.top+d[1]*step,true);
+   });
+   function resize(){if(!button)return;setRatio(safeRead());}
+   addEventListener('resize',resize,{passive:true});
+   addEventListener('orientationchange',resize,{passive:true});
+   /* Não sobrepõe a barra após ajustes de layout. */
+   const nav=document.getElementById('nav-movel');
+   if(nav&&typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(nav);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
 </script>
 </body></html>
