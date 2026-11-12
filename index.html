@@ -1958,10 +1958,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-11p-sc1170"></script>
+<script src="./pwa-transport.js?v=2026-11-12a-sc1180"></script>
 <script>
-var VERSAO_TELA = '2026-11-11p';
-var VERSAO_STUDIO = '11.6.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-12a';
+var VERSAO_STUDIO = '11.8.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -6715,7 +6715,7 @@ document.addEventListener('touchstart', function(e){
   if(e.touches.length !== 1 || !navMovelVisivel() || !el('modal').classList.contains('hidden') || foco.rodando) return;
   var t = e.touches[0], a = e.target;
   if(t.clientX < 20 || t.clientX > window.innerWidth - 20) return;
-  if(a.closest('.linha-swipe, .ag-sw, .sc68-home-item, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-drag], .fantasma-dnd, pre') || rolaNaHorizontal(a)) return;   // [data-drag]: bandeja, quadro e calendário (segurar e arrastar)
+  if(a.closest('.linha-swipe, .ag-sw, .sc68-home-item, .sc100-task, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-drag], .fantasma-dnd, pre') || rolaNaHorizontal(a)) return;   // [data-drag]: bandeja, quadro e calendário (segurar e arrastar)
   abaSw = { x:t.clientX, y:t.clientY, t:Date.now() };
 }, { passive:true });
 document.addEventListener('touchmove', function(e){
@@ -6945,7 +6945,7 @@ function ptrOcultar(){ var p = el('ptr'); p.classList.remove('on'); p.style.tran
 document.addEventListener('touchstart', function(e){
   ptr = null;
   if(e.touches.length !== 1 || !navMovelVisivel() || !el('modal').classList.contains('hidden') || foco.rodando || (window.scrollY||0) > 0) return;
-  if(e.target.closest('.linha-swipe, .ag-sw, .sc68-home-item, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-ini], #nav-movel, #lote')) return;
+  if(e.target.closest('.linha-swipe, .ag-sw, .sc68-home-item, .sc100-task, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-ini], #nav-movel, #lote')) return;
   ptr = { y:e.touches[0].clientY, x:e.touches[0].clientX, d:0 };
 }, { passive:true });
 document.addEventListener('touchmove', function(e){
@@ -8937,7 +8937,7 @@ html[data-sc-theme] :is(#v-agenda,#v-tarefas,#v-metas,#v-config,#modal:not(.sc75
 html[data-sc-theme] ::selection{color:var(--sc77-on-active);background:var(--sc77-active-bg)}
 @media(forced-colors:active){html[data-sc-theme] :is(button,input,select,textarea,a):focus-visible{outline:3px solid Highlight!important}html[data-sc-theme] :is(input,select,textarea){border-color:ButtonText!important}}
 </style>
-<script src="./pwa-install.js?v=2026-11-11p-sc1170"></script>
+<script src="./pwa-install.js?v=2026-11-12a-sc1180"></script>
 
 <style id="sc80-dark-panels">
 /* Compatibilidade dos painéis antigos com os tokens atuais dos cinco temas. */
@@ -11341,6 +11341,68 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
    if(nav&&typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(nav);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
+})();
+</script>
+
+<style id="sc118-home-swipe-style">
+/* Studio 11.8 — gesto nas Prioridades do Hoje, sem botões extras. */
+#sc100-home .sc100-task{touch-action:pan-y;overscroll-behavior-x:contain;user-select:none;-webkit-user-select:none;position:relative;will-change:transform;transition:transform .17s ease-out,background-color .17s ease-out;border-radius:11px}
+#sc100-home .sc100-task.sc118-right{background:rgba(16,185,129,.15)!important}
+#sc100-home .sc100-task.sc118-left{background:rgba(239,68,68,.13)!important}
+@media(prefers-reduced-motion:reduce){#sc100-home .sc100-task{transition:none!important}}
+</style>
+<script id="sc118-home-swipe">
+(function(){'use strict';
+/* Compartilha as operações persistentes existentes; nunca escreve por conta própria. */
+let active=null,lastGesture={at:0,rect:null},lastRun={id:'',at:0};
+const rowFrom=node=>node&&node.closest?node.closest('#sc100-home .sc100-task'):null;
+const blockControl=node=>node&&node.closest&&node.closest('button,a,input,select,textarea,[contenteditable="true"]');
+function clear(){if(active&&active.row&&active.row.isConnected){active.row.style.transform='';active.row.classList.remove('sc118-left','sc118-right');}active=null;}
+function begin(node,x,y){if(active||blockControl(node))return;const row=rowFrom(node);if(!row)return;
+ const control=row.querySelector('[data-sc100-complete]');if(!control)return;
+ active={row,id:String(control.getAttribute('data-sc100-complete')||''),x,y,dx:0,dy:0,horizontal:false};
+}
+function move(x,y,event){const a=active;if(!a)return;const dx=x-a.x,dy=y-a.y;
+ if(!a.horizontal&&Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)*1.15){clear();return;}
+ if(Math.abs(dx)>14&&Math.abs(dx)>Math.abs(dy)*1.25)a.horizontal=true;
+ if(!a.horizontal)return;
+ a.dx=dx;a.dy=dy;
+ if(event&&event.cancelable)event.preventDefault();
+ a.row.style.transform='translateX('+Math.max(-96,Math.min(96,dx))+'px)';
+ a.row.classList.toggle('sc118-right',dx>0);a.row.classList.toggle('sc118-left',dx<0);
+}
+function completeOrDelete(a,direction){if(!a.id||typeof obter!=='function')return;
+ const item=obter('tarefas',a.id);if(!item||!item.id||item.status==='feita')return;
+ const now=Date.now();if(lastRun.id===a.id&&now-lastRun.at<950)return;
+ lastRun={id:a.id,at:now};
+ if(direction==='right'){
+   if(typeof alternarTarefa==='function')alternarTarefa(a.id,true);
+   else if(typeof salvar==='function')salvar('tarefas',{id:a.id,status:'feita'});
+ }else if(typeof excluirComDesfazer==='function')excluirComDesfazer('tarefas',a.id,'Tarefa excluída.');
+}
+function end(x,y,event){const a=active;if(!a)return;
+ const dx=x-a.x,dy=y-a.y,valid=a.horizontal&&Math.abs(dx)>=75&&Math.abs(dx)>Math.abs(dy)*1.25;
+ const rect=a.row.getBoundingClientRect();clear();if(!valid)return;
+ lastGesture={at:Date.now(),rect:{left:rect.left-110,right:rect.right+110,top:rect.top-25,bottom:rect.bottom+25}};
+ if(event&&event.cancelable)event.preventDefault();
+ if(event){event.stopPropagation();if(typeof event.stopImmediatePropagation==='function')event.stopImmediatePropagation();}
+ completeOrDelete(a,dx>0?'right':'left');
+}
+function startTouch(e){if(e.touches.length!==1)return;const t=e.touches[0];begin(e.target,t.clientX,t.clientY);}
+function moveTouch(e){if(active&&e.touches.length===1){const t=e.touches[0];move(t.clientX,t.clientY,e);}}
+function endTouch(e){if(active&&e.changedTouches.length){const t=e.changedTouches[0];end(t.clientX,t.clientY,e);}else clear();}
+document.addEventListener('touchstart',startTouch,{capture:true,passive:true});
+document.addEventListener('touchmove',moveTouch,{capture:true,passive:false});
+document.addEventListener('touchend',endTouch,{capture:true,passive:false});
+document.addEventListener('touchcancel',clear,{capture:true,passive:true});
+document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0)begin(e.target,e.clientX,e.clientY);},true);
+document.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')move(e.clientX,e.clientY,e);},true);
+document.addEventListener('pointerup',e=>{if(e.pointerType==='mouse')end(e.clientX,e.clientY,e);},true);
+document.addEventListener('pointercancel',e=>{if(e.pointerType==='mouse')clear();},true);
+document.addEventListener('click',e=>{if(Date.now()-lastGesture.at>500||!lastGesture.rect)return;
+ const r=lastGesture.rect;if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();}
+},true);
+window.SC118={get enabled(){return true;},name:'Gestos no Hoje'};
 })();
 </script>
 </body></html>
