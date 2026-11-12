@@ -1,7 +1,7 @@
 /* 2º Cérebro Studio 9.0 — cache isolado da interface; NUNCA armazena respostas Google. */
-const CACHE='segundo-cerebro-2026-11-11o-sc1160';
+const CACHE='segundo-cerebro-2026-11-11p-sc1170';
 const PREFIX='segundo-cerebro-';
-const ESSENCIAIS=['./index.html','./pwa-transport.js?v=2026-11-11o-sc1160','./pwa-install.js?v=2026-11-11o-sc1160'];
+const ESSENCIAIS=['./index.html','./pwa-transport.js?v=2026-11-11p-sc1170','./pwa-install.js?v=2026-11-11p-sc1170'];
 const OPCIONAIS=['./offline.html','./','./manifest.webmanifest','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
