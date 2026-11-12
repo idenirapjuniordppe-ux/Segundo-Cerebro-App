@@ -2187,10 +2187,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-12h-sc11131"></script>
+<script src="./pwa-transport.js?v=2026-11-12i-sc11140"></script>
 <script>
-var VERSAO_TELA = '2026-11-12h';
-var VERSAO_STUDIO = '11.13.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-12i';
+var VERSAO_STUDIO = '11.14.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -2994,7 +2994,7 @@ function abrirNovo(){
     '<div id="captura-prev-m" class="hidden"></div>' +
     '<div class="flex gap-1.5 flex-wrap">' + chips.map(function(c){ return '<button class="chip chip-f" onclick="'+C('inserirToken',c)+'">'+h(c)+'</button>'; }).join('') + '</div>' +
     '<div class="grid grid-cols-3 gap-2"><button class="btn btn-s" onclick="abrirTarefa({data: hojeISO()})"><i class="fa-solid fa-list-check"></i>Tarefa</button><button class="btn btn-s" onclick="abrirEvento({data: hojeISO()})"><i class="fa-regular fa-calendar"></i>Evento</button><button class="btn btn-s" onclick="abrirNota({})"><i class="fa-solid fa-note-sticky"></i>Nota</button></div>',
-    (simples() ? '<span></span>' : '<button class="btn btn-s" onclick="capturar(true,\'-m\')">Salvar como nota</button>') + '<button class="btn btn-p" onclick="capturar(false,\'-m\')">Salvar</button>');
+    (simples() ? '<span></span>' : '<button class="btn btn-s" onclick="capturar(true,\'-m\')">Analisar como nota</button>') + '<button class="btn btn-p" onclick="capturar(false,\'-m\')">Analisar</button>');
   if(window.sc119LoadDraft)sc119LoadDraft();
   setTimeout(function(){ var c = el('captura-m'); if(c) c.focus(); }, 80);
 }
@@ -6748,7 +6748,7 @@ function prevCaptura(suf){
     (r.prioridade==='alta' ? '<span class="chip" style="background:#ef44441a;color:#b91c1c"><i class="fa-solid fa-flag"></i>alta</span>' : '') +
     (r.feito ? '<span class="chip" style="background:#10b9811a;color:#047857"><i class="fa-solid fa-check"></i>já feito</span>' : '') +
     r.etiquetas.map(function(e){ return '<span class="text-xs text-slate-400">#'+h(e)+'</span>'; }).join('') + (r.tipo==='habito' ? '<span class="chip chip-f"><i class="fa-solid fa-repeat"></i>'+h(cmNomeDias(r.dias))+(r.diasDitos?'':' (padrão)')+'</span>' : '') + (r.tipo==='alarme' ? '<span class="chip chip-f"><i class="fa-solid fa-clock"></i>aviso '+h(r.alarme||r.inicio)+(r.alarme&&r.alarme!==r.inicio?' · compromisso '+h(r.inicio):'')+'</span><span class="text-xs text-slate-400">notificação do Google Agenda</span>' : (r.lembrete && r.inicio ? '<span class="text-xs text-slate-400">aviso '+(r.lembrete==='0'?'no horário':h(r.lembrete)+' min antes')+'</span>' : ''));
-  box.innerHTML = '<div class="flex items-center gap-1.5 flex-wrap">'+chips+'</div><p class="text-[11px] text-slate-400 mt-1">'+(r.motivo && !capOv[suf] ? 'Nota porque: '+h(r.motivo)+'. ' : capOv[suf] ? 'Tipo trocado por você. ' : '')+'Toque no tipo para trocar · Enter salva · Shift+Enter salva como nota</p>';
+  box.innerHTML = '<div class="flex items-center gap-1.5 flex-wrap">'+chips+'</div><p class="text-[11px] text-slate-400 mt-1">'+(r.motivo && !capOv[suf] ? 'Nota porque: '+h(r.motivo)+'. ' : capOv[suf] ? 'Tipo trocado por você. ' : '')+'Toque no tipo para trocar · Enter analisa · Shift+Enter analisa como nota</p>';
   var ajustes = cartoes && cartoes.length>1 ? '<p class="text-sm">'+cartoes.length+' itens nesta captura</p>' : '';
   (cartoes || []).forEach(function(cartao,i){
     var chave=vozAjusteRapido(cartao);
@@ -6760,7 +6760,7 @@ function prevCaptura(suf){
     }).join('') : '<input id="'+id+'" class="input" type="'+(chave==='data'?'date':'time')+'" aria-label="'+rotulo+'"><button type="button" class="btn btn-s" onclick="vozAplicarEscolha('+arg(suf)+','+i+','+arg(chave)+',val('+arg(id)+'))">Aplicar</button>';
     ajustes += '<div class="voz-prev-ajuste"><p>'+(cartoes.length>1 ? h(cartao.item.titulo)+': ' : '')+h(vozErro(cartao))+'</p>'+alternativas+'</div>';
   });
-  box.innerHTML += ajustes + '<div class="voz-prev-acoes"><button type="button" class="btn btn-p" onclick="capturar(false,'+arg(suf)+')">Salvar</button>'+
+  box.innerHTML += ajustes + '<div class="voz-prev-acoes"><button type="button" class="btn btn-p" onclick="capturar(false,'+arg(suf)+')">Analisar</button>'+
     '<button type="button" class="btn btn-s" onclick="'+C('vozPreparar','',suf)+'">Revisar captura</button></div>';
   box.classList.remove('hidden');
 }
@@ -6804,6 +6804,7 @@ function prevCaptura(suf){
         else if(r.inicio){ var ajC = ajustarLembrete(r.data, r.inicio, r.lembrete || '10'); o.lembrete = ajC.lembrete; if(ajC.aviso) toast(ajC.aviso); }
     msg = r.feito ? 'Registrado como feito hoje: ' + r.titulo : 'Tarefa criada: ' + r.titulo + (r.data?' · '+dataBonita(r.data):' (caixa de entrada)');
   }
+  if(tabela==='tarefas' && Number(r.duracao)>0)o.duracao=String(r.duracao);
   salvar(tabela, o, extra);   // salvar() preenche o.id no próprio objeto
   if(tabela==='eventos' || tabela==='tarefas') saidaAuto(tabela, o, extra);
   var criado = o;
@@ -12095,5 +12096,135 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-12h-sc11131"></script>
+<script src="./pwa-install.js?v=2026-11-12i-sc11140"></script>
+<script id="sc114-capture">
+/* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
+(function(){'use strict';
+const originalLocal=vozLocal,originalSplit=vozSeparar,originalCorrect=vozCorrigir,originalError=vozErro,originalSave=gravarCaptura;
+vozTipos.projeto='Projeto';vozTipos.comando='Comando';
+const normal=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+const clone=x=>JSON.parse(JSON.stringify(x));
+function command(text){
+ const match=String(text).trim().match(/^(conclu[ai]r?|finaliz[ae]r?|reabr[ai]r?|reagend[ae]r?|adi[ae]r?)\s+(?:(?:a\s+)?tarefa\s+)?["“]?(.+?)["”]?$/i);
+ if(!match){if(/^(?:exclu[ai]r?|apag[ae]r?|remov[ae]r?|cancel[ae]r?|alter[ae]r?)\s+/i.test(String(text).trim()))return {action:'nao_suportado',query:text,date:'',candidates:[],target:''};return null;}
+ const action=/^(concl|final)/i.test(match[1])?'concluir':/^reabr/i.test(match[1])?'reabrir':'reagendar';
+ let query=match[2],date='';
+ if(action==='reagendar'){
+  const parts=query.match(/^(.+?)\s+para\s+(.+)$/i);if(parts){query=parts[1].replace(/["”]$/,'');const parsed=originalLocal('t: ajuste '+parts[2],false);if(parsed.item.data&&parsed.item.dataDita)date=parsed.item.data;}
+ }
+ query=query.replace(/^["“]|["”]$/g,'').trim();
+ const tasks=Array.isArray(D.tarefas)?D.tarefas:[];let matches=tasks.filter(t=>normal(t.titulo)===normal(query));
+ if(!matches.length&&normal(query).length>=4)matches=tasks.filter(t=>normal(t.titulo).includes(normal(query)));
+ return {action,query,date,candidates:matches.map(t=>({id:String(t.id),titulo:t.titulo,data:t.data||''})),target:matches.length===1?String(matches[0].id):''};
+}
+window.vozSeparar=function(text){
+ if(urlDe(text)||/^\s*(?:n\s*:|nota\s*:)/i.test(text))return originalSplit(text);
+ return originalSplit(String(text).replace(/\s+(?:e\s+depois|depois|e\s+tamb[eé]m)\s+(?=(?:comprar|pagar|enviar|ligar|estudar|ler|revisar|criar|agendar)\b)/gi,'; '));
+};
+window.vozLocal=function(text,note){
+ if(!note){const cmd=command(text);if(cmd)return {item:{tipo:'comando',titulo:cmd.action+': '+cmd.query,data:cmd.date,inicio:'',fim:'',etiquetas:[]},texto:text,pergunta:'',opcoes:[],bloqueio:'',comando:cmd};}
+ const project=!note&&String(text).match(/^\s*(?:projeto\s*:|(?:criar|crie|novo|nova|iniciar)\s+(?:um\s+)?projeto\s*:?)\s*(.*)$/i);
+ const card=originalLocal(project?'t: '+project[1]:text,note);card.texto=text;
+ if(project){card.item.tipo='projeto';card.item.inicio='';card.item.fim='';card.item.lembrete='';card.bloqueio='';card.pergunta='';card.opcoes=[];}
+ if(card.item.tipo==='habito'&&(!card.item.diasDitos||/\bvezes\s+(?:por|na|a)\s+semana\b/i.test(text))){card.item.dias=[];card.bloqueio='dias';card.pergunta='Em quais dias da semana?';}
+ if(card.item.dataPelaHora){card.item.data='';card.item.dataPelaHora=false;if(!card.bloqueio){card.bloqueio='data';card.pergunta='Em qual dia? Você informou uma hora, mas não disse a data.';}}
+ if(!note&&card.item.tipo!=='nota'&&/\b(?:semana que vem|proxima semana)\b/.test(normal(text))){card.item.data='';card.bloqueio='data';card.pergunta='Qual dia da próxima semana?';}
+ if(!note&&!['nota','projeto','habito','meta'].includes(card.item.tipo)&&!card.item.inicio&&/\b(?:a tarde|a noite|de manha|depois do almoco)\b/.test(normal(text))){card.bloqueio='inicio';card.pergunta='Qual horário? Você também pode responder “sem horário”.';}
+ return card;
+};
+window.vozErro=function(card){
+ if(card.comando){const c=card.comando;if(c.action==='nao_suportado')return 'Este comando ainda não é executado pela captura. Abra o registro para editar ou excluir.';if(!c.candidates.length)return 'Não encontrei essa tarefa. Confira o título.';if(!c.target)return 'Qual das tarefas abaixo?';if(c.action==='reagendar'&&!vozDataValida(c.date))return 'Para qual data?';return '';}
+ if(card.item.tipo==='projeto'){if(!String(card.item.titulo||'').trim())return 'Qual é o nome do projeto?';return card.item.data&&!vozDataValida(card.item.data)?'Informe um prazo válido.':'';}
+ const issue=originalError(card);if(issue)return issue;
+ if(card.item.tipo==='evento'&&!card.item.fim&&!Number(card.item.duracao))return 'Qual é o fim ou a duração do evento? Ex.: duração de 40 minutos.';
+ if(card.item.tipo==='evento'&&card.item.inicio&&Number(card.item.duracao)&&Number(card.item.inicio.slice(0,2))*60+Number(card.item.inicio.slice(3))+Number(card.item.duracao)>=1440)return 'Esse evento atravessa a meia-noite. Revise as datas no formulário de evento.';
+ return '';
+};
+function correct(card,text){
+ const input=String(text||'').replace(/^\s*(?:na verdade|corrigindo|quer dizer)\s*[,.:]?\s*/i,'').trim(),q=normal(input);let m;
+ if(card.item.tipo==='habito'&&/segunda|terca|quarta|quinta|sexta|sabado|domingo|dias uteis|todos os dias|diariamente|fim de semana/.test(q)){const days=cmDias(input).dias;if(days&&days.length){card.item.dias=days;card.item.diasDitos=true;card.bloqueio='';card.pergunta='';return true;}}
+ if(card.comando){if(card.comando.action!=='reagendar')return false;const parsed=originalLocal('t: ajuste '+input,false);if(parsed.item.data&&parsed.item.dataDita){card.comando.date=parsed.item.data;card.item.data=parsed.item.data;return true;}return false;}
+ if((m=input.match(/^(?:fim(?:\s+[àa]s)?|at[eé])\s+(.+)$/i))){const end=originalLocal('t: ajuste às '+m[1],false);if(end.item.inicio&&!end.bloqueio){card.item.fim=end.item.inicio;return true;}return false;}
+ if((m=input.match(/^(?:local|lugar)\s*(?::|para|é|e)\s*(.+)$/i))){card.item.local=m[1].trim();return true;}
+ if((m=q.match(/^(?:prioridade\s+)?(alta|media|baixa)$/))){card.item.prioridade=m[1];return true;}
+ if((m=q.match(/^(?:duracao\s*(?:de|:)?\s*|por\s+)(\d{1,3})\s*(min(?:utos?)?|horas?|h)$/))){const n=+m[1]*(/^h/.test(m[2])?60:1);if(n<1||n>1440)return false;card.item.duracao=n;return true;}
+ if((m=input.match(/^[áa]rea\s*(?::|para|é|e)\s*(.+)$/i))){const area=areas().find(x=>normal(x)===normal(m[1]));if(!area)return false;card.item.area=area;return true;}
+ if(/^(?:sem|remover|tirar)\s+(?:o\s+)?horario$/.test(q)){card.item.inicio='';card.item.fim='';card.item.lembrete='';card.item.dataPelaHora=false;if(card.bloqueio==='inicio'){card.bloqueio='';card.pergunta='';card.opcoes=[];}return true;}
+ if(/^sem data$/.test(q)){card.item.data='';card.item.dataPelaHora=false;if(card.bloqueio==='data'){card.bloqueio='';card.pergunta='';}return true;}
+ if((m=q.match(/^(?:(?:me\s+)?(?:avise|lembre)\s+|lembrete\s+(?:de\s+)?)?(\d{1,3}|meia)\s+(min(?:utos?)?|horas?)\s+antes\.?$/))){const n=m[1]==='meia'?30:+m[1]*(/^hora/.test(m[2])?60:1);if(n>999)return false;vozEditar(card,'lembrete',String(n));return true;}
+ if((m=q.match(/^(?:isso\s+)?(?:e|como)\s+(?:um[a]?\s+)?(tarefa|evento|nota|habito|meta|projeto)$/))){vozEditar(card,'tipo',m[1]);return true;}
+ return originalCorrect(card,input);
+}
+window.vozCorrigir=function(card,text){const draft=clone(card);if(!correct(draft,text))return false;Object.keys(card).forEach(k=>delete card[k]);Object.assign(card,draft);return true;};
+window.gravarCaptura=function(item,text){
+ if(item.tipo==='projeto'){const p={nome:item.titulo,area:item.area||'',descricao:'',prazo:item.data||'',status:'ativo',cor:'#6366f1'};salvar('projetos',p);return p;}
+ return originalSave(item,text);
+};
+function sessionFor(suf){const field=el('captura'+suf);return {field,session:field&&vozRascunhos.get(field)};}
+function run(card){
+ if(!card.comando)return gravarCaptura(card.item,card.texto);
+ const cmd=card.comando,t=obter('tarefas',cmd.target);
+ if(!t.id||!cmd.candidates.some(x=>x.id===String(t.id)&&x.titulo===t.titulo))throw new Error('A tarefa mudou. Analise o comando novamente.');
+ if(cmd.action==='concluir'){if(typeof SC111!=='undefined'&&SC111.finished(t))throw new Error('A tarefa já está encerrada.');if(t.status==='feita')throw new Error('A tarefa já está concluída.');alternarTarefa(t.id);}
+ else if(cmd.action==='reabrir'){if(t.status!=='feita')throw new Error('A tarefa não está concluída.');alternarTarefa(t.id);}
+ else{if(!vozDataValida(cmd.date))throw new Error('Data inválida.');salvar('tarefas',{id:t.id,data:cmd.date});}
+ return {id:t.id};
+}
+function finish(suf){const {field,session}=sessionFor(suf);if(!field||!session)return;
+ if(!session.cartoes.length){field.value='';vozRascunhos.delete(field);if(window.sc119ClearDraft)sc119ClearDraft(suf);prevCaptura(suf);if(suf)fecharModal();return;}
+ field.value=session.cartoes.map(c=>c.texto).join('; ');session.texto=textoCaptura(suf);render(suf);
+}
+function commit(suf,index){const {session}=sessionFor(suf);if(!session||session.busy)return;
+ const selected=index==null?session.cartoes.slice():[session.cartoes[index]];if(selected.some(c=>!c))return;
+ const issue=selected.map(vozErro).find(Boolean);if(issue){toast(issue,true);return;}
+ if(!scConfirmarDuplicatas(selected.filter(c=>!c.comando)))return;
+ const projectNames=new Set();const projects=selected.filter(c=>c.item.tipo==='projeto');if(projects.some(c=>{const name=normal(c.item.titulo),repeated=projectNames.has(name);projectNames.add(name);return repeated||D.projetos.some(p=>normal(p.nome)===name);})&&!confirm('Já existe projeto com esse nome. Criar outro?'))return;
+ session.busy=true;
+ try{for(const card of selected){run(card);session.cartoes.splice(session.cartoes.indexOf(card),1);}}catch(e){toast('A captura parou: '+e.message+'. Os itens restantes continuam em revisão.',true);}finally{session.busy=false;finish(suf);}
+}
+function render(suf){const {field,session}=sessionFor(suf),box=el('captura-prev'+suf);if(!field||!session||!box)return;
+ box.innerHTML='';box.classList.remove('hidden');box.classList.add('voz-em-revisao');const host=document.createElement('section');host.className='voz-rascunhos';host.setAttribute('aria-label','Conversa da captura');
+ const intro=document.createElement('strong');intro.textContent='Entendi '+session.cartoes.length+' item(ns). Confira antes de confirmar.';host.appendChild(intro);
+ session.cartoes.forEach((card,index)=>{
+ const row=document.createElement('article'),title=document.createElement('strong');title.textContent=(index+1)+'. '+(vozTipos[card.item.tipo]||card.item.tipo)+' · '+card.item.titulo;row.appendChild(title);
+ const summary=document.createElement('p');summary.className='subt';summary.textContent=[card.item.data?deISO(card.item.data).toLocaleDateString('pt-BR'):'Sem data',card.item.inicio||'',card.item.duracao?card.item.duracao+' min':'',card.item.local||'',card.item.area||'',card.item.tipo==='habito'&&card.item.dias&&card.item.dias.length?cmNomeDias(card.item.dias):''].filter(Boolean).join(' · ');row.appendChild(summary);
+ const error=vozErro(card);if(error){const question=document.createElement('p');question.setAttribute('role','status');question.textContent=error;row.appendChild(question);}
+ if(card.comando&&!card.comando.target)card.comando.candidates.slice(0,20).forEach(candidate=>{const b=document.createElement('button');b.type='button';b.className='btn btn-s';b.textContent=candidate.titulo+(candidate.data?' · '+candidate.data:'');b.onclick=()=>{card.comando.target=candidate.id;render(suf)};row.appendChild(b);});
+ if(card.bloqueio==='inicio')(card.opcoes||[]).forEach(time=>{const b=document.createElement('button');b.type='button';b.className='btn btn-s';b.textContent=time;b.onclick=()=>{vozEditar(card,'inicio',time);render(suf)};row.appendChild(b);});
+ const form=document.createElement('form'),input=document.createElement('input');input.className='input';input.placeholder='Ex.: amanhã às 15h · prioridade alta';input.setAttribute('aria-label','Corrigir item '+(index+1));input.autocomplete='off';const apply=document.createElement('button');apply.type='submit';apply.className='btn btn-s';apply.textContent='Ajustar';form.append(input,apply);form.onsubmit=e=>{e.preventDefault();if(!vozCorrigir(card,input.value)){toast('Não entendi o ajuste. Use título:…, amanhã às 15h, prioridade alta, duração de 30 min ou local:…',true);return;}render(suf);};row.appendChild(form);
+ const details=document.createElement('details'),label=document.createElement('summary');label.textContent='Editar campos';details.appendChild(label);
+ for(const [key,name,type] of [['titulo','Título','text'],['data','Data','date'],['inicio','Hora','time'],['fim','Fim','time'],['duracao','Duração em minutos','number']]){
+ if((key==='fim'&&card.item.tipo!=='evento')||card.comando||(key==='inicio'&&['nota','projeto','habito','meta'].includes(card.item.tipo))||(key==='duracao'&&!['tarefa','evento'].includes(card.item.tipo)))continue;
+ const lab=document.createElement('label');lab.textContent=name;const control=document.createElement('input');control.className='input';control.type=type;control.value=card.item[key]||'';control.onchange=()=>{if(key==='duracao'){const n=Number(control.value);if(!Number.isInteger(n)||n<0||n>1440){toast('Duração inválida.',true);return;}card.item.duracao=n;}else vozEditar(card,key,control.value);render(suf);};lab.appendChild(control);details.appendChild(lab);
+ }const type=document.createElement('select');type.className='input';type.setAttribute('aria-label','Tipo do item');for(const name of Object.keys(vozTipos).filter(x=>x!=='comando')){const option=document.createElement('option');option.value=name;option.textContent=vozTipos[name];type.appendChild(option);}type.value=card.item.tipo;type.onchange=()=>{vozEditar(card,'tipo',type.value);if(type.value==='habito'&&!card.item.diasDitos){card.item.dias=[];card.bloqueio='dias';card.pergunta='Em quais dias da semana?';}render(suf);};if(!card.comando)details.prepend(type);row.appendChild(details);
+ const save=document.createElement('button');save.type='button';save.className='btn btn-p';save.textContent=card.comando?'Confirmar comando':'Confirmar item';save.disabled=!!error;save.onclick=()=>commit(suf,index);
+ const discard=document.createElement('button');discard.type='button';discard.className='btn btn-s';discard.textContent='Descartar';discard.onclick=()=>{session.cartoes.splice(index,1);finish(suf)};row.append(save,discard);host.appendChild(row);
+ });
+ if(session.cartoes.length>1){const all=document.createElement('button');all.type='button';all.className='btn btn-p';all.textContent='Confirmar todos';all.onclick=()=>commit(suf,null);host.appendChild(all);}
+ const advanced=document.createElement('details'),advancedLabel=document.createElement('summary');advancedLabel.textContent='Análise avançada';advanced.appendChild(advancedLabel);const ai=document.createElement('button');ai.type='button';ai.className='btn btn-s';ai.textContent='Analisar com Gemini (envia este texto)';ai.onclick=()=>aiAnalyze(suf,ai);advanced.appendChild(ai);host.appendChild(advanced);box.appendChild(host);
+}
+window.vozPainel=render;
+window.vozPreparar=function(shift,suf){suf=suf||'';const field=el('captura'+suf);if(!field||!field.value.trim())return;
+ if(/^(?:nao|não)\s+(?:salve|salvar|crie|criar|adicione|adicionar|agende|agendar)\b/i.test(field.value.trim())){toast('Entendido: nenhum registro foi criado.');return;}
+ const text=textoCaptura(suf),old=vozRascunhos.get(field);if(old&&old.texto===text){render(suf);return;}
+ const cards=vozCartoes(field,text,!!shift);if(!cards||cards.length>12){toast('Divida em até 12 itens.',true);return;}
+ vozRascunhos.set(field,{texto:text,cartoes:cards});render(suf);
+};
+window.capturar=function(shift,suf){if(typeof reconhecimento!=='undefined'&&reconhecimento){vozSalvarDireto(shift,suf);return;}vozPreparar(shift,suf);};
+let aiSeq=0;
+function aiAnalyze(suf,button){
+ const field=el('captura'+suf);if(!field)return;const text=field.value.trim(),seq=++aiSeq,revision=JSON.stringify(vozRascunhos.get(field)||null);button.disabled=true;
+ const ctx={hoje:hojeISO(),agora:pad2(new Date().getHours())+':'+pad2(new Date().getMinutes()),fuso:Intl.DateTimeFormat().resolvedOptions().timeZone};
+ google.script.run.withSuccessHandler(result=>{
+  button.disabled=false;if(seq!==aiSeq||field!==el('captura'+suf)||field.value.trim()!==text)return;
+  if(JSON.stringify(vozRascunhos.get(field)||null)!==revision){toast('Você ajustou a captura durante a análise. Mantive suas correções.');return;}
+  if(!result||!Array.isArray(result.itens)||!result.itens.length){toast('A IA não retornou itens para revisar.',true);return;}
+  const cards=result.itens.map(x=>({item:{tipo:x.tipo,titulo:x.titulo,data:x.data,inicio:x.hora,fim:x.fim,duracao:x.duracao,local:x.local,area:x.area,prioridade:x.prioridade,etiquetas:[],dias:x.dias,diasDitos:!!x.dias.length},texto:x.tipo==='nota'?'n: '+x.conteudo:text,pergunta:x.pergunta,opcoes:[],bloqueio:x.pendencia,origem:'Gemini'}));
+  vozRascunhos.set(field,{texto:textoCaptura(suf),cartoes:cards});render(suf);
+ }).withFailureHandler(e=>{button.disabled=false;if(seq===aiSeq)toast(String(e&&e.message||e),true);}).capturaInteligente(text,ctx);
+}
+window.SC114={command,correct:vozCorrigir,commit};
+})();
+
+</script>
 </body></html>
