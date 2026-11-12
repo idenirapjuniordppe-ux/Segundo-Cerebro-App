@@ -15,7 +15,7 @@ function trocarConfiguracao(){
     telaConfig('Confira o ID com o botão de copiar do Google Cloud. A troca não apaga tarefas, notas nem operações pendentes.',antiga);
   });
 }
-function diagnostico(){return ['Origem da PWA: '+location.origin,'Caminho: '+location.pathname,'ID OAuth em uso: '+idResumo(cfg&&cfg.cid),'Endereço Apps Script: '+(cfg?cfg.url:'não configurado'),'Contexto: '+(window.matchMedia&&matchMedia('(display-mode: standalone)').matches?'PWA instalada':'navegador'),'Versão transporte: 2026-11-12a'].join('\n');}
+function diagnostico(){return ['Origem da PWA: '+location.origin,'Caminho: '+location.pathname,'ID OAuth em uso: '+idResumo(cfg&&cfg.cid),'Endereço Apps Script: '+(cfg?cfg.url:'não configurado'),'Contexto: '+(window.matchMedia&&matchMedia('(display-mode: standalone)').matches?'PWA instalada':'navegador'),'Versão transporte: 2026-11-12g'].join('\n');}
 window.scPwaDiagnostico=diagnostico;
 window.scPwaEditarConexao=trocarConfiguracao;
 function hashCfg(){
@@ -194,7 +194,7 @@ function limparApp(){
     if(window.caches)jobs.push(caches.keys().then(function(ks){
       return Promise.all(ks.filter(function(k){return k.indexOf('segundo-cerebro-')===0;}).map(function(k){
         return caches.open(k).then(function(c){return c.keys();}).then(function(reqs){
-          return reqs.some(function(r){try{return new URL(r.url).pathname.indexOf(pasta)===0;}catch(_){return false;}}) ? caches.delete(k) : false;
+          return reqs.length > 0 && reqs.every(function(r){try{var u=new URL(r.url);return u.origin===origem && u.pathname.indexOf(pasta)===0;}catch(_){return false;}}) ? caches.delete(k) : false;
         }).catch(function(){return false;});
       }));
     }));
@@ -202,6 +202,8 @@ function limparApp(){
   }catch(e){fim();}
 }
 function trocarEnd(){trocarConfiguracao();}
+window.limparApp=limparApp;
+window.trocarEnd=trocarEnd;
 window.addEventListener('error',function(e){ setTimeout(function(){ mostrarPresa('Erro no app: '+(e&&e.message||'desconhecido')+' (etapa: '+etapa+'). Mande este texto para o suporte.'); },600); });
 window.addEventListener('unhandledrejection',function(e){ setTimeout(function(){ mostrarPresa('Erro: '+((e&&e.reason&&e.reason.message)||e.reason||'desconhecido')+' (etapa: '+etapa+')'); },600); });
 setTimeout(function(){ var cc=document.getElementById('carregando'); if(ovl||(cc&&cc.querySelector('button'))) return; var d={login:'esperando o login do Google',servidor:'esperando resposta do Apps Script',resposta:'processando a resposta',iniciando:'iniciando a tela'}; mostrarPresa('Continua '+(d[etapa]||etapa)+' (versão '+(typeof VERSAO_TELA!=='undefined'?VERSAO_TELA:'?')+').'); },12000);
@@ -247,13 +249,13 @@ function chamar(fn,args,tentou){
 window.addEventListener('storage',function(e){
   if(e.key===K_SESSAO && sessao && !e.newValue){sessao='';tok='';tokExp=0;ls('r',K_TOK);avisoDispensado=false;mostrarLoginSeNecessario();}
 });
-function construtor(ok,fail){
-  var base={ withSuccessHandler:function(f){ return construtor(f,fail); }, withFailureHandler:function(f){ return construtor(ok,f); }, withUserObject:function(){ return construtor(ok,fail); } };
+function construtor(ok,fail,userObject){
+  var base={ withSuccessHandler:function(f){ return construtor(f,fail,userObject); }, withFailureHandler:function(f){ return construtor(ok,f,userObject); }, withUserObject:function(obj){ return construtor(ok,fail,obj); } };
   return new Proxy(base,{ get:function(t,p){
     if(p in t) return t[p];
     if(typeof p!=='string') return undefined;
     return function(){ var a=Array.prototype.slice.call(arguments);
-      chamar(p,a).then(function(r){ if(ok) ok(r); },function(e){ if(fail) fail(e instanceof Error?e:new Error(String(e))); });
+      chamar(p,a).then(function(r){ if(ok) ok(r,userObject); },function(e){ if(fail) fail(e instanceof Error?e:new Error(String(e)),userObject); });
     };
   }});
 }
