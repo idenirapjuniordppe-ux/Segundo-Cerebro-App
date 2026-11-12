@@ -1885,6 +1885,7 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
         <div class="card p-4 mb-5 overflow-x-auto"><div id="mt-habitos"></div></div><div id="mt-heat-card" class="card p-4 mb-5 hidden"><h2 class="font-bold mb-2"><i class="fa-solid fa-fire text-orange-500 mr-1.5"></i>Constância <span class="subt font-normal">· últimas 12 semanas</span></h2><div id="mt-heat" class="overflow-x-auto"></div></div><div id="mt-metas" class="grid md:grid-cols-2 gap-4"></div>
       </section>
       <section id="v-config" class="vista hidden">
+<button type="button" class="btn btn-s mb-3" onclick="sc1111Open()">Automações</button>
         <div class="mb-4"><h1 class="text-2xl font-extrabold">Configurações</h1></div>
         <div class="grid lg:grid-cols-2 gap-5">
           <section id="sc69-theme-panel" class="card lg:col-span-2 sc69-theme-panel" aria-labelledby="sc69-title">
@@ -1958,10 +1959,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-12a-sc1180"></script>
+<script src="./pwa-transport.js?v=2026-11-12g-sc11130"></script>
 <script>
-var VERSAO_TELA = '2026-11-12a';
-var VERSAO_STUDIO = '11.8.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-12g';
+var VERSAO_STUDIO = '11.13.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -2599,6 +2600,7 @@ function salvar(tabela, itens, extra){
   itens.forEach(function(o){
     if(!o.id) o.id = tabela.charAt(0) + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
   });
+  if(window.sc119Remember && !sc119Remember(tabela,itens.map(function(x){return x.id;}),'edit'))return;
   var antesCelebracao = Celebracao.captura(tabela,itens);
   var cmd = Object.assign({ tipo:'SALVAR', tabela:tabela, itens:itens }, extra||{});
   efeitoLocal(cmd); renderTudo();
@@ -2608,6 +2610,7 @@ function salvar(tabela, itens, extra){
 
 function excluir(tabela, ids, extra){
   ids = [].concat(ids).map(String);
+  if(window.sc119Remember && !sc119Remember(tabela,ids,'delete'))return;
   var cmd = Object.assign({ tipo:'EXCLUIR', tabela:tabela, ids:ids }, extra||{});
   efeitoLocal(cmd); renderTudo();
   enviar(cmd);
@@ -2621,7 +2624,7 @@ function excluirComDesfazer(tabela, id, rotulo){
   toast(rotulo || 'Excluído', false, { rotulo:'Desfazer', fn:function(){
     var r = Object.assign({}, item), ex = null;
     if(tabela==='eventos' && r.google_id){ r.google_id = ''; ex = { google:true }; }
-    if(tabela==='tarefas') r.google_task_id = '';
+    if(tabela==='tarefas'){r.google_task_id='';r.evento_google='';}
     salvar(tabela, tabela==='notas' ? [r].concat(filhosDiretos) : r, ex); toast('Restaurado.');
   }});
 }
@@ -2763,6 +2766,7 @@ function abrirNovo(){
     '<div class="flex gap-1.5 flex-wrap">' + chips.map(function(c){ return '<button class="chip chip-f" onclick="'+C('inserirToken',c)+'">'+h(c)+'</button>'; }).join('') + '</div>' +
     '<div class="grid grid-cols-3 gap-2"><button class="btn btn-s" onclick="abrirTarefa({data: hojeISO()})"><i class="fa-solid fa-list-check"></i>Tarefa</button><button class="btn btn-s" onclick="abrirEvento({data: hojeISO()})"><i class="fa-regular fa-calendar"></i>Evento</button><button class="btn btn-s" onclick="abrirNota({})"><i class="fa-solid fa-note-sticky"></i>Nota</button></div>',
     (simples() ? '<span></span>' : '<button class="btn btn-s" onclick="capturar(true,\'-m\')">Salvar como nota</button>') + '<button class="btn btn-p" onclick="capturar(false,\'-m\')">Salvar</button>');
+  if(window.sc119LoadDraft)sc119LoadDraft();
   setTimeout(function(){ var c = el('captura-m'); if(c) c.focus(); }, 80);
 }
 /* Cada bloco da tela roda protegido: um erro esconde só aquele bloco (com aviso) e o resto do app abre normal. */
@@ -5457,6 +5461,7 @@ function atualizarMeta(id, v){
 /* ───────── modais: helpers ───────── */
 var sc114FocoAnterior=null;
 function abrirModal(tit, corpo, rod){
+  if(window.sc119SaveDraft)sc119SaveDraft();
   var m=el('modal');if(!m)return;
   if(m.classList.contains('hidden'))sc114FocoAnterior=document.activeElement;
   rasc=null;el('modal-titulo').innerHTML=tit;el('modal-corpo').innerHTML=corpo;
@@ -5469,6 +5474,7 @@ function abrirModal(tit, corpo, rod){
   });
 }
 function fecharModal(){
+  if(window.sc119SaveDraft)sc119SaveDraft();
   var m=el('modal');if(!m||m.classList.contains('hidden'))return;
   m.classList.add('hidden');document.body.classList.remove('sc114-modal-open');
   var antes=sc114FocoAnterior;sc114FocoAnterior=null;
@@ -5789,13 +5795,15 @@ function salvarRevisao(){
 }
 
 /* ───────── busca ───────── */
+var sc119Filtro='';
 function abrirBusca(){
-  abrirModal('Buscar', '<input id="q" class="input" placeholder="Digite para buscar em tudo…" oninput="buscar(this.value)" onkeydown="if(event.key===\'Enter\'){var p=document.querySelector(\'#busca-res > div\');if(p)p.click();}" autocomplete="off" enterkeyhint="search"><div id="busca-res" class="mt-3 space-y-1"></div>', '');
+ sc119Filtro='';
+  abrirModal('Buscar', '<input id="q" class="input" placeholder="Digite para buscar em tudo…" oninput="buscar(this.value)" onkeydown="if(event.key===\'Enter\'){var p=document.querySelector(\'#busca-res > div\');if(p)p.click();}" autocomplete="off" enterkeyhint="search"><label class="subt" for="sc119-filter">Tipo</label><select id="sc119-filter" class="input" onchange="sc119Filtro=this.value;buscar(el(\'q\').value)"><option value="">Tudo</option><option>Tarefa</option><option>Evento</option><option>Nota</option><option>Projeto</option><option>Meta</option><option>Hábito</option></select><button type="button" class="btn btn-s mt-2" onclick="sc1113History()">Recuperar versões</button><div id="busca-res" class="mt-3 space-y-1"></div>', '');
   buscar(''); setTimeout(function(){ var q = el('q'); if(q) q.focus(); }, 50);
 }
 function buscar(termo){
   var q=scNormalizarTexto(termo), out=el('busca-res');
-  if(!q){out.innerHTML=recentesHtml();return;}
+  if(!q && !sc119Filtro){out.innerHTML=recentesHtml();return;}
   var termos=q.split(' ').filter(Boolean), resultados=[];
   function pontuar(titulo, detalhes){
     var a=scNormalizarTexto(titulo), b=scNormalizarTexto(detalhes), texto=a+' '+b;
@@ -5805,6 +5813,7 @@ function buscar(termo){
     return pontos;
   }
   function incluir(icone,tipo,titulo,detalhes,abrir){
+    if(sc119Filtro && tipo!==sc119Filtro)return;
     var score=pontuar(titulo,detalhes);
     if(score)resultados.push({score:score,icone:icone,tipo:tipo,titulo:titulo,abrir:abrir});
   }
@@ -5819,7 +5828,7 @@ function buscar(termo){
     return '<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm" onclick="'+i.abrir+'"><i class="fa-solid '+i.icone+' text-purple-700 w-4 text-center"></i><span class="text-[11px] text-slate-400 w-14">'+i.tipo+'</span><span class="truncate">'+h(i.titulo)+'</span></div>';
   }).join(''):'<p class="subt">Nada encontrado.</p>';
   if(!resultados.length && q.length>=4){
-    var aprox=sc82BuscaAproximada(q);
+    var aprox=sc82BuscaAproximada(q).filter(function(x){return !sc119Filtro||x.tipo===sc119Filtro;});
     if(aprox.length)out.innerHTML='<p class="subt">Possíveis resultados (digitação aproximada):</p>'+aprox.map(function(i){return '<div class="flex items-center gap-3 p-2 rounded-lg cursor-pointer text-sm" onclick="'+i.abrir+'"><i class="fa-solid '+i.icone+' w-4"></i><span class="text-[11px] text-slate-400 w-14">'+h(i.tipo)+'</span><span class="truncate">'+h(i.titulo)+'</span></div>';}).join('');
   }
 }
@@ -6382,7 +6391,7 @@ function vozPainel(suf){
 function vozRemover(suf,campo,sessao,i){
   sessao.cartoes.splice(i,1);
   if(sessao.cartoes.length){vozPainel(suf);return;}
-  vozRascunhos.delete(campo); campo.value=''; capOv[suf]=''; prevCaptura(suf);
+  vozRascunhos.delete(campo); campo.value=''; if(window.sc119ClearDraft)sc119ClearDraft(suf); capOv[suf]=''; prevCaptura(suf);
 }
 
 function vozEnviarFormulario(evento,suf){
@@ -6458,7 +6467,7 @@ function vozSalvarDireto(shift,suf){
   }
   if(!scConfirmarDuplicatas(cartoes))return;
   cartoes.forEach(function(cartao){gravarCaptura(cartao.item,cartao.texto);});
-  vozRascunhos.delete(campo); campo.value=''; capOv[suf]=''; prevCaptura(suf);
+  vozRascunhos.delete(campo); campo.value=''; if(window.sc119ClearDraft)sc119ClearDraft(suf); capOv[suf]=''; prevCaptura(suf);
   if(suf) fecharModal();
 }
 
@@ -8937,7 +8946,7 @@ html[data-sc-theme] :is(#v-agenda,#v-tarefas,#v-metas,#v-config,#modal:not(.sc75
 html[data-sc-theme] ::selection{color:var(--sc77-on-active);background:var(--sc77-active-bg)}
 @media(forced-colors:active){html[data-sc-theme] :is(button,input,select,textarea,a):focus-visible{outline:3px solid Highlight!important}html[data-sc-theme] :is(input,select,textarea){border-color:ButtonText!important}}
 </style>
-<script src="./pwa-install.js?v=2026-11-12a-sc1180"></script>
+<script src="./pwa-install.js?v=2026-11-12g-sc11130"></script>
 
 <style id="sc80-dark-panels">
 /* Compatibilidade dos painéis antigos com os tokens atuais dos cinco temas. */
@@ -10436,7 +10445,7 @@ var SC111=(function(){
   return {count,first};
  }
  function history(d,at){at=at||new Date();const min=at.getTime()-90*86400000,blocks={manha:0,tarde:0,noite:0},areas={};let count=0;
-  arr(d,'tarefas').forEach(t=>{if(!finished(t))return;const dt=completedAt(t.concluida_em);if(!dt||dt.getTime()<min||dt.getTime()>at.getTime())return;const block=dt.getHours()<12?'manha':dt.getHours()<18?'tarde':'noite',ctx=context(t);blocks[block]++;areas[ctx]||(areas[ctx]={manha:0,tarde:0,noite:0});areas[ctx][block]++;count++;});
+  arr(d,'tarefas').forEach(t=>{if(!['feita','feito','concluida','concluido','finalizada','finalizado'].includes(norm(t.status)))return;const dt=completedAt(t.concluida_em);if(!dt||dt.getTime()<min||dt.getTime()>at.getTime())return;const block=dt.getHours()<12?'manha':dt.getHours()<18?'tarde':'noite',ctx=context(t);blocks[block]++;areas[ctx]||(areas[ctx]={manha:0,tarde:0,noite:0});areas[ctx][block]++;count++;});
   const best=Object.keys(blocks).sort((a,b)=>blocks[b]-blocks[a])[0],confidence=count?blocks[best]/count:0;
   const from=(counts)=>{const n=Object.values(counts).reduce((x,y)=>x+y,0),p=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];return n>=5&&counts[p]/n>=.65?p:null;};
   const byArea={};Object.keys(areas).forEach(k=>byArea[k]=from(areas[k]));return {count,parts:blocks,byArea,preferred:count>=8&&confidence>=.60?best:null,confidence};
@@ -10509,7 +10518,7 @@ var SC111=(function(){
   if(enabled(d,'sc92_windows',true)){const flex=tasks.find(t=>t.data===now&&!tid(t.hora)&&Number(t.duracao)>=15&&Number(t.duracao)<=240);
    if(flex){const areaPref=hist&&hist.byArea[context(flex)],pref=areaPref||hist&&hist.preferred,win=windowFor(d,now,Number(flex.duracao),at,imported,pref);if(win)add('janela','Intervalo disponível','Sugestão: '+win.hora+'–'+win.fim,44,'agenda',flex.id);}}
   let unique=new Map();items.forEach(i=>{const key=i.kind+'|'+(i.ref||i.scope);if(!unique.has(key)||unique.get(key).rank<i.rank)unique.set(key,i);});
-  let list=[...unique.values()].map(x=>({...x,rank:x.rank-(learn?Math.min(36,12*Math.max(0,Math.min(3,Number((prof.declined||{})[x.kind])||0))):0)})).filter(x=>x.rank>=25).sort((a,b)=>b.rank-a.rank||a.id.localeCompare(b.id));
+  let list=[...unique.values()].map(x=>({...x,rank:x.rank-(learn && !['evento','conflito'].includes(x.kind) && !(x.kind==='financeiro'&&x.rank>=112)?Math.min(36,12*Math.max(0,Math.min(3,Number((prof.declined||{})[x.kind])||0))):0)})).filter(x=>x.rank>=25).sort((a,b)=>b.rank-a.rank||a.id.localeCompare(b.id));
   return {items:list,top:list[0]||null,history:hist,profile:prof,learn,summary:{late:late.length,financeDue:finance.length,studies:studies.length,conflicts:cx.count,openTasks:tasks.length}};
  }
  return {day,validDate,minutes,daysBetween,finished,pending,scoreTask,sortTasks,allEvents,busy,conflicts,history,windowFor,analyze,context,completedAt};
@@ -10611,6 +10620,7 @@ var SC92=(function(){
   if(scope==='agenda'&&item.kind==='janela'&&item.ref&&typeof abrirTarefa==='function')return propose(item.ref);
   if(scope==='agenda'&&item.kind==='evento'&&item.ref&&typeof abrirEvento==='function'&&arr(data(),'eventos').some(e=>String(e.id)===String(item.ref)))return abrirEvento(item.ref);
   if(scope==='notas'&&item.ref&&typeof abrirNota==='function')return abrirNota(item.ref);
+  if(scope==='tarefas'&&item.kind==='projeto'&&item.ref&&typeof abrirProjeto==='function')return abrirProjeto(item.ref);
   if(scope==='tarefas'&&item.ref&&['tarefa','adiamento'].includes(item.kind)&&typeof abrirTarefa==='function')return abrirTarefa(item.ref);
   if(scope==='metas'&&item.kind==='habito'&&item.ref&&typeof abrirHabito==='function')return abrirHabito(item.ref);
   if(scope==='metas'&&item.kind==='projeto'&&item.ref&&typeof abrirMeta==='function')return abrirMeta(item.ref);
@@ -10621,7 +10631,15 @@ var SC92=(function(){
   if(!win){if(typeof toast==='function')toast('Nenhum intervalo disponível com a duração cadastrada.');return;}
   if(typeof abrirModal!=='function')return;
   abrirModal('Sugestão de horário','<div class="sc92-dialog"><p><strong>'+h(t.titulo||'Tarefa')+'</strong></p><p>'+h(win.data)+' · '+h(win.hora)+'–'+h(win.fim)+'</p><p class="subt">Apenas uma sugestão. Nada foi alterado.</p><button class="btn btn-p" type="button" id="sc92-confirm-slot">Aplicar horário</button></div>','<button type="button" class="btn btn-s" onclick="fecharModal()">Cancelar</button>');
-  const btn=document.getElementById('sc92-confirm-slot');if(btn)btn.addEventListener('click',()=>{if(!window.confirm('Aplicar '+win.hora+' à tarefa?'))return;salvar('tarefas',{id:t.id,data:win.data,hora:win.hora});fecharModal();});
+  const original=JSON.stringify([t.data,t.hora,t.duracao,t.status]);
+  const btn=document.getElementById('sc92-confirm-slot');if(btn)btn.addEventListener('click',()=>{
+   if(!window.confirm('Aplicar '+win.hora+' à tarefa?'))return;
+   const current=data(),latest=arr(current,'tarefas').find(x=>String(x.id)===String(id)),at=new Date();
+   if(!latest||SC111.finished(latest)||JSON.stringify([latest.data,latest.hora,latest.duracao,latest.status])!==original||SC111.day(at)!==win.data){toast('A tarefa ou o dia mudou. Gere a sugestão novamente.',true);return;}
+   const fresh=windowFor(current,win.data,Number(latest.duracao),at,typeof gcalDoDia==='function'?gcalDoDia(win.data):[],learning(current)?history(current,at).preferred:null);
+   if(!fresh||fresh.hora!==win.hora||fresh.fim!==win.fim){toast('Este intervalo não está mais disponível na sugestão atual. Gere novamente.',true);return;}
+   btn.disabled=true;try{salvar('tarefas',{id:latest.id,data:win.data,hora:win.hora});fecharModal();}catch(e){btn.disabled=false;throw e;}
+  });
  }
  function updatePrefs(p){let x=JSON.stringify(p);if(x.length>1800)return;salvarConfig({[prefKey]:x});}
  function dismiss(kind){if(!learning(data()))return;const p=prefs(data());if(!seenKinds.includes(kind))return;p.declined[kind]=Math.min(3,(Number(p.declined[kind])||0)+1);p.updated=Date.now();updatePrefs(p);}
@@ -10629,12 +10647,12 @@ var SC92=(function(){
   const imported=[];if(typeof gcalCache==='object'&&gcalCache)Object.keys(gcalCache).forEach(k=>{if(Array.isArray(gcalCache[k]))imported.push(...gcalCache[k]);});
   const result=analyze(d,new Date(),imported),top=result.top;if(!top)return;
   const line=document.createElement('div');line.className='sc92-suggestion';line.innerHTML='<span class="sc92-dot" aria-hidden="true"></span><span class="sc92-line">'+h(top.title)+'</span><button type="button" class="sc92-link" data-sc92-open>Ver</button>'+(result.learn?'<button type="button" class="sc92-dismiss" title="Reduzir sugestões deste tipo" aria-label="Dispensar sugestão">×</button>':'');
-  line.querySelector('[data-sc92-open]').addEventListener('click',()=>action(top));const dismissBtn=line.querySelector('.sc92-dismiss');if(dismissBtn)dismissBtn.addEventListener('click',()=>dismiss(top.kind));host.appendChild(line);
+  line.querySelector('[data-sc92-open]').addEventListener('click',()=>window.SC1112?SC1112.review(top):action(top));const dismissBtn=line.querySelector('.sc92-dismiss');if(dismissBtn)dismissBtn.addEventListener('click',()=>dismiss(top.kind));host.appendChild(line);
  }
  function modalHint(tool){if(!showHints(data()))return '';const result=analyze(data(),new Date());let hit=result.items.find(x=>x.scope===tool);return hit?'<div class="sc92-modal-hint" aria-live="polite">'+h(hit.title)+'</div>':'';}
  function renderSettings(){const area=document.getElementById('v-config');if(!area)return;let p=document.getElementById('sc92-settings');if(!p){p=document.createElement('section');p.id='sc92-settings';p.className='card p-4 sc92-settings';p.setAttribute('aria-label','Assistente adaptativo');const grid=area.querySelector('.grid');if(grid)grid.prepend(p);else area.appendChild(p);}
   const d=data(),result=analyze(d,new Date()),on=learning(d),enabled=showHints(d),win=configBool(d,'sc92_windows',true);
-  p.innerHTML='<div class="sc92-settings-head"><strong>Organização adaptativa</strong></div><label class="sc92-toggle"><span>Sugestões discretas</span><input type="checkbox" id="sc92-hints" '+(enabled?'checked':'')+'></label><label class="sc92-toggle"><span>Aprender com meu histórico</span><input type="checkbox" id="sc92-learn" '+(on?'checked':'')+'></label><label class="sc92-toggle"><span>Sugerir horários livres</span><input type="checkbox" id="sc92-windows" '+(win?'checked':'')+'></label><div class="sc92-settings-bottom"><small>'+(on?'Histórico analisado: '+(result.history?result.history.count:0)+' conclusões nos últimos 90 dias.':'Aprendizado desligado; seus registros continuam disponíveis normalmente.')+'</small><button type="button" class="btn btn-s" id="sc92-reset">Redefinir</button></div>';
+  p.innerHTML='<div class="sc92-settings-head"><strong>Organização adaptativa</strong><button type="button" class="btn btn-s" onclick="SC1112.review()">Entender sugestões</button></div><label class="sc92-toggle"><span>Sugestões discretas</span><input type="checkbox" id="sc92-hints" '+(enabled?'checked':'')+'></label><label class="sc92-toggle"><span>Aprender com meu histórico</span><input type="checkbox" id="sc92-learn" '+(on?'checked':'')+'></label><label class="sc92-toggle"><span>Sugerir horários livres</span><input type="checkbox" id="sc92-windows" '+(win?'checked':'')+'></label><div class="sc92-settings-bottom"><small>'+(on?'Histórico analisado: '+(result.history?result.history.count:0)+' conclusões nos últimos 90 dias.':'Aprendizado desligado; seus registros continuam disponíveis normalmente.')+'</small><button type="button" class="btn btn-s" id="sc92-reset">Redefinir</button></div>';
   ['hints','learn','windows'].forEach(k=>{const e=p.querySelector('#sc92-'+k);if(e)e.addEventListener('change',()=>{salvarConfig({['sc92_'+k]:e.checked?'sim':'nao'});});});
   p.querySelector('#sc92-reset').addEventListener('click',()=>{if(!confirm('Redefinir somente as preferências aprendidas? Suas tarefas, notas e finanças serão preservadas.'))return;updatePrefs(defaultPrefs());});
  }
@@ -11404,6 +11422,301 @@ document.addEventListener('click',e=>{if(Date.now()-lastGesture.at>500||!lastGes
 },true);
 window.SC118={get enabled(){return true;},name:'Gestos no Hoje'};
 })();
+</script>
+<script id="sc119-recovery">
+/* Studio 11.9: recuperação local de tarefas/notas e rascunho da sessão. */
+(function(){
+'use strict';
+function scope(){let c='';try{c=localStorage.getItem('sc_pwa_cfg_v1')||'';}catch(_){}return encodeURIComponent(location.pathname+'|'+c);}
+function prefix(){return 'sc119_history:'+scope()+':';}
+function entries(){const p=prefix(),a=[];for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(!k||!k.startsWith(p))continue;try{let v=JSON.parse(localStorage.getItem(k));if(v&&['tarefas','notas'].includes(v.table)&&v.item&&v.item.id)a.push({key:k,...v});}catch(_){}}return a.sort((a,b)=>b.at-a.at);}
+function remember(table,ids,reason){
+ if(!['tarefas','notas'].includes(table))return true;
+ try{
+ const records=ids.map(id=>obter(table,id)).filter(x=>x&&x.id);
+ if(!records.length)return true;
+ for(const item of records){
+ const key=prefix()+crypto.randomUUID();
+ localStorage.setItem(key,JSON.stringify({at:Date.now(),table,reason,item}));
+ }
+ // Limite explícito: 100 cópias locais. Nunca remove a cópia anterior antes de guardar a nova.
+ const all=entries();all.slice(100).forEach(x=>localStorage.removeItem(x.key));
+ return true;
+ }catch(e){toast('Não foi possível guardar a cópia de recuperação. A alteração foi interrompida. Libere espaço no navegador e tente novamente.',true);throw new Error('RECUPERACAO_LOCAL: alteração interrompida porque a cópia não pôde ser guardada.');}
+}
+window.sc119Remember=remember;
+window.sc119History=function(){
+ let list;try{list=entries();}catch(_){toast('Histórico local indisponível.',true);return;}
+ abrirModal('Histórico neste aparelho',
+ '<p class="subt">Até 100 cópias anteriores de tarefas e notas. Recuperar cria uma nova cópia. Não substitui o backup do servidor.</p><div id="sc119-list" class="space-y-2 mt-3"></div>',
+ '<button class="btn btn-s" onclick="abrirBusca()">Voltar à busca</button>');
+ const box=el('sc119-list');
+ if(!list.length){box.textContent='Nenhuma versão guardada ainda.';return;}
+ for(const entry of list){const b=document.createElement('button');b.type='button';b.className='btn btn-s w-full';b.textContent=(entry.item.titulo||'Sem título')+' · '+(entry.reason==='delete'?'Antes de excluir':'Antes de editar')+' · '+new Date(entry.at).toLocaleString('pt-BR');b.onclick=()=>preview(entry);box.appendChild(b);}
+};
+function preview(entry){
+ abrirModal('Prévia da recuperação','<p class="subt">Será criada uma cópia independente; vínculos externos e hierarquia não serão recuperados.</p><pre id="sc119-preview" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:45vh;overflow:auto"></pre>',
+ '<button class="btn btn-s" onclick="sc119History()">Voltar</button><button id="sc119-remove" class="btn btn-s">Apagar esta versão</button><button id="sc119-restore" class="btn btn-p">Recuperar cópia</button>');
+ el('sc119-preview').textContent=[entry.item.titulo||'Sem título',entry.item.data?'Data: '+entry.item.data:'',entry.item.notas||entry.item.conteudo||''].filter(Boolean).join('\n\n');
+ el('sc119-remove').onclick=function(){if(confirm('Apagar somente esta cópia do histórico local?')){try{localStorage.removeItem(entry.key);sc119History();}catch(_){toast('Não foi possível apagar a cópia.',true);}}};
+ el('sc119-restore').onclick=function(){
+ this.disabled=true;
+ const item=JSON.parse(JSON.stringify(entry.item));
+ ['id','google_task_id','google_task_list_id','evento_google','google_id','google_calendar_id','doc_id','doc_url','drive_id','pasta_id','last_modified','criado_em','criada_em'].forEach(k=>delete item[k]);
+ item.titulo=String(item.titulo||'Sem título')+' (recuperado)';
+ if(entry.table==='notas'){item.pagina_pai='';item.flutuante='';}
+ if(entry.table==='tarefas'){item.projeto='';item.meta_id='';item.pai='';item.top3='';}
+ salvar(entry.table,item);fecharModal();toast('Cópia adicionada à fila de sincronização.');
+ };
+}
+function draftKey(suf){return 'sc119_draft:'+scope()+':'+suf;}
+function storeDraft(field){if(!field)return;try{sessionStorage.setItem(draftKey(field.id==='captura-m'?'-m':''),field.value);}catch(_){}}
+window.sc119SaveDraft=function(){storeDraft(el('captura-m'));};
+window.sc119LoadDraft=function(){const field=el('captura-m');if(!field)return;try{field.value=sessionStorage.getItem(draftKey('-m'))||'';if(field.value)prevCaptura('-m');}catch(_){}};
+window.sc119ClearDraft=function(suf){try{sessionStorage.removeItem(draftKey(suf||''));}catch(_){}};
+document.addEventListener('input',e=>{if(e.target.id==='captura'||e.target.id==='captura-m')storeDraft(e.target);});
+window.addEventListener('pagehide',()=>{storeDraft(el('captura'));storeDraft(el('captura-m'));});
+function restoreTop(){let f=el('captura');try{if(f&&!f.value){f.value=sessionStorage.getItem(draftKey(''))||'';if(f.value)prevCaptura('');}}catch(_){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreTop);else restoreTop();
+})();
+
+</script>
+<script id="sc1110-planner">
+/* Planejamento explicável: sem alterar horários, datas ou durações. */
+(function(){'use strict';
+const minutes=t=>{const n=Number(t.duracao);return Number.isFinite(n)&&n>0?n:null;};
+function plan(tasks,day,budget,energy){
+ const open=tasks.filter(t=>SC111.pending(t));const current=open.filter(t=>t.top3===day);
+ const known=current.reduce((n,t)=>n+(minutes(t)||0),0);let left=Math.max(0,budget-known),slots=Math.max(0,3-current.length);
+ const candidates=open.filter(t=>t.top3!==day&&(!t.data||(SC111.validDate(t.data)&&t.data<=day))).map(t=>{
+ let score=0,reasons=[];const duration=minutes(t);
+ if(t.data&&t.data<day){score+=100;reasons.push('data vencida');}else if(t.data===day){score+=60;reasons.push('prevista para hoje');}else reasons.push('sem data');
+ if(t.prioridade==='alta'){score+=35;reasons.push('prioridade alta');}
+ if(energy==='baixa'&&duration&&duration<=20){score+=20;reasons.push('curta para um dia de pouca energia');}
+ if(energy==='alta'&&duration&&duration>=40){score+=10;reasons.push('bloco mais longo');}
+ return {id:String(t.id),title:String(t.titulo||'Sem título'),duration,score,reasons};
+ }).sort((a,b)=>b.score-a.score||(a.duration||Infinity)-(b.duration||Infinity)||a.id.localeCompare(b.id));
+ const selected=[];for(const c of candidates){if(slots&&c.duration!==null&&c.duration<=left){selected.push(c.id);slots--;left-=c.duration;}}
+ return {current,known,unknown:current.filter(t=>minutes(t)===null).length,candidates,selected};
+}
+window.SC1110={plan,minutes};
+let session=null;
+window.sugerirTop3=function(){
+ session=null;
+ abrirModal('Planejar prioridades',
+ '<label class="rot" for="sc1110-time">Tempo total para prioridades hoje (minutos)</label><input id="sc1110-time" class="input" type="number" min="1" max="1440" step="1" inputmode="numeric" placeholder="Informe seu tempo disponível">'+
+ '<label class="rot" for="sc1110-energy">Energia agora</label><select id="sc1110-energy" class="input"><option value="baixa">Baixa · favorecer tarefas curtas</option><option value="media" selected>Média · equilibrar</option><option value="alta">Alta · considerar blocos longos</option></select>'+ 
+ '<p class="subt">As prioridades já escolhidas contam nesse tempo. A duração usada é a que você informou nas tarefas.</p><div id="sc1110-results" class="space-y-2 mt-3" aria-live="polite"></div>',
+ '<button class="btn btn-s" onclick="fecharModal()">Fechar</button><button id="sc1110-propose" class="btn btn-p">Ver sugestões</button>');
+ el('sc1110-propose').onclick=propose;
+ for(const id of ['sc1110-time','sc1110-energy'])el(id).addEventListener('input',()=>{session=null;el('sc1110-results').textContent='Toque em Ver sugestões para recalcular.';});
+};
+function propose(){
+ const budget=Number(el('sc1110-time').value),energy=el('sc1110-energy').value;
+ if(!Number.isInteger(budget)||budget<1||budget>1440){toast('Informe entre 1 e 1440 minutos.',true);return;}
+ const day=hojeISO(),result=plan(D.tarefas,day,budget,energy);session={day,budget,energy};
+ const box=el('sc1110-results');box.innerHTML='';
+ const summary=document.createElement('p');summary.className='subt';summary.textContent=result.current.length+' prioridade(s) já escolhida(s) · '+result.known+' min conhecidos.'+(result.unknown?' Há prioridade sem duração; o total não pode ser garantido.':'');box.appendChild(summary);
+ if(result.current.length>=3){summary.textContent+=' Conclua ou retire uma prioridade para incluir outra.';return;}
+ if(!result.candidates.length){summary.textContent+=' Nenhuma outra tarefa de hoje, atrasada ou sem data.';return;}
+ if(result.known>budget){summary.textContent+=' As prioridades atuais já ultrapassam o tempo informado.';return;}
+ for(const candidate of result.candidates){
+ const label=document.createElement('label');label.className='flex items-start gap-2 p-2';
+ const input=document.createElement('input');input.type='checkbox';input.value=candidate.id;input.className='sc1110-choice';input.checked=result.selected.includes(candidate.id);
+ const text=document.createElement('span');text.textContent=candidate.title+' · '+(candidate.duration===null?'duração não informada':candidate.duration+' min')+' — '+candidate.reasons.join(', ');
+ label.append(input,text);box.appendChild(label);
+ }
+ const hint=document.createElement('p');hint.className='subt';hint.textContent='Revise as escolhas. Tarefas sem duração não são selecionadas automaticamente. Energia usa a duração como critério; não mede esforço mental.';box.appendChild(hint);
+ const apply=document.createElement('button');apply.type='button';apply.className='btn btn-p';apply.textContent='Aplicar escolhas';apply.onclick=()=>commit(apply);box.appendChild(apply);
+}
+function commit(button){
+ if(!session||session.day!==hojeISO()){toast('O dia ou os critérios mudaram. Gere as sugestões novamente.',true);return;}
+ const ids=Array.from(document.querySelectorAll('.sc1110-choice:checked')).map(x=>x.value);
+ if(!ids.length){toast('Selecione pelo menos uma tarefa.',true);return;}
+ const current=D.tarefas.filter(t=>SC111.pending(t)&&t.top3===session.day);
+ const selected=ids.map(id=>D.tarefas.find(t=>String(t.id)===id));
+ if(selected.some(t=>!t||SC111.finished(t)||(t.data&&(!SC111.validDate(t.data)||t.data>session.day)))){toast('Uma tarefa mudou. Gere as sugestões novamente.',true);return;}
+ const additions=selected.filter(t=>t.top3!==session.day);
+ if(current.length+additions.length>3){toast('Escolha no máximo '+Math.max(0,3-current.length)+' nova(s) prioridade(s).',true);return;}
+ const all=current.concat(additions),known=all.reduce((n,t)=>n+(minutes(t)||0),0);
+ if(known>session.budget){toast('As escolhas ultrapassam o tempo informado: '+known+' minutos.',true);return;}
+ if(all.some(t=>minutes(t)===null)&&!confirm('Há tarefa sem duração. Não é possível garantir que tudo caiba no tempo disponível. Aplicar mesmo assim?'))return;
+ if(!additions.length){toast('Essas tarefas já são prioridades.');return;}
+ button.disabled=true;
+ try{salvar('tarefas',additions.map(t=>({id:t.id,top3:session.day})));session=null;fecharModal();toast('Prioridades adicionadas à fila de sincronização.');}catch(e){button.disabled=false;throw e;}
+}
+})();
+
+</script>
+<script id="sc1111-automations">
+function sc1111Rules_(raw){
+ if(typeof raw!=='string'||raw.length>2000)throw new Error('Regras de automação inválidas.');
+ var obj=JSON.parse(raw);if(!obj||Array.isArray(obj)||typeof obj!=='object'||Object.keys(obj).some(function(k){return ['plan','weekly','inbox'].indexOf(k)<0;}))throw new Error('Regras de automação inválidas.');
+ var defaults={plan:{enabled:false,time:'08:00'},weekly:{enabled:false,time:'18:00',day:0},inbox:{enabled:false,time:'17:00',threshold:5}},out={};
+ Object.keys(defaults).forEach(function(k){
+  var r=obj[k]===undefined?defaults[k]:obj[k];
+  if(!r||Array.isArray(r)||typeof r!=='object'||typeof r.enabled!=='boolean'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time)||Object.keys(r).some(function(f){return !Object.prototype.hasOwnProperty.call(defaults[k],f);}))throw new Error('Horário ou preferência inválida.');
+  out[k]={enabled:r.enabled,time:r.time};
+  if(k==='weekly'){if(!Number.isInteger(r.day)||r.day<0||r.day>6)throw new Error('Dia da revisão inválido.');out[k].day=r.day;}
+  if(k==='inbox'){if(!Number.isInteger(r.threshold)||r.threshold<1||r.threshold>100)throw new Error('Limite da caixa de entrada inválido.');out[k].threshold=r.threshold;}
+ });return out;
+}
+
+(function(){'use strict';
+const CONFIG='sc1111_rules';const labels={plan:'Planejar prioridades',weekly:'Revisar a semana',inbox:'Organizar a caixa de entrada'};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function due(data,rules,now){
+ const day=iso(now),time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+ const tasks=Array.isArray(data.tarefas)?data.tarefas:[],open=tasks.filter(t=>SC111.pending(t));const items=[];
+ function add(rule,condition){if(rules[rule].enabled&&time>=rules[rule].time&&condition)items.push({rule,day,id:rule+':'+day,title:labels[rule]});}
+ add('plan',open.some(t=>!t.data||(SC111.validDate(t.data)&&t.data<=day))&&!open.some(t=>t.top3===day));
+ add('weekly',now.getDay()===rules.weekly.day);
+ add('inbox',open.filter(t=>!t.data).length>=rules.inbox.threshold);
+ return items;
+}
+function rules(){try{return sc1111Rules_(String(D.config[CONFIG]||'{}'));}catch(_){return sc1111Rules_('{}');}}
+function prefix(){let config='';try{config=localStorage.getItem('sc_pwa_cfg_v1')||'';}catch(_){}return 'sc1111_log:'+encodeURIComponent(location.pathname+'|'+config)+':';}
+function read(item){try{return JSON.parse(localStorage.getItem(prefix()+item.id)||'null');}catch(_){return null;}}
+function record(item,status){localStorage.setItem(prefix()+item.id,JSON.stringify({rule:item.rule,day:item.day,at:Date.now(),status}));}
+function logs(){const p=prefix(),out=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.startsWith(p))continue;try{const x=JSON.parse(localStorage.getItem(k));if(x&&labels[x.rule]&&Number.isFinite(x.at))out.push({key:k,...x});}catch(_){}}return out.sort((a,b)=>b.at-a.at);}
+function prune(){logs().slice(90).forEach(x=>localStorage.removeItem(x.key));}
+function runAction(item){
+ try{record(item,'aberto');}catch(_){toast('Não foi possível registrar a abertura neste aparelho.',true);return;}
+ if(item.rule==='plan')sugerirTop3();else if(item.rule==='weekly')Planner.revisao();else abrirTriagem('entrada');
+}
+function check(){
+ if(document.visibilityState!=='visible'||!D||!D.config)return;
+ const modal=el('modal');if(modal&&!modal.classList.contains('hidden'))return;
+ const pending=due(D,rules(),new Date()).filter(item=>!read(item));if(!pending.length)return;
+ // Grava antes de avisar. Se o armazenamento falhar, não repete avisos sem controle.
+ try{pending.forEach(item=>record(item,'avisado'));prune();}catch(_){return;}
+ toast(pending.length===1?pending[0].title:pending.length+' lembretes de rotina disponíveis.',false,{rotulo:'Ver',fn:window.sc1111Open});
+}
+let busy=false;
+async function tick(){if(busy)return;busy=true;try{
+ if(navigator.locks&&navigator.locks.request)await navigator.locks.request(prefix(),{ifAvailable:true},lock=>{if(lock)check();});else check();
+ }catch(e){console.warn('[Automações] Não foi possível verificar as regras.');}finally{busy=false;}}
+window.sc1111Open=function(){
+ const cfg=rules();
+ abrirModal('Automações', '<p class="subt">Lembretes enquanto o app estiver aberto. Horários seguem este aparelho; nenhum e-mail ou notificação externa é enviado.</p><div id="sc1111-rules" class="space-y-3 mt-3"></div><div id="sc1111-pending" class="space-y-2 mt-3"></div><details class="mt-3"><summary>Histórico neste aparelho</summary><div id="sc1111-log" class="subt"></div></details>', '<button class="btn btn-s" onclick="fecharModal()">Fechar</button><button id="sc1111-save" class="btn btn-p">Salvar regras</button>');
+ const box=el('sc1111-rules');
+ for(const key of Object.keys(labels)){
+ const line=document.createElement('div');
+ const label=document.createElement('label');label.className='flex items-center gap-2';
+ const toggle=document.createElement('input');toggle.type='checkbox';toggle.id='sc1111-'+key;toggle.checked=cfg[key].enabled;
+ label.append(toggle,document.createTextNode(labels[key]));line.appendChild(label);
+ const time=document.createElement('input');time.type='time';time.id='sc1111-time-'+key;time.value=cfg[key].time;time.className='input';time.setAttribute('aria-label','Horário: '+labels[key]);line.appendChild(time);
+ if(key==='weekly'){
+ const select=document.createElement('select');select.id='sc1111-day';select.className='input';select.setAttribute('aria-label','Dia da revisão semanal');
+ ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'].forEach((name,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=name;select.appendChild(option);});select.value=String(cfg.weekly.day);line.appendChild(select);
+ }
+ if(key==='inbox'){const limit=document.createElement('input');limit.type='number';limit.min='1';limit.max='100';limit.id='sc1111-limit';limit.value=String(cfg.inbox.threshold);limit.className='input';limit.setAttribute('aria-label','Quantidade mínima de tarefas sem data');line.appendChild(limit);}
+ box.appendChild(line);
+ }
+ el('sc1111-save').onclick=function(){
+ const next={};for(const key of Object.keys(labels))next[key]={enabled:el('sc1111-'+key).checked,time:el('sc1111-time-'+key).value};
+ next.weekly.day=Number(el('sc1111-day').value);next.inbox.threshold=Number(el('sc1111-limit').value);
+ try{sc1111Rules_(JSON.stringify(next));}catch(e){toast(e.message,true);return;}
+ salvarConfig({[CONFIG]:JSON.stringify(next)});fecharModal();toast('Regras adicionadas à fila de sincronização.');setTimeout(tick,1500);
+ };
+ const pendingBox=el('sc1111-pending');
+ for(const item of due(D,cfg,new Date())){
+ const old=read(item);if(old&&['dispensado','aberto'].includes(old.status))continue;
+ const line=document.createElement('div');line.className='flex gap-2';const open=document.createElement('button');open.type='button';open.className='btn btn-s';open.textContent=item.title;open.onclick=()=>runAction(item);
+ const skip=document.createElement('button');skip.type='button';skip.className='btn btn-s';skip.textContent='Dispensar hoje';skip.onclick=()=>{try{record(item,'dispensado');window.sc1111Open();}catch(_){toast('Não foi possível registrar a dispensa.',true);}};
+ line.append(open,skip);pendingBox.appendChild(line);
+ }
+ try{const history=logs().slice(0,30);el('sc1111-log').textContent=history.length?history.map(x=>new Date(x.at).toLocaleString('pt-BR')+' · '+labels[x.rule]+' · '+({avisado:'aviso exibido',aberto:'tela aberta (não significa conclusão)',dispensado:'dispensado'}[x.status]||x.status)).join('\n'):'Nenhuma ocorrência registrada.';el('sc1111-log').style.whiteSpace='pre-line';}catch(_){el('sc1111-log').textContent='Histórico indisponível neste navegador.';}
+};
+window.SC1111={due,check:tick,rules:sc1111Rules_};
+setInterval(tick,60000);setTimeout(tick,5000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')tick();});
+})();
+
+</script>
+<script id="sc1112-context">
+/* Explicações e navegação por evidências já carregadas; não grava registros. */
+(function(){'use strict';
+const array=(d,k)=>Array.isArray(d[k])?d[k]:[];
+function imports(){const all=[];if(typeof gcalCache==='object'&&gcalCache)Object.values(gcalCache).forEach(x=>{if(Array.isArray(x))all.push(...x);});return all;}
+function evidence(item,data,at,external){
+ let table='';
+ if(item.kind==='evento')table='eventos';
+ else if(['tarefa','adiamento','janela'].includes(item.kind))table='tarefas';
+ else if(item.kind==='financeiro')table='financas';
+ else if(item.kind==='nota')table='notas';
+ else if(item.kind==='estudo')table='estudos';
+ else if(item.kind==='habito')table='habitos';
+ else if(item.kind==='projeto')table=item.scope==='metas'?'metas':'projetos';
+ if(item.kind==='conflito'){
+ const pair=SC111.conflicts(data,at,external).first;
+ return pair?[pair.a,pair.b].map(x=>({table:x.type,id:String(x.event.id||''),title:String(x.event.titulo||x.event.nome||'Registro sem título'),detail:new Date(x.start).toLocaleString('pt-BR')+' – '+new Date(x.end).toLocaleString('pt-BR')})):[];
+ }
+ const records=table==='eventos'?SC111.allEvents(data,external):array(data,table);
+ const record=records.find(x=>String(x.id)===String(item.ref));if(!record)return [];
+ const details=[];
+ if(record.data||record.prazo)details.push('Data: '+(record.data||record.prazo));
+ if(record.hora||record.inicio)details.push('Horário: '+(record.hora||record.inicio));
+ if(record.status)details.push('Estado: '+record.status);
+ if(record.prioridade)details.push('Prioridade: '+record.prioridade);
+ if(record.duracao)details.push('Duração cadastrada: '+record.duracao+' min');
+ if(item.kind==='adiamento')details.push('Adiamentos registrados: '+(record.adiamentos||0));
+ if(item.kind==='projeto'&&table==='projetos')details.push('Nenhuma tarefa pendente vinculada encontrada.');
+ if(item.kind==='habito')details.push('Previsto para hoje e sem registro de conclusão.');
+ return [{table,id:String(record.id),title:String(record.titulo||record.nome||record.descricao||'Registro sem título'),detail:details.join(' · ')}];
+}
+function snapshot(){const external=imports(),at=new Date();return {external,at,result:SC111.analyze(D,at,external)};}
+window.SC1112={evidence,review};
+function review(selected){
+ const state=snapshot();const items=selected?state.result.items.filter(x=>x.id===selected.id).slice(0,1):state.result.items.slice(0,3);
+ abrirModal('Entender sugestões','<p class="subt">Sugestões calculadas a partir dos registros carregados. Revise os dados antes de agir.</p><div id="sc1112-items" class="space-y-3 mt-3"></div><details class="mt-3"><summary>Como o assistente decide</summary><p id="sc1112-method" class="subt"></p></details>', '<button class="btn btn-s" onclick="fecharModal()">Fechar</button>');
+ const box=el('sc1112-items');if(!items.length)box.textContent=selected?'A situação mudou e esta sugestão não está mais ativa.':'Nenhuma sugestão contextual neste momento.';
+ for(const item of items){
+ const section=document.createElement('section');section.className='card p-3';
+ const title=document.createElement('strong');title.textContent=item.title;section.appendChild(title);
+ const reason=document.createElement('p');reason.className='subt';reason.textContent=item.detail;section.appendChild(reason);
+ const detail=document.createElement('details');const label=document.createElement('summary');label.textContent='Registros considerados';detail.appendChild(label);
+ const sources=evidence(item,D,state.at,state.external);
+ for(const source of sources){const p=document.createElement('p');p.className='subt';p.textContent=source.title+(source.detail?' — '+source.detail:'');detail.appendChild(p);}
+ if(!sources.length){const p=document.createElement('p');p.className='subt';p.textContent='Conferir os registros na tela correspondente.';detail.appendChild(p);}
+ section.appendChild(detail);
+ const button=document.createElement('button');button.type='button';button.className='btn btn-s';button.textContent='Revisar';
+ button.onclick=()=>{const fresh=snapshot().result.items.find(x=>x.id===item.id);if(!fresh){toast('Os dados mudaram. As sugestões foram recalculadas.');review();return;}SC92.action(fresh);};
+ section.appendChild(button);box.appendChild(section);
+ }
+ const history=state.result.history;
+ el('sc1112-method').textContent='Datas, horários, conflitos, estados e vínculos determinam as sugestões. Durações não são inventadas. '+(state.result.learn?'Aprendizado ativado: '+(history?history.count:0)+' conclusões válidas nos últimos 90 dias; padrões descritivos, sem garantia de produtividade.':'Aprendizado pelo histórico está desligado.')+' Dados ausentes ou ainda não sincronizados podem mudar o resultado. Nenhum conteúdo é enviado a uma IA externa.';
+}
+})();
+
+</script>
+<script id="sc1113-history">
+(function(){'use strict';
+let request=0;
+function active(n,id){return n===request&&el(id)&&el('modal')&&!el('modal').classList.contains('hidden');}
+function fail(n,id,e){if(active(n,id))el(id).textContent='Não foi possível consultar o histórico: '+String(e&&e.message||e)+'. Confira a conexão e a versão do servidor.';}
+window.sc1113History=function(){const n=++request;
+ abrirModal('Histórico sincronizado','<p class="subt">Até 200 cópias anteriores de tarefas e notas. Uma cópia registra a tentativa de alteração; não comprova que ela terminou.</p><div id="sc1113-list" class="space-y-2 mt-3">Consultando servidor…</div>', '<button class="btn btn-s" onclick="sc119History()">Histórico neste aparelho</button><button class="btn btn-s" onclick="fecharModal()">Fechar</button>');
+ google.script.run.withSuccessHandler(function(result){if(!active(n,'sc1113-list'))return;const box=el('sc1113-list');box.textContent='';const items=result&&Array.isArray(result.itens)?result.itens:[];
+ if(!items.length){box.textContent='Nenhuma cópia no servidor ainda. O histórico começa após instalar esta versão e alterar ou excluir uma tarefa ou nota.';return;}
+ for(const item of items){const button=document.createElement('button');button.type='button';button.className='btn btn-s w-full';button.textContent=item.titulo+' · '+(item.motivo==='antes_exclusao'?'Antes de excluir':'Antes de editar')+' · '+new Date(item.instante).toLocaleString('pt-BR');button.onclick=()=>preview(item.chave);box.appendChild(button);}
+ }).withFailureHandler(e=>fail(n,'sc1113-list',e)).historicoListar();
+};
+function copy(data){
+ if(!data||!['tarefas','notas'].includes(data.tabela)||!data.item||typeof data.item!=='object'||Array.isArray(data.item))throw new Error('Cópia inválida.');
+ const fields=data.tabela==='tarefas'?['titulo','notas','area','status','prioridade','data','hora','etiquetas','duracao','local']:['titulo','conteudo','area','etiquetas','tipo','colunas_nota','postit_cor'];
+ const item={};for(const key of fields)if(Object.prototype.hasOwnProperty.call(data.item,key))item[key]=data.item[key];
+ item.titulo=String(item.titulo||'Sem título')+' (recuperado)';return item;
+}
+function preview(key){const n=++request;
+ abrirModal('Prévia da recuperação','<p class="subt">Recuperar cria uma cópia independente. Vínculos, recorrência e lembretes não são restaurados; revise-os depois.</p><pre id="sc1113-preview" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:45vh;overflow:auto">Carregando…</pre>', '<button class="btn btn-s" onclick="sc1113History()">Voltar</button><button id="sc1113-restore" class="btn btn-p" disabled>Recuperar cópia</button>');
+ google.script.run.withSuccessHandler(function(data){if(!active(n,'sc1113-preview'))return;let restored;try{restored=copy(data);}catch(e){fail(n,'sc1113-preview',e);return;}
+ el('sc1113-preview').textContent=[data.item.titulo||'Sem título',data.item.data?'Data: '+data.item.data:'',data.item.notas||data.item.conteudo||''].filter(Boolean).join('\n\n');
+ const button=el('sc1113-restore');button.disabled=false;button.onclick=()=>{button.disabled=true;try{salvar(data.tabela,restored);request++;fecharModal();toast('Cópia adicionada à fila de sincronização.');}catch(e){button.disabled=false;toast('Não foi possível recuperar: '+e.message,true);}};
+ }).withFailureHandler(e=>fail(n,'sc1113-preview',e)).historicoLer(key);
+}
+window.SC1113={copy};
+})();
+
 </script>
 </body></html>
 
