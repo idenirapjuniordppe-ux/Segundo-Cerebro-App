@@ -2051,7 +2051,7 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
 <div id="topo" class="sticky top-0 z-20 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
       <div class="max-w-6xl mx-auto px-4 lg:px-8 py-3 flex items-start gap-2">
         <div class="flex-1 min-w-0">
-          <form class="relative" onsubmit="vozEnviarFormulario(event,'')"><i class="fa-solid fa-bolt text-purple-700 absolute left-3 top-1/2 -translate-y-1/2 text-sm"></i><input id="captura" oninput="prevCaptura()" onkeydown="vozTeclaEnviar(event,'')" class="input pl-9 pr-3 py-2.5" placeholder="Capturar: “audiência sexta 10h #TJPE”" autocomplete="off" enterkeyhint="send"><button type="button" class="btn-mic hidden" data-mic="" onclick="ditar('')" aria-label="Ditar por voz"><i class="fa-solid fa-microphone"></i></button><button type="submit" hidden>Enviar</button></form>
+          <form class="relative" onsubmit="vozEnviarFormulario(event,'')"><i class="fa-solid fa-bolt text-purple-700 absolute left-3 top-1/2 -translate-y-1/2 text-sm"></i><input id="captura" oninput="prevCaptura()" onkeydown="vozTeclaEnviar(event,'')" class="input pl-9 pr-3 py-2.5" placeholder="Fale ou escreva. A captura é automática." autocomplete="off" enterkeyhint="send"><button type="button" class="btn-mic hidden" data-mic="" onclick="ditar('')" aria-label="Ditar por voz"><i class="fa-solid fa-microphone"></i></button><button type="submit" hidden>Enviar</button></form>
           <div id="captura-prev" class="hidden mt-2"></div>
         </div>
         <button id="status-mini" onclick="retentarFila()" class="btn btn-s px-3 py-2.5 hidden" title="Gravações pendentes"></button>
@@ -2187,10 +2187,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-12i-sc11140"></script>
+<script src="./pwa-transport.js?v=2026-11-12k-sc11150"></script>
 <script>
-var VERSAO_TELA = '2026-11-12i';
-var VERSAO_STUDIO = '11.14.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-12k';
+var VERSAO_STUDIO = '11.15.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -7401,9 +7401,10 @@ function ditar(suf){
   if(vozRascunhos.has(campoCap)) prevCaptura(suf);
   var rec = new SR(); rec.campoCaptura=campoCap; rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 3;
   var base = campoCap.value ? campoCap.value.trim() + ' ' : '';
-  rec.onstart = function(){ if(btn) btn.classList.add('ouvindo'); toast('Ouvindo… fale a captura.'); };
+  rec.onstart = function(){ if(window.SC115)SC115.voiceStart(suf); if(btn) btn.classList.add('ouvindo'); toast('Ouvindo… fale a captura.'); };
   rec.onresult = function(ev){
         var segmentos = Array.from(ev.results);
+        rec.sc115Final=segmentos.length>0&&segmentos.every(function(s){return s.isFinal;});
         var txt = segmentos.map(function(s){return s[0].transcript.trim();}).join(' ');
         campoCap.value = base + txt;
         prevCaptura(suf);
@@ -7430,6 +7431,7 @@ function ditar(suf){
         caixa.appendChild(opcoes);
       };
   rec.onerror = function(ev){
+    rec.sc115Failed=true;
     rec.enviarAoTerminar=null;
     if(ev.error==='not-allowed' || ev.error==='service-not-allowed'){
       // Se o Chrome não marcou o microfone como "negado" para o site, quem bloqueia é a página embutida do Google (Apps Script): não tem conserto aqui.
@@ -7449,7 +7451,8 @@ function ditar(suf){
     reconhecimento=null;
     if(btn) btn.classList.remove('ouvindo');
     if(!campoCap.isConnected) return;
-    if(rec.enviarAoTerminar) rec.enviarAoTerminar();
+    if(rec.sc115Final&&!rec.sc115Failed){if(window.SC115)SC115.input(suf);else prevCaptura(suf);}
+    else if(rec.enviarAoTerminar) rec.enviarAoTerminar();
     else campoCap.focus();
   };
   reconhecimento = rec;
@@ -10465,7 +10468,7 @@ html[data-sc-theme="editorial"] #modal:not(.sc75-note) .sc61-install{
 [data-sc904-head] :where(h3):not(.sc-nunca)::after,
 [data-sc904-head] :where(.np-title):not(.sc-nunca)::after,
 [data-sc904-head] :where(.sc90-dv-kicker):not(.sc-nunca)::after,
-[data-sc904-head]:is(h2,h3,.rot)::after{
+[data-sc904-head]:is(h2,h3,strong,.rot)::after{
  content:"";display:inline-block;vertical-align:middle;width:8px;height:8px;
  border-right:2px solid currentColor;border-bottom:2px solid currentColor;
  margin-left:13px;transform:rotate(225deg);transition:transform .16s ease;
@@ -10475,9 +10478,16 @@ html[data-sc-theme="editorial"] #modal:not(.sc75-note) .sc61-install{
 [data-sc904-fold="closed"] > [data-sc904-head] :where(h3):not(.sc-nunca)::after,
 [data-sc904-fold="closed"] > [data-sc904-head] :where(.np-title):not(.sc-nunca)::after,
 [data-sc904-fold="closed"] > [data-sc904-head] :where(.sc90-dv-kicker):not(.sc-nunca)::after,
-[data-sc904-fold="closed"] > [data-sc904-head]:is(h2,h3,.rot)::after{transform:rotate(45deg);}
+[data-sc904-fold="closed"] > [data-sc904-head]:is(h2,h3,strong,.rot)::after{transform:rotate(45deg);}
 [data-sc904-fold="closed"] > [data-sc904-content]{display:none!important;}
 [data-sc904-fold="closed"] > [data-sc904-head]{margin-bottom:0!important;padding-bottom:0!important;border-bottom:none!important;}
+#sc61-mobile-help > [data-sc904-head]{display:block;min-height:44px}
+/* Ajustes: manter somente o título quando o painel estiver recolhido. */
+#sc58-google[data-sc904-fold="closed"] .sc58-top p,
+#sc69-theme-panel[data-sc904-fold="closed"] .sc69-heading p,
+#sc92-settings[data-sc904-fold="closed"] .sc92-settings-head > button{display:none!important}
+#sc92-settings [data-sc904-head] > strong::after{content:"";display:inline-block;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;margin-left:12px;vertical-align:middle;transform:rotate(225deg)}
+#sc92-settings[data-sc904-fold="closed"] [data-sc904-head] > strong::after{transform:rotate(45deg)}
 /* Dia Vivo: a faixa com o título fica visível e as informações detalhadas são recolhidas. */
 #sc90-dia-vivo[data-sc904-fold="closed"] .sc90-dv-copy > :not(.sc90-dv-kicker){display:none!important;}
 #sc90-dia-vivo[data-sc904-fold="closed"]{align-items:center;min-height:61px;}
@@ -10513,6 +10523,10 @@ html[data-sc-theme="editorial"] #modal:not(.sc75-note) .sc61-install{
    return (anc?.id||'geral')+':'+tipo+':'+tit+ nth;
  }
  function padrao(root){
+   if(root.id==='sc61-mobile-help')return root.querySelector(':scope > strong');
+   if(root.id==='sc92-settings')return root.querySelector(':scope > .sc92-settings-head');
+   if(root.id==='sc58-google')return root.querySelector(':scope > .sc58-top');
+   if(root.id==='sc69-theme-panel')return root.querySelector(':scope > .sc69-heading');
    if(root.id==='sc90-dia-vivo')return root.querySelector(':scope > .sc90-dv-copy');
    const fixed=root.querySelector(':scope > .sc-radar-cab,:scope > .sc84-cab,:scope > .s4-heading,:scope > .np-top,:scope > .sc904-schedule-head');
    if(fixed)return fixed;
@@ -10531,7 +10545,7 @@ html[data-sc-theme="editorial"] #modal:not(.sc75-note) .sc61-install{
  }
  function nomes(root,head){
    if(root.id==='sc90-dia-vivo')return 'Dia Vivo';
-   const h=head.querySelector('h2,h3,.np-title,.sc90-dv-kicker')||head;
+   const h=head.querySelector('h2,h3,.np-title,.sc90-dv-kicker,strong')||head;
    return (h.textContent||root.getAttribute('aria-label')||'painel').trim().replace(/\s+/g,' ').slice(0,80);
  }
  function aplicar(root){
@@ -10583,6 +10597,8 @@ html[data-sc-theme="editorial"] #modal:not(.sc75-note) .sc61-install{
  function escanear(){
    prepararExtras();
    const sels=[
+    '#sc58-google','#sc60-diagnostics','#sc61-mobile-help','#sc5-recovery',
+    '#sc92-settings','#sc69-theme-panel','#sc100-settings','#sc11-settings',
     '#sc-radar','#sc90-dia-vivo','#s4-decision','#s4-workspaces',
     '#s4-reports .s4-panel','#s4-knowledge .s4-panel',
     '#s4-decision .s4-panel','#s4-workspaces .s4-panel',
@@ -12096,7 +12112,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-12i-sc11140"></script>
+<script src="./pwa-install.js?v=2026-11-12k-sc11150"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12224,6 +12240,81 @@ function aiAnalyze(suf,button){
  }).withFailureHandler(e=>{button.disabled=false;if(seq===aiSeq)toast(String(e&&e.message||e),true);}).capturaInteligente(text,ctx);
 }
 window.SC114={command,correct:vozCorrigir,commit};
+})();
+
+</script>
+<style>html.sc115-capture-active .sc90-route-intent{display:none!important}</style>
+<script id="sc115-auto-capture">
+/* Captura automática: pausa de digitação/ditado final -> IA -> registro quando completo. */
+(function(){'use strict';
+document.documentElement.classList.add('sc115-capture-active');
+const PAUSE=2500,states=new Map();
+const n=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+function state(suf){if(!states.has(suf))states.set(suf,{seq:0,busy:false,timer:0,pending:[],answer:'',last:''});return states.get(suf);}
+function paint(suf,text){const box=el('captura-prev'+suf);if(!box)return;box.innerHTML='';box.classList.add('sc115-auto');box.classList.remove('voz-em-revisao');if(!text){box.classList.add('hidden');return;}box.classList.remove('hidden');const p=document.createElement('p');p.className='subt';p.setAttribute('role','status');p.textContent=text;box.appendChild(p);}
+function clearInput(suf,field){state(suf).armed=false;field.value='';if(window.sc119ClearDraft)sc119ClearDraft(suf);}
+function projectDuplicate(item){return (D.projetos||[]).some(p=>n(p.nome)===n(item.titulo));}
+function exactDuplicate(r){const table={tarefa:'tarefas',evento:'eventos',nota:'notas',habito:'habitos',meta:'metas',alarme:'tarefas'}[r.tipo];return !!table&&(D[table]||[]).some(x=>n(x.titulo||x.nome)===n(r.titulo)&&(!['tarefas','eventos','metas'].includes(table)||String(x.data||x.prazo||'')===String(r.data||''))&&(!['tarefas','eventos'].includes(table)||String(x.hora||x.inicio||'')===String(r.inicio||'')));}
+function execute(cards){
+ const issues=cards.map(vozErro).filter(Boolean);if(issues.length)throw Error(issues[0]);
+ let count=0,duplicates=0;
+ while(cards.length){const card=cards[0];
+  if(card.comando){const cmd=card.comando,t=obter('tarefas',cmd.target);if(!t.id||!cmd.candidates.some(c=>c.id===String(t.id)&&c.titulo===t.titulo))throw Error('A tarefa mudou. Diga novamente o título.');
+   if(cmd.action==='concluir'){if(!SC111.finished(t))alternarTarefa(t.id);else duplicates++;}
+   else if(cmd.action==='reabrir'){if(t.status==='feita')alternarTarefa(t.id);else duplicates++;}
+   else if(cmd.action==='reagendar')salvar('tarefas',{id:t.id,data:cmd.date});
+   else throw Error('Esse comando exige abrir o registro.');
+  }else{
+   const duplicate=card.item.tipo==='projeto'?projectDuplicate(card.item):exactDuplicate(card.item);
+   if(duplicate)duplicates++;else gravarCaptura(card.item,card.texto);
+  }
+  cards.shift();count++;
+ }
+ return {count,duplicates};
+}
+function format(card){const r=card.item;return {tipo:r.tipo,titulo:r.titulo,data:r.data||'',hora:r.inicio||'',fim:r.fim||'',duracao:Number(r.duracao)||0,local:r.local||'',area:r.area||'',prioridade:r.prioridade||'media',conteudo:r.tipo==='nota'?String(card.texto||'').replace(/^n:\s*/,''):'',dias:r.dias||[],pergunta:card.pergunta||'',pendencia:card.bloqueio||''};}
+function consume(suf,text,result,field){const s=state(suf);
+ if(result&&(!Array.isArray(result.itens)||!result.itens.length)){s.answer=result.resposta||'Pode explicar um pouco mais?';clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
+ if(result&&result.itens&&result.itens.length)s.pending=result.itens.map(x=>({item:{tipo:x.tipo,titulo:x.titulo,data:x.data,inicio:x.hora,fim:x.fim,duracao:x.duracao,local:x.local,area:x.area,prioridade:x.prioridade,etiquetas:[],dias:x.dias,diasDitos:!!x.dias.length},texto:x.tipo==='nota'?'n: '+x.conteudo:text,pergunta:x.pergunta,opcoes:[],bloqueio:x.pendencia,origem:'Gemini'}));
+ if(!s.pending.length){s.answer=result&&result.resposta||'Não identifiquei uma ação completa. Pode continuar falando ou escrevendo.';clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
+ const issues=s.pending.map(c=>vozErro(c)||c.pergunta).filter(Boolean);
+ if(issues.length){s.answer=issues[0];clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
+ try{const count=execute(s.pending);s.answer=count.duplicates===count.count?'Esse registro já consta no aplicativo.':(count.count-count.duplicates)+' item(ns) adicionado(s) à fila de sincronização.';clearInput(suf,field);s.last='';if(window.sc119ClearDraft)sc119ClearDraft(suf);paint(suf,s.answer);}catch(e){s.answer=e.message;clearInput(suf,field);s.last='';paint(suf,s.answer);}
+}
+function live(field){return field&&field.isConnected&&document.visibilityState!=='hidden'&&(!field.getClientRects||field.getClientRects().length>0);}
+function send(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);if(!live(field))return;
+ const text=field.value.trim();if(!text||s.composing||!s.armed)return;
+ if(typeof reconhecimento!=='undefined'&&reconhecimento)return;
+ if(s.busy){schedule(suf);return;}if(s.last===text)return;
+ clearTimeout(s.timer);s.seq++;const seq=s.seq;s.last=text;
+ if(/^(cancelar|cancela|desistir|descartar|nova conversa)[.!]?$/i.test(text)){s.pending=[];s.answer='Entendido. A captura pendente foi descartada.';clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
+ if(/^(?:não|nao)\s+(?:salve|salvar|crie|criar|adicione|adicionar|agende|agendar)\b/i.test(text)){clearInput(suf,field);s.last='';paint(suf,'Entendido. Nenhuma ação executada.');return;}
+ const command=SC114.command(text);
+ if(command){const card=vozLocal(text,false);s.pending=[card];const err=vozErro(card);if(err){clearInput(suf,field);s.last='';paint(suf,err+(command.candidates.length>1?' '+command.candidates.map((c,i)=>(i+1)+'. '+c.titulo+(c.data?' ('+c.data+')':'')).join(' · '):''));return;}consume(suf,text,null,field);return;}
+ // Escolha verbal de um registro quando o título corresponde a mais de uma tarefa.
+ if(s.pending.length===1&&s.pending[0].comando){const card=s.pending[0],cmd=card.comando,choice=/^(?:a\s+|o\s+)?(primeira|primeiro|segunda|segundo|terceira|terceiro|\d+)[.!]?$/.exec(n(text));
+  if(choice){const i={primeira:0,primeiro:0,segunda:1,segundo:1,terceira:2,terceiro:2}[choice[1]]??Number(choice[1])-1;if(cmd.candidates[i]){cmd.target=cmd.candidates[i].id;consume(suf,text,null,field);return;}}
+  if(SC114.correct(card,text)){consume(suf,text,null,field);return;}
+ }
+ s.busy=true;paint(suf,'Entendendo sua mensagem…');
+ const ctx={hoje:hojeISO(),agora:pad2(new Date().getHours())+':'+pad2(new Date().getMinutes()),fuso:Intl.DateTimeFormat().resolvedOptions().timeZone,rascunhos:s.pending.filter(c=>!c.comando).map(format)};
+ google.script.run.withSuccessHandler(result=>{
+  s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}
+  consume(suf,text,result,field);
+ }).withFailureHandler(error=>{s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}s.last='';s.armed=false;s.answer='Não consegui acessar a IA: '+String(error&&error.message||error)+'. Sua mensagem foi mantida.';paint(suf,s.answer);}).capturaInteligente(text,ctx);
+}
+function schedule(suf){const s=state(suf);clearTimeout(s.timer);if(!s.armed||s.composing)return;s.timer=setTimeout(()=>send(suf),PAUSE);}
+window.prevCaptura=function(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);s.seq++;clearTimeout(s.timer);
+ if(!field||!field.value.trim()){s.armed=false;paint(suf,s.answer);return;}
+ paint(suf,typeof reconhecimento!=='undefined'&&reconhecimento?'Ouvindo…':'Vou agir após uma pausa na digitação.');schedule(suf);
+};
+window.capturar=function(_shift,suf){suf=suf||'';state(suf).armed=true;send(suf);};window.vozPreparar=window.capturar;
+const oldOpen=window.abrirNovo;window.abrirNovo=function(){oldOpen.apply(this,arguments);const field=el('captura-m');if(field){field.placeholder='Diga ou escreva o que você quer fazer';el('modal-rodape').innerHTML='';paint('-m',state('-m').answer||'Captura automática: basta falar ou escrever.');}};
+function userInput(suf){suf=suf||'';state(suf).armed=true;prevCaptura(suf);}
+document.addEventListener('input',e=>{if(e.target.id==='captura'||e.target.id==='captura-m')userInput(e.target.id==='captura-m'?'-m':'');});
+document.addEventListener('compositionstart',e=>{if(!['captura','captura-m'].includes(e.target.id))return;const s=state(e.target.id==='captura-m'?'-m':'');s.seq++;clearTimeout(s.timer);s.composing=true;});
+document.addEventListener('compositionend',e=>{if(!['captura','captura-m'].includes(e.target.id))return;state(e.target.id==='captura-m'?'-m':'').composing=false;prevCaptura(e.target.id==='captura-m'?'-m':'');});
+window.SC115={send,state,input:userInput,voiceStart:function(suf){const s=state(suf||'');s.seq++;s.armed=false;clearTimeout(s.timer);},delay:PAUSE};
 })();
 
 </script>
