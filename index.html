@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13m-sc11192"></script>
+<script src="./pwa-transport.js?v=2026-11-13n-sc11193"></script>
 <script>
-var VERSAO_TELA = '2026-11-13m';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.19.2'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13n';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.19.3'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -5470,36 +5470,44 @@ function interpretar(texto, forcaNota){
   return { tipo:'meta', titulo:tit, area:b2.area || '', prioridade:'media', data:b2.data || '', inicio:'', fim:'', duracao:0, etiquetas:[] };
 }
 
-/* ───────── botão voltar do celular: não sai do app por engano ─────────
-   Voltar fecha a janela aberta → volta para "Hoje" → pede um segundo toque (2,5 s) para sair.
-   O Chrome ignora entradas de histórico criadas sem toque do usuário (e a cada reabertura do app o
-   histórico recomeça), então a "trava" é recolocada no primeiro toque e a cada toque/volta ao app. */
-var voltarUltimo = 0;
-function voltarGuard(){
-  try { if(!(history.state && history.state.sc === 'guard')) history.pushState({ sc:'guard' }, ''); } catch(err){}
+/* Voltar: fecha janela, retorna a Hoje e exige segundo toque para sair. */
+var voltarUltimo=0,voltarTimer=null,voltarInstalado=false,voltarInteragiu=false;
+function voltarAviso(visivel){
+ var notice=document.getElementById('sc132-exit-notice');
+ if(visivel&&!notice){notice=document.createElement('div');notice.id='sc132-exit-notice';notice.setAttribute('role','alert');notice.textContent='Toque em Voltar novamente para sair.';document.body.appendChild(notice)}
+ if(notice)notice.hidden=!visivel;
 }
+function voltarGuard(){
+ try{
+  if(window.top!==window.self||document.hidden||!voltarInteragiu)return;
+  if(Date.now()-voltarUltimo<3000&&voltarUltimo)return;
+  if(history.state&&history.state.sc==='guard')return;
+  if(!(history.state&&history.state.sc==='base'))history.replaceState(Object.assign({},history.state||{},{sc:'base'}),'');
+  history.pushState(Object.assign({},history.state||{},{sc:'guard'}),'');
+ }catch(_){}
+}
+function voltarCancelar(){voltarUltimo=0;clearTimeout(voltarTimer);voltarAviso(false);voltarGuard()}
 function voltarIniciar(){
-  try {
-    if(window.top !== window.self || !window.history || !history.pushState) return;   // dentro do Apps Script (iframe) não mexe no histórico
-    if(!(history.state && (history.state.sc === 'guard' || history.state.sc === 'base'))) history.replaceState({ sc:'base' }, '');
-    ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(function(ev){ document.addEventListener(ev, voltarGuard, { capture:true, passive:true }); });
-    window.addEventListener('pageshow', function(e){ if(e.persisted) voltarGuard(); });
-    document.addEventListener('visibilitychange', function(){ if(!document.hidden) voltarGuard(); });
-    window.addEventListener('popstate', function(e){
-      var s = e.state && e.state.sc;
-      if(s !== 'base') return;                       // só reage quando voltou até a entrada-base
-      var m = document.getElementById('modal');
-      if(m && !m.classList.contains('hidden')){ fecharModal(); voltarGuard(); return; }
-      if(typeof window.sc5SwipeUntil === 'number' && Date.now() < window.sc5SwipeUntil && vistaAtual === 'agenda'){ voltarGuard(); return; }
-      if(typeof vistaAtual !== 'undefined' && vistaAtual !== 'hoje'){ irPara('hoje'); voltarGuard(); return; }
-      if(Date.now() - voltarUltimo < 2500){ voltarUltimo = 0; history.back(); return; }   // segundo toque: sai de verdade
-      voltarUltimo = Date.now();
-      toast('Toque em voltar de novo para sair do app.');
-      voltarGuard();
-    });
-  } catch(err){}
+ try{
+  if(voltarInstalado||window.top!==window.self||!window.history||!history.pushState)return;
+  voltarInstalado=true;if(!(history.state&&['base','guard'].includes(history.state.sc)))history.replaceState(Object.assign({},history.state||{},{sc:'base'}),'');
+  // Uma interação normal cancela a intenção de sair e restabelece a proteção.
+  ['pointerdown','keydown'].forEach(function(name){document.addEventListener(name,function(){voltarInteragiu=true;voltarCancelar()},{capture:true,passive:true})});
+  window.addEventListener('pageshow',voltarCancelar);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)voltarCancelar()});
+  window.addEventListener('popstate',function(e){
+   if(!e.state||e.state.sc!=='base')return;
+   var modal=document.getElementById('modal');
+   if(modal&&!modal.classList.contains('hidden')){voltarUltimo=0;fecharModal();voltarAviso(false);voltarGuard();return}
+   if(typeof vistaAtual!=='undefined'&&vistaAtual!=='hoje'){voltarUltimo=0;irPara('hoje');voltarAviso(false);voltarGuard();return}
+   // Não recolocar o guard durante o aviso: o próximo Voltar deve seguir o histórico nativo.
+   voltarUltimo=Date.now();voltarAviso(true);clearTimeout(voltarTimer);
+   voltarTimer=setTimeout(function(){voltarUltimo=0;voltarAviso(false);voltarGuard()},3000);
+  });
+ }catch(_){}
 }
 voltarIniciar();
+window.SC132Back={armed:function(){return !!voltarUltimo&&Date.now()-voltarUltimo<3000}};
 
 /* ───────── Meta diária: alvo por dia, zera à meia-noite, histórico de cada dia ───────── */
 // Colunas da aba Metas: alvo_dia (minutos por dia; vazio = meta comum), desde (1º dia) e log_dias (JSON {"AAAA-MM-DD": minutos}).
@@ -7237,7 +7245,7 @@ function tratarAtalho(){
   var q; try { q = new URLSearchParams(location.search); } catch(e){ return; }
   var a = q.get('a') || '', txt = [q.get('title'), q.get('text'), q.get('url')].filter(function(x){ return x; }).join(' ').trim();
   if(!a && !txt) return;
-  try { history.replaceState(null, '', location.pathname); } catch(e){}
+  try { history.replaceState(history.state, '', location.pathname); } catch(e){}
   if(txt){ abrirNovo(); setTimeout(function(){ var c = el('captura-m'); if(c){ c.value = txt.slice(0, 600); prevCaptura('-m'); c.focus(); } }, 80); return; }
   if(a==='tarefa') abrirTarefa({});
   else if(a==='nota') abrirNota({});
@@ -12147,7 +12155,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13m-sc11192"></script>
+<script src="./pwa-install.js?v=2026-11-13n-sc11193"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12794,5 +12802,9 @@ document.addEventListener('click',e=>{if(!blocked||Date.now()>blocked.until||e.d
 })();
 </script>
 
+<style id="sc132-back-notice">
+#sc132-exit-notice{position:fixed;z-index:10000;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));width:max-content;max-width:calc(100vw - 24px);padding:13px 17px;border-radius:14px;background:var(--sc11-paper,#fff);color:var(--sc11-ink,#18243b);border:1px solid var(--sc11-border,#d8deeb);box-shadow:0 6px 24px #0003;font-size:14px;text-align:center;pointer-events:none}
+#sc132-exit-notice[hidden]{display:none!important}
+</style>
 </body></html>
 
