@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13n-sc11193"></script>
+<script src="./pwa-transport.js?v=2026-11-13o-sc11194"></script>
 <script>
-var VERSAO_TELA = '2026-11-13n';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.19.3'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13o';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.19.4'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12155,7 +12155,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13n-sc11193"></script>
+<script src="./pwa-install.js?v=2026-11-13o-sc11194"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12594,7 +12594,7 @@ function navIcon(v){const paths={hoje:'<rect x="3" y="5" width="18" height="16" 
 function nav(){const active=tabFor(vistaAtual);['nav-movel','nav-lateral'].forEach(id=>{const n=$(id);if(!n)return;n.innerHTML=mainTabs.map(([v,icon,title])=>'<button type="button" class="'+(id==='nav-movel'?'nav-m':'nav-i')+(active===v?' ativo':'')+'" data-v="'+v+'" data-sc126-route="'+v+'" aria-current="'+(active===v?'page':'false')+'">'+navIcon(v)+'<span>'+title+'</span></button>').join('')});}
 function button(label,attr,cls='sc126-inline'){return '<button type="button" class="'+cls+'" '+attr+'>'+esc(label)+'</button>'}
 function openAttr(type,id){return 'data-sc126-open="'+esc(type)+'" data-id="'+esc(id)+'"'}
-function row(type,x,minor,check=false){return '<div class="sc126-row'+(done(x)?' sc126-done':'')+'">'+(check?'<button type="button" class="sc126-check" data-sc126-check="'+esc(x.id)+'" aria-label="'+(done(x)?'Reabrir':'Concluir')+' '+esc(name(x))+'" aria-pressed="'+done(x)+'">'+(done(x)?'☑':'☐')+'</button>':'')+'<button type="button" class="sc126-row-main" '+openAttr(type,x.id)+'><strong>'+esc(name(x))+'</strong><small>'+esc(minor||x.area||'')+'</small></button><span aria-hidden="true">›</span></div>'}
+function row(type,x,minor,check=false){return '<div class="sc126-row'+(done(x)?' sc126-done':'')+'"'+(type==='tarefas'?' data-sc133-task="'+esc(x.id)+'"':'')+'>'+(check?'<button type="button" class="sc126-check" data-sc126-check="'+esc(x.id)+'" aria-label="'+(done(x)?'Reabrir':'Concluir')+' '+esc(name(x))+'" aria-pressed="'+done(x)+'">'+(done(x)?'☑':'☐')+'</button>':'')+'<button type="button" class="sc126-row-main" '+openAttr(type,x.id)+'><strong>'+esc(name(x))+'</strong><small>'+esc(minor||x.area||'')+'</small></button><span aria-hidden="true">›</span></div>'}
 function list(items,empty){return '<div class="sc126-list">'+(items||'<p class="sc126-empty">'+esc(empty)+'</p>')+'</div>'}
 function meta(x){return [x.data||x.prazo,x.hora,x.status].filter(Boolean).join(' · ')}
 function tools(options,current,key){return '<div class="sc126-tools" role="group" aria-label="Categorias">'+options.map(([id,title])=>'<button type="button" data-sc126-'+key+'="'+id+'" aria-pressed="'+(id===current)+'">'+title+'</button>').join('')+'</div>'}
@@ -12769,26 +12769,32 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 
 <style id="sc131-habit-swipe">
-#sc126-home-habits .sc126-row{touch-action:pan-y;position:relative;transition:transform .16s ease-out,background-color .16s ease-out;border-radius:12px}
-#sc126-home-habits .sc131-dragging{transition:none;user-select:none;-webkit-user-select:none}
-#sc126-home-habits .sc131-right{background:rgba(16,185,129,.16)!important}
-#sc126-home-habits .sc131-left{background:rgba(125,95,215,.16)!important}
-#sc126-home-habits .sc131-dragging::after{content:attr(data-swipe-hint);position:absolute;right:8px;bottom:2px;font-size:11px;color:var(--sc11-ink);background:var(--sc11-paper);padding:2px 7px;border-radius:8px;pointer-events:none}
-@media(prefers-reduced-motion:reduce){#sc126-home-habits .sc126-row{transition:none!important}}
+#sc126-home-habits .sc126-row,[data-sc133-task]{touch-action:pan-y;position:relative;transition:transform .16s ease-out,background-color .16s ease-out;border-radius:12px}
+#sc126-home-habits .sc131-dragging,[data-sc133-task].sc131-dragging{transition:none;user-select:none;-webkit-user-select:none}
+#sc126-home-habits .sc131-right,[data-sc133-task].sc131-right{background:rgba(16,185,129,.16)!important}
+#sc126-home-habits .sc131-left,[data-sc133-task].sc131-left{background:rgba(125,95,215,.16)!important}
+#sc126-home-habits .sc131-dragging::after,[data-sc133-task].sc131-dragging::after{content:attr(data-swipe-hint);position:absolute;right:8px;bottom:2px;font-size:11px;color:var(--sc11-ink);background:var(--sc11-paper);padding:2px 7px;border-radius:8px;pointer-events:none}
+@media(prefers-reduced-motion:reduce){#sc126-home-habits .sc126-row,[data-sc133-task]{transition:none!important}}
 </style>
 <script id="sc131-habit-swipe-controller">
 (function(){'use strict';
 let gesture=null,blocked=null;
-const rowOf=n=>n&&n.closest?n.closest('#sc126-home-habits [data-sc131-habit]'):null;
+const rowOf=n=>n&&n.closest?n.closest('#sc126-home-habits [data-sc131-habit],[data-sc133-task]'):null;
 function reset(){const a=gesture;gesture=null;if(!a)return;a.row.style.transform='';a.row.classList.remove('sc131-dragging','sc131-right','sc131-left');delete a.row.dataset.swipeHint;try{if(a.row.hasPointerCapture?.(a.pointer))a.row.releasePointerCapture(a.pointer)}catch(_){}}
-function down(e){if(e.isPrimary===false){reset();return}if(e.button!==0)return;const row=rowOf(e.target);if(!row||e.target.closest('input,textarea,select,a'))return;reset();gesture={row,id:row.dataset.sc131Habit,pointer:e.pointerId,x:e.clientX,y:e.clientY,locked:false};}
+function down(e){if(e.isPrimary===false){reset();return}if(e.button!==0)return;const row=rowOf(e.target);if(!row||e.target.closest('input,textarea,select,a'))return;reset();gesture={row,id:row.dataset.sc133Task||row.dataset.sc131Habit,kind:row.dataset.sc133Task?'tarefa':'habito',pointer:e.pointerId,x:e.clientX,y:e.clientY,locked:false};}
 function move(e){const a=gesture;if(!a||e.pointerId!==a.pointer)return;if(!a.row.isConnected){reset();return}const dx=e.clientX-a.x,dy=e.clientY-a.y;
  if(!a.locked&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.15){reset();return}
  if(!a.locked&&Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.35){a.locked=true;try{a.row.setPointerCapture?.(a.pointer)}catch(_){}}
- if(!a.locked)return;if(e.cancelable)e.preventDefault();a.row.classList.add('sc131-dragging');a.row.classList.toggle('sc131-right',dx>0);a.row.classList.toggle('sc131-left',dx<0);a.row.style.transform='translateX('+Math.max(-85,Math.min(85,dx*.8))+'px)';a.row.dataset.swipeHint=dx>0?'Concluir hoje':'Desfazer hoje';
+ if(!a.locked)return;if(e.cancelable)e.preventDefault();a.row.classList.add('sc131-dragging');a.row.classList.toggle('sc131-right',dx>0);a.row.classList.toggle('sc131-left',dx<0);a.row.style.transform='translateX('+Math.max(-85,Math.min(85,dx*.8))+'px)';a.row.dataset.swipeHint=a.kind==='tarefa'?(dx>0?'Concluir tarefa':'Excluir · pode desfazer'):(dx>0?'Concluir hoje':'Desfazer hoje');
 }
 function up(e){const a=gesture;if(!a||e.pointerId!==a.pointer)return;const dx=e.clientX-a.x,dy=e.clientY-a.y,threshold=Math.max(70,Math.min(110,a.row.getBoundingClientRect().width*.26));const valid=a.row.isConnected&&a.locked&&Math.abs(dx)>=threshold&&Math.abs(dx)>Math.abs(dy)*1.35;
- if(a.locked)blocked={id:a.id,until:Date.now()+600};reset();if(!valid)return;if(e.cancelable)e.preventDefault();e.stopPropagation();
+ if(a.locked)blocked={id:a.id,kind:a.kind,until:Date.now()+600};reset();if(!valid)return;if(e.cancelable)e.preventDefault();e.stopPropagation();
+ if(a.kind==='tarefa'){
+  const task=typeof obter==='function'?obter('tarefas',a.id):null;if(!task||!task.id)return;
+  if(dx>0){const finished=typeof SC111!=='undefined'?SC111.finished(task):task.status==='feita';if(finished)return;alternarTarefa(a.id,true)}
+  else excluirComDesfazer('tarefas',a.id,'Tarefa excluída.');
+  if(window.SC126){const body=document.getElementById('modal-corpo'),modal=document.getElementById('modal');if(modal&&!modal.classList.contains('hidden')&&body?.dataset.sc126Detail&&body.dataset.sc126Id)SC126.detail(body.dataset.sc126Detail,body.dataset.sc126Id);SC126.refresh()}return;
+ }
  const day=hojeISO(),habit=typeof obter==='function'?obter('habitos',a.id):null;if(!habit||!habit.id||habit.ativo==='Não')return;
  const wanted=dx>0,marked=habitoFeito(a.id,day);if(wanted===marked)return;
  marcarHabito(a.id,day);if(window.SC126)SC126.refresh();if(typeof toast==='function')toast(wanted?'Hábito marcado como feito hoje.':'Marcação de hoje desfeita.');
@@ -12798,7 +12804,7 @@ document.addEventListener('pointermove',move,{capture:true,passive:false});
 document.addEventListener('pointerup',up,{capture:true,passive:false});
 document.addEventListener('pointercancel',e=>{if(gesture?.pointer===e.pointerId)reset()},{capture:true,passive:true});
 window.addEventListener('blur',reset);document.addEventListener('visibilitychange',()=>{if(document.hidden)reset()});
-document.addEventListener('click',e=>{if(!blocked||Date.now()>blocked.until||e.detail===0)return;const row=rowOf(e.target);if(row&&row.dataset.sc131Habit===blocked.id){e.preventDefault();e.stopImmediatePropagation()}},true);
+document.addEventListener('click',e=>{if(!blocked||Date.now()>blocked.until||e.detail===0)return;const row=rowOf(e.target);if(row&&(row.dataset.sc133Task||row.dataset.sc131Habit)===blocked.id&&(row.dataset.sc133Task?'tarefa':'habito')===blocked.kind){e.preventDefault();e.stopImmediatePropagation()}},true);
 })();
 </script>
 
