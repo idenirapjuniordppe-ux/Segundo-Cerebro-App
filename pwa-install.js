@@ -3,7 +3,7 @@
  if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
  let registration=null,reloading=false;
  function safe(){
-  if(document.visibilityState==='hidden'||window.SC132Back?.armed())return false;
+  if(document.visibilityState==='hidden'||window.SC132Back?.armed()||window.SC138Notes?.isEditing())return false;
   const a=document.activeElement;if(a&&(a.matches('input,textarea,select')||a.isContentEditable))return false;
   if(document.querySelector('#modal:not(.hidden)'))return false;
   if(Array.from(document.querySelectorAll('#captura,#captura-m')).some(f=>f.value.trim()))return false;
