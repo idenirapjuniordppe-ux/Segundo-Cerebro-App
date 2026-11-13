@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13h-sc11171"></script>
+<script src="./pwa-transport.js?v=2026-11-13i-sc11172"></script>
 <script>
-var VERSAO_TELA = '2026-11-13h';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.17.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13i';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.17.2'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -7684,22 +7684,14 @@ function usarDuracao(m){ var s = el('f-dur'); if(!s) return; s.value = String(m)
 // desta tela, index.html e sw.js foram publicados em versões diferentes (ou o app ainda mostra a tela antiga: feche e reabra).
 var pwaStatus = '', pwaAvisou = false;
 function verificarPWA(){
-  if(!window.__PWA) return; // no Apps Script não há SW do GitHub a verificar
-
-  try {
-    if(!document.querySelector('link[rel="manifest"]') || window.top !== window.self || !window.caches) return;
-    caches.keys().then(function(ks){
-      var scopeSuffix='-'+encodeURIComponent(new URL('./',location.href).href);
-      var sw = ks.filter(function(k){ return k.indexOf('segundo-cerebro-')===0 && k.endsWith(scopeSuffix); });
-      if(!sw.length) return;
-      if(sw.some(function(k){ return k.indexOf('segundo-cerebro-' + VERSAO_TELA + '-') === 0; })) pwaStatus = 'Arquivos offline desta versão disponíveis (' + VERSAO_TELA + ')';
-      else {
-        pwaStatus = 'PWA com versões diferentes: tela ' + VERSAO_TELA + ' / sw.js ' + sw.map(function(k){ return k.replace(/^segundo-cerebro-/, ''); }).join(', ');
-        if(!pwaAvisou){ pwaAvisou = true; toast('Arquivos do app em versões diferentes (tela ' + VERSAO_TELA + ', sw.js ' + sw[sw.length-1].replace(/^segundo-cerebro-/, '') + '). Publique index.html e sw.js juntos no GitHub; se já publicou, feche e reabra o app.', true); }
-      }
-      if(vistaAtual==='config') renderConfig();
-    }).catch(function(){});
-  } catch(e){}
+ if(!window.__PWA||!navigator.serviceWorker)return;
+ // Cache instalado pode pertencer a um worker aguardando ativação; não é o controlador da tela.
+ const worker=navigator.serviceWorker.controller;if(!worker)return;
+ const channel=new MessageChannel(),timer=setTimeout(()=>channel.port1.close(),1500);
+ channel.port1.onmessage=function(e){clearTimeout(timer);channel.port1.close();const version=e.data&&e.data.version;if(!version)return;
+ pwaStatus=version===VERSAO_TELA?'Arquivos offline desta versão disponíveis ('+version+')':'Atualização disponível. Será aplicada ao terminar a edição.';
+ if(version!==VERSAO_TELA&&window.SC127Update)SC127Update.check();
+ if(vistaAtual==='config')renderConfig();};worker.postMessage({type:'SC_SHELL_VERSION'},[channel.port2]);
 }
 
 /* ───────── Hora de sair automática ao salvar evento/tarefa com Local ───────── */
@@ -12155,7 +12147,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13h-sc11171"></script>
+<script src="./pwa-install.js?v=2026-11-13i-sc11172"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
