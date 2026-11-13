@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13g-sc11170"></script>
+<script src="./pwa-transport.js?v=2026-11-13h-sc11171"></script>
 <script>
-var VERSAO_TELA = '2026-11-13g';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.17.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13h';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.17.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12155,7 +12155,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13g-sc11170"></script>
+<script src="./pwa-install.js?v=2026-11-13h-sc11171"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12609,7 +12609,7 @@ function renderOrganize(){const host=$('v-organizar');if(!host)return;const coun
  if(k==='tarefas')html+='<p class="sc126-caption">'+button('Filtros e seleção em lote','data-sc126-route="tarefas"')+'</p>';
  if(k==='metas'||k==='habitos')html+='<p class="sc126-caption">'+button('Histórico e constância','data-sc126-route="metas"')+'</p>';
  }
- if(organize==='resumo')html+='<details class="sc126-details"><summary>Mais ferramentas</summary><div class="sc126-tools">'+[['planner','Planejamento'],['mapa','Mapa de conexões'],['linha','Linha do tempo'],['automacoes','Automações'],['revisao','Revisão semanal']].map(([k,t])=>button(t,'data-sc126-extra="'+k+'"')).join('')+'</div></details>';host.innerHTML=html;
+ if(organize==='resumo')html+='<details class="sc126-details"><summary>Mais ferramentas</summary><div class="sc126-tools">'+[['planner','Planejamento'],['mapa','Mapa de conexões'],['linha','Linha do tempo'],['automacoes','Automações'],['revisao','Revisão semanal'],['conversa','Histórico da conversa'],['ajustes','Ajustes']].map(([k,t])=>button(t,'data-sc126-extra="'+k+'"')).join('')+'</div></details>';host.innerHTML=html;
 }
 function links(){const result=[],seen=new Set();rows('notas').forEach(n=>{const text=String(n.conteudo||'');for(const m of text.matchAll(/https:\/\/[^\s<>"\]\)]+/g)){let u;try{u=new URL(m[0])}catch(_){continue}if(seen.has(u.href))continue;seen.add(u.href);result.push({url:u.href,note:n,host:u.hostname})}});return result;}
 function renderLibrary(){const host=$('v-biblioteca');if(!host)return;let html='<h1>Biblioteca</h1>'+tools([['notas','Notas'],['estudos','Estudos'],['arquivos','Links e arquivos'],['postits','Post-its']],library,'library');
@@ -12636,7 +12636,7 @@ function complete(id){const before=rows('tarefas').find(x=>String(x.id)===String
 function transcript(){const host=$('sc126-transcript');if(!host)return;const turns=SC120.conversation();host.innerHTML=turns.length?turns.map(t=>'<div class="sc126-message user"><small>Você</small>'+esc(t.usuario)+'</div><div class="sc126-message"><small>2º Cérebro</small>'+esc(t.assistente)+'</div>').join(''):'<p class="sc126-empty">Escreva ou fale naturalmente. A captura interpreta após uma pausa.</p>';const recent=SC120.recent().filter(x=>rows(x.tabela).some(r=>String(r.id)===String(x.id)));if(recent.length){host.insertAdjacentHTML('beforeend','<div class="sc126-chips">'+recent.map(x=>button(name(rows(x.tabela).find(r=>String(r.id)===String(x.id))),openAttr(x.tabela,x.id),'')).join('')+'</div>')}host.scrollTop=host.scrollHeight;const undo=$('sc126-undo');if(undo)undo.hidden=!SC120.canUndo();}
 function conversation(){abrirNovo();const f=$('captura-m'),body=$('modal-corpo');if(!f||!body)return;const form=f.closest('form'),status=$('captura-prev-m');if(!form||!status)return;body.replaceChildren();const host=document.createElement('div');host.className='sc126-transcript';host.id='sc126-transcript';host.setAttribute('role','log');host.setAttribute('aria-label','Conversa desta sessão');body.append(host,form,status);const bar=document.createElement('div');bar.className='sc126-tools';bar.innerHTML=button('Desfazer','id="sc126-undo" data-sc126-undo')+button('Nova conversa','data-sc126-reset');body.appendChild(bar);f.placeholder='Continue falando ou escrevendo…';transcript();f.focus();}
 function init(){document.documentElement.classList.add('sc126');const parent=$('v-hoje')?.parentNode;if(!parent)return;['organizar','biblioteca'].forEach(v=>{if(!$('v-'+v)){const s=document.createElement('section');s.id='v-'+v;s.className='vista sc126-page hidden';parent.appendChild(s)}});
- const header=document.createElement('div');header.id='sc126-brand';header.innerHTML='<strong>2º Cérebro</strong><div class="sc126-head-actions">'+button('Conversa','data-sc126-chat','sc126-inline')+'<button type="button" class="sc126-icon" data-sc126-route="config" aria-label="Perfil e ajustes">'+esc(String(data().config?.nome||'J').slice(0,1).toUpperCase())+'</button></div>';$('topo').prepend(header);
+
  const originalNav=window.montarNav;window.montarNav=function(){originalNav.apply(this,arguments);nav()};
  const originalRender=window.renderVista;window.renderVista=function(){const r=originalRender.apply(this,arguments);refresh();return r};
  const oldHome=window.SC100?.render;if(oldHome){window.SC100.render=function(){const r=oldHome.apply(this,arguments);renderHome();return r};const home=$('sc100-home');if(home)new MutationObserver(()=>{if(!$('sc126-calendar'))renderHome()}).observe(home,{childList:true})}
@@ -12655,7 +12655,7 @@ function init(){document.documentElement.classList.add('sc126');const parent=$('
  else if(target.dataset.sc126Tool)SC10.open(target.dataset.sc126Tool);
  else if(target.dataset.sc126Linked){const fields={};fields[target.dataset.sc126Linked==='projetos'?'projeto':'meta_id']=target.dataset.id;abrirTarefa(fields)}
  else if(target.dataset.sc126Day){agDia=target.dataset.sc126Day;agModo='dia';irPara('agenda')}
- else if(target.dataset.sc126Extra){const actions={planner:()=>Planner.menu(),mapa:()=>SC90.openMap(),linha:()=>SC90.openTimeline(),automacoes:()=>{irPara('config');setTimeout(()=>document.querySelector('[onclick*=s4OpenRules]')?.focus(),0)},revisao:()=>Planner.revisao()};actions[target.dataset.sc126Extra]?.()}
+ else if(target.dataset.sc126Extra){const actions={conversa:conversation,ajustes:()=>irPara('config'),planner:()=>Planner.menu(),mapa:()=>SC90.openMap(),linha:()=>SC90.openTimeline(),automacoes:()=>{irPara('config');setTimeout(()=>document.querySelector('[onclick*=s4OpenRules]')?.focus(),0)},revisao:()=>Planner.revisao()};actions[target.dataset.sc126Extra]?.()}
  else if(target.hasAttribute('data-sc126-chat'))conversation();
  else if(target.hasAttribute('data-sc126-undo')){try{toast(SC120.undoLast());transcript();refresh()}catch(err){toast(err.message,true)}}
  else if(target.hasAttribute('data-sc126-reset')){SC120.reset();['','-m'].forEach(s=>{const state=SC120.state(s);state.answer='';const box=$('captura-prev'+s);if(box){box.innerHTML='';box.classList.add('hidden')}});transcript()}
