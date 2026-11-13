@@ -1,0 +1,23 @@
+// DOM integration checks: real new navigation code, synthetic records, no network or provider calls.
+const {JSDOM}=require(process.env.SC_TEST_JSDOM||'jsdom');
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync(require('path').join(__dirname,'./index.html'),'utf8');
+const code=html.match(/<script id="sc126-navigation">([\s\S]*?)<\/script>/)[1];
+const dom=new JSDOM(`<html><body><div id="topo"></div><div id="nav-movel"></div><div id="nav-lateral"></div><main><div><section id="v-hoje" class="vista"><div id="sc100-home"><header class="sc100-header"></header></div></section>${['tarefas','metas','notas','config','agenda'].map(x=>'<section class="vista hidden" id="v-'+x+'"></section>').join('')}</div></main><div id="modal-corpo"></div></body></html>`,{runScripts:'outside-only',url:'https://example.test'});
+const w=dom.window;w.D={config:{nome:'Junior'},tarefas:[{id:'t1',titulo:'Ler recurso',status:'aberta',projeto:'p1',meta_id:'m1'},{id:'t2',titulo:'Concluída',status:'feita'}],projetos:[{id:'p1',nome:'Estudar recursos',status:'ativo'}],metas:[{id:'m1',titulo:'Aprender recursos',projeto:'p1',status:'ativa'}],habitos:[{id:'h1',nome:'Caminhar',dias:'5',ativo:'Sim'}],notas:[{id:'n1',titulo:'Referências',conteudo:'https://example.org/doc.pdf javascript:alert(1) https://example.org/doc.pdf'}],estudos:[{id:'s1',titulo:'Sessão'}],financas:[{id:'f1',descricao:'Conta',valor_centavos:'1000'}],registros:[]};
+w.vistaAtual='hoje';w.hojeISO=()=> '2026-11-13';w.somaDias=(d,n)=>{const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};w.habitoFeito=()=>false;w.sequencia=()=>0;w.toast=()=>{};w.montarNav=()=>{};w.renderVista=()=>{};w.irPara=v=>{w.vistaAtual=v;w.document.querySelectorAll('.vista').forEach(x=>x.classList.toggle('hidden',x.id!=='v-'+v));w.renderVista()};w.abrirModal=(title,body)=>{w.document.getElementById('modal-corpo').innerHTML=body};w.abrirNovo=()=>{w.abrirModal('Conversa','<form><input id="captura-m"></form><div id="captura-prev-m"></div>')};w.alternarTarefa=id=>{const x=w.D.tarefas.find(x=>x.id===id);x.status=x.status==='feita'?'aberta':'feita'};const calls=[];['abrirTarefa','abrirMeta','abrirProjeto','abrirHabito','abrirNota'].forEach(fn=>w[fn]=x=>calls.push([fn,x]));w.marcarHabito=(id,date)=>calls.push(['habit',id,date]);w.SC10={open:x=>calls.push(['tool',x]),edit:x=>calls.push(['editTool',x])};w.SC120={conversation:()=>[{usuario:'<img src=x onerror=alert(1)>',assistente:'Resposta'}],recent:()=>[],canUndo:()=>false,reset:()=>{},state:()=>({})};
+w.eval(code);w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+const click=sel=>{const x=w.document.querySelector(sel);assert(x,'missing '+sel);x.click()};
+assert.equal(w.document.querySelectorAll('#nav-movel button').length,3);
+click('[data-sc126-route="organizar"]');assert.equal(w.vistaAtual,'organizar');
+click('[data-sc126-organize="tarefas"]');assert(w.document.getElementById('v-organizar').textContent.includes('Ler recurso'));
+click('[data-sc126-check="t1"]');assert.equal(w.D.tarefas[0].status,'feita');assert(w.document.querySelector('.sc126-done'));
+click('[data-sc126-check="t1"]');assert.equal(w.D.tarefas[0].status,'aberta');
+w.SC126.detail('projetos','p1');assert(w.document.getElementById('modal-corpo').textContent.includes('Ler recurso'));click('[data-sc126-linked="projetos"]');assert.equal(calls.at(-1)[1].projeto,'p1');
+w.SC126.detail('tarefas','t1');assert(w.document.querySelector('[data-sc126-open="metas"]'));
+click('[data-sc126-route="biblioteca"]');click('[data-sc126-library="arquivos"]');assert.equal(w.document.querySelectorAll('#v-biblioteca a').length,1);assert.equal(w.document.querySelector('#v-biblioteca a').protocol,'https:');
+click('[data-sc126-library="estudos"]');click('[data-sc126-open="estudos"]');assert.deepEqual(calls.at(-1),['editTool','s1']);
+w.irPara('hoje');click('[data-sc126-day="2026-11-14"]');assert.equal(w.agDia,'2026-11-14');assert.equal(w.agModo,'dia');assert.equal(w.vistaAtual,'agenda');
+w.SC126.conversation();assert(!w.document.querySelector('#sc126-transcript img'));assert(w.document.getElementById('sc126-transcript').textContent.includes('<img'));assert.equal(w.document.querySelectorAll('#modal-corpo form').length,1);assert(!w.document.querySelector('#modal-corpo button[type="submit"]'));
+assert.equal(w.SC126.tabFor('notas'),'biblioteca');assert.equal(w.SC126.tabFor('metas'),'organizar');assert.equal(w.SC126.tabFor('agenda'),'hoje');
+console.log('PASS: three tabs, task check/reopen, linked records/creation, file URL safety/deduplication, studies, selected calendar day, escaped conversation, no send button.');w.close();
