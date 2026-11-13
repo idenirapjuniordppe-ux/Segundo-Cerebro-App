@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13e-sc11164"></script>
+<script src="./pwa-transport.js?v=2026-11-13f-sc11165"></script>
 <script>
-var VERSAO_TELA = '2026-11-13e';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.16.4'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13f';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.16.5'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12155,7 +12155,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13e-sc11164"></script>
+<script src="./pwa-install.js?v=2026-11-13f-sc11165"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12534,5 +12534,31 @@ window.SC120={context,prepare,execute,undoLast,state,reset,snapshot};
 })();
 
 </script>
+<style id="sc125-mobile-fit">
+/* 11.16.5: uma única margem lateral no celular; sem zoom ou bloqueio de acessibilidade. */
+@media (max-width:899px){
+ html.sc11-active body main > div.max-w-6xl{box-sizing:border-box;width:100%!important;max-width:none!important;margin:0!important;padding:12px 10px 20px!important}
+ html.sc11-active body main #v-hoje,html.sc11-active body main .vista:not(#v-hoje){box-sizing:border-box;width:100%!important;max-width:none!important;margin:0!important;padding-inline:0!important}
+ html.sc11-active.sc100-active body #sc100-home{box-sizing:border-box;width:100%!important;max-width:none!important;margin:0!important;padding:0 0 12px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-layout{width:100%;min-width:0;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-pane{box-sizing:border-box;width:100%;min-width:0;padding:14px!important;border-radius:18px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-pane-heading{font-size:16px!important;margin-bottom:8px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-pane-heading small{font-size:12px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-task{gap:8px!important;padding:12px 0!important;min-width:0}
+ html.sc11-active.sc100-active body #sc100-home .sc100-task-time{flex:0 0 42px!important;font-size:12px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-task-main{flex:1 1 0;min-width:0}
+ html.sc11-active.sc100-active body #sc100-home .sc100-task-main strong{font-size:15px!important;line-height:1.4!important;overflow-wrap:anywhere}
+ html.sc11-active.sc100-active body #sc100-home .sc100-task-main small{font-size:12px!important;line-height:1.4!important}
+ html.sc11-active.sc100-active body #sc100-home .sc11-task-check{box-sizing:border-box;width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;border-radius:7px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-task-open{box-sizing:border-box;flex:0 0 28px!important;min-width:28px;min-height:44px;padding:10px 5px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-spaces{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-spaces button{min-height:64px!important;padding:10px 6px!important;font-size:13px!important}
+ html.sc11-active.sc100-active body #sc100-home .sc100-simple-link{font-size:13px!important;min-height:40px}
+ html.sc11-active.sc100-active body #sc100-home .sc100-foot{margin:10px 0!important}
+ html.sc11-active body #topo > div{box-sizing:border-box;max-width:none!important;padding-inline:10px!important}
+ html.sc11-active body #topo #captura{font-size:16px!important;min-width:0}
+}
+
+</style>
 </body></html>
 
