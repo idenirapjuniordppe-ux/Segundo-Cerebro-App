@@ -2097,7 +2097,7 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
         </div>
       </section>
       <section id="v-agenda" class="vista hidden">
-        <div class="flex items-end justify-between gap-3 flex-wrap mb-4"><div><h1 class="text-2xl font-extrabold">Agenda</h1><p class="subt" id="ag-titulo"></p></div><div class="flex gap-2 flex-wrap items-center"><div id="ag-modo" class="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"></div><button onclick="agNav(-1)" class="btn btn-s" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button><button onclick="agHoje()" class="btn btn-s">Hoje</button><button onclick="agNav(1)" class="btn btn-s" aria-label="Próximo"><i class="fa-solid fa-chevron-right"></i></button><button onclick="novoEventoAg()" class="btn btn-p" aria-label="Novo evento"><i class="fa-solid fa-plus"></i></button></div></div>
+        <div class="flex items-end justify-between gap-3 flex-wrap mb-4"><div><h1 class="text-2xl font-extrabold">Agenda</h1><p class="subt" id="ag-titulo"></p></div><div class="flex gap-2 flex-wrap items-center"><div id="ag-modo" class="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"></div><button type="button" onclick="agNav(-1)" class="btn btn-s" aria-label="Período anterior"><i class="fa-solid fa-chevron-left"></i></button><button onclick="agHoje()" class="btn btn-s">Hoje</button><button type="button" onclick="agNav(1)" class="btn btn-s" aria-label="Próximo período"><i class="fa-solid fa-chevron-right"></i></button><button onclick="novoEventoAg()" class="btn btn-p" aria-label="Novo evento"><i class="fa-solid fa-plus"></i></button></div></div>
         <div id="ag-grade" class="grid grid-cols-1 md:grid-cols-7 gap-2"></div>
       </section>
       <section id="v-tarefas" class="vista hidden">
@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13r-sc11211"></script>
+<script src="./pwa-transport.js?v=2026-11-13s-sc11212"></script>
 <script>
-var VERSAO_TELA = '2026-11-13r';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.21.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13s';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.21.2'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -4002,9 +4002,9 @@ function renderFoco(){
 
 /* ───────── agenda: semana (lista no celular) e dia (grade de horas) ───────── */
 var agRolar = false;
-function agNav(n){ if(agModo==='dia'){ agDia = somaDias(agDia||hojeISO(), n); agRolar = true; } else semanaOffset += n; renderAgenda(); }
-function agHoje(){ semanaOffset = 0; agDia = hojeISO(); agRolar = true; renderAgenda(); }
-function setAgModo(m){ agModo = m; agRolar = (m==='dia'); renderAgenda(); }
+function agNav(n){ if(agModo==='dia'){ agDia = somaDias(agDia||hojeISO(), n); agRolar = false; } else semanaOffset += n; renderAgenda(); }
+function agHoje(){ semanaOffset = 0; agDia = hojeISO(); agRolar = false; renderAgenda(); }
+function setAgModo(m){ agModo = m; agRolar = false; renderAgenda(); }
 function abrirDiaAgenda(dia){ agDia = dia; agModo = 'dia'; agRolar = true; renderAgenda(); }
 function novoEventoAg(){ abrirEvento({ data: agModo==='dia' ? (agDia||hojeISO()) : hojeISO() }); }
 function toggleDiaAg(dia){ var b = el('agc-'+dia); if(!b) return; b.classList.toggle('hidden'); agAbertos[dia] = !b.classList.contains('hidden'); }
@@ -4015,6 +4015,8 @@ function renderAgenda(){
   if(agModo==='grade' && larguraEfetiva() < 768) agModo = 'semana';
   el('ag-modo').innerHTML = modosAg.map(function(m){ return '<button class="px-3 py-2 text-xs font-bold '+(agModo===m[0]?'bg-purple-700 text-white':'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300')+'" onclick="'+C('setAgModo',m[0])+'">'+m[1]+'</button>'; }).join('');
   el('ag-modo').insertAdjacentHTML('beforeend','<button type="button" class="px-3 py-2 text-xs font-bold" onclick="Planner.menu()">Planner</button>');
+  const unidade=agModo==='dia'?'dia':'semana';
+  document.querySelectorAll('#v-agenda button[onclick^="agNav"]').forEach(function(b){const label=(b.getAttribute('onclick').includes('-1')?'Voltar ':'Avançar ')+(unidade==='semana'?'uma semana':'um dia');b.setAttribute('aria-label',label);b.title=label;});
   if(agModo==='dia') renderAgendaDia(); else if(agModo==='grade') renderAgendaGrade(); else renderAgendaSemana();
 }
 function renderAgendaSemana(){
@@ -4110,7 +4112,7 @@ function renderAgendaDia(){
   el('ag-grade').innerHTML =
     ((semGrade = simples() ? semGrade.filter(function(x){ return !(x.tipo === 'tarefa' && !x.inicio); }) : semGrade).length ? '<div class="card p-3 mb-3"><p class="rot">Sem horário na grade</p>'+semGrade.map(function(x){ return htmlItemAgenda(x); }).join('')+'</div>' : '') +
     bandejaAgenda(dia) + '<div class="card p-3"><div class="relative" data-drop="grade:'+dia+'" data-ini="'+ini+'" data-fim="'+fim+'" data-px="'+PX+'" style="height:'+alt+'px">'+fundo+'<div class="absolute pointer-events-none" style="left:3rem;right:0;top:0;bottom:0">'+html+'</div>'+linhaAgora+'</div></div>';
-  if(agRolar){   // só ao entrar no dia (não a cada minuto): leva a grade até "agora" (hoje) ou até o primeiro compromisso
+  if(agRolar && !document.getElementById('sc5-unified')){   // só ao entrar no dia (não a cada minuto): leva a grade até "agora" (hoje) ou até o primeiro compromisso
     agRolar = false;
     var alvo = dia===hoje ? am : (blocos.length ? Math.min.apply(null, blocos.map(function(b){ return b.a; })) : 8*60);
     var grade = el('ag-grade').querySelector('.relative');
@@ -8273,11 +8275,13 @@ function capture(){if(!$('sc5-fab')){const b=document.createElement('button');b.
  };document.body.appendChild(b);}}
 
 /* Unified agenda. The original calendar remains available below. */
-function addAgenda(){const v=$('v-agenda');if(v&&!$('sc5-unified')){const x=document.createElement('section');x.id='sc5-unified';x.className='sc5-unified';x.innerHTML='<h2>Próximos compromissos</h2><div class="sc5-tabs" role="group" aria-label="Período da agenda"><button type="button" data-period="hoje">Hoje</button><button type="button" data-period="amanha">Amanhã</button><button type="button" data-period="semana">7 dias</button></div><div id="sc5-agenda-list" aria-live="polite"></div><p class="sc5-muted">Deslize à direita para concluir; à esquerda para excluir com desfazer.</p>';v.insertBefore(x,v.querySelector('#ag-grade'));x.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{agendaFilter=b.dataset.period;renderAgendaUnified();});}}
+function addAgenda(){const v=$('v-agenda');if(v&&!$('sc5-unified')){const x=document.createElement('section');x.id='sc5-unified';x.className='sc5-unified';x.innerHTML='<h2>Próximos compromissos</h2><div class="sc5-tabs" role="group" aria-label="Período da agenda"><button type="button" data-period="hoje">Hoje</button><button type="button" data-period="amanha">Amanhã</button><button type="button" data-period="semana">Semana</button></div><div id="sc5-agenda-list" aria-live="polite"></div><p class="sc5-muted">Deslize à direita para concluir; à esquerda para excluir com desfazer.</p>';v.insertBefore(x,v.querySelector('#ag-grade'));x.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{agendaFilter=b.dataset.period;agRolar=false;semanaOffset=0;agDia=agendaFilter==='amanha'?somaDias(hojeISO(),1):hojeISO();agModo=agendaFilter==='semana'?'semana':'dia';renderAgenda();});}}
 function renderAgendaUnified(){const area=$('sc5-agenda-list');if(!area)return;
- document.querySelectorAll('#sc5-unified [data-period]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.period===agendaFilter)));
  if(typeof D==='undefined'||!D)return;
- const day=hojeISO(),dates=agendaFilter==='hoje'?[day]:agendaFilter==='amanha'?[somaDias(day,1)]:Array.from({length:7},(_,i)=>somaDias(day,i));
+ const day=hojeISO();let dates;
+ if(agModo==='dia')dates=[agDia||day];else{const base=deISO(day);base.setDate(base.getDate()-(base.getDay()+6)%7+semanaOffset*7);const start=iso(base);dates=Array.from({length:7},(_,i)=>somaDias(start,i));}
+ document.querySelectorAll('#sc5-unified [data-period]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.period==='semana'?agModo!=='dia'&&semanaOffset===0:agModo==='dia'&&dates[0]===(b.dataset.period==='amanha'?somaDias(day,1):day))));
+ const heading=document.querySelector('#sc5-unified h2');if(heading)heading.textContent=agModo==='dia'?'Compromissos do dia':'Compromissos da semana';
  let html='';dates.forEach(date=>{
  const items=[];
  (D.tarefas||[]).forEach(t=>{if(t.data===date)items.push({type:'tarefa',obj:t,title:t.titulo||'Tarefa',time:t.hora||'',completed:t.status==='feita'});});
@@ -12155,7 +12159,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13r-sc11211"></script>
+<script src="./pwa-install.js?v=2026-11-13s-sc11212"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12889,5 +12893,8 @@ html.sc126[data-sc-theme] :is(.sc100-header,.sc129-date){text-shadow:0 1px 3px v
 html.sc126[data-sc-theme] #sc100-home .sc100-header{background:var(--sc128-paper)!important;border-radius:12px;padding:10px!important}
 @media(prefers-reduced-transparency:reduce){html.sc126[data-sc-theme]{--sc128-paper:var(--sc128-base)!important;--sc128-top:var(--sc128-base)!important}}
 </style>
-</body></html>
+<style id="sc137-agenda-navigation">
+@media(max-width:767px){html.sc126 #v-agenda>div:first-child>div:last-child{display:grid!important;grid-template-columns:44px minmax(70px,1fr) 44px 44px;width:100%;gap:7px!important}html.sc126 #ag-modo{grid-column:1/-1;display:flex}html.sc126 #ag-modo button{flex:1;min-height:42px}html.sc126 #v-agenda button[onclick^="agNav"]{min-width:44px;padding:8px!important}}
+html.sc126 #sc5-unified{background:var(--sc128-paper)!important;color:var(--sc128-ink)!important;border-color:var(--sc128-border)!important}
+</style></body></html>
 

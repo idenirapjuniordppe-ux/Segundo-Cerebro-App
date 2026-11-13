@@ -1,0 +1,13 @@
+// Run: npm install --no-save jsdom && node organizado.test.cjs
+const {JSDOM,VirtualConsole}=require(process.env.SC_TEST_JSDOM||'jsdom');
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const source=fs.readFileSync(require('path').join(__dirname,'index.html'),'utf8');
+let scripts=0;for(const m of source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)){if(m[1].trim()){new vm.Script(m[1]);scripts++}}
+const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(e.type==='unhandled-exception')errors.push(e.message)});
+const dom=new JSDOM(source,{url:'https://example.test/app/',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.scrollTo=()=>{};w.matchMedia=()=>({matches:false,addListener(){},addEventListener(){}});w.confirm=()=>true;w.document.execCommand=()=>false;w.navigator.vibrate=()=>{};w.HTMLCanvasElement.prototype.getContext=()=>null;const chain=new Proxy({}, {get:(t,k)=>k==='withSuccessHandler'||k==='withFailureHandler'?()=>chain:()=>{}});w.google={script:{run:chain}};}});
+const wait=()=>new Promise(r=>setTimeout(r,140));
+(async()=>{await wait();const w=dom.window,d=w.document;let scrolls=0;w.scrollTo=()=>scrolls++;const today=w.hojeISO(),tomorrow=w.somaDias(today,1),week=w.somaDias(today,7);w.D.tarefas=[{id:'now',titulo:'Atividade hoje',data:today,status:'aberta'},{id:'next',titulo:'Atividade amanhã',data:tomorrow,status:'aberta'},{id:'week',titulo:'Atividade próxima semana',data:week,status:'aberta'}];w.irPara('agenda');w.setAgModo('dia');await wait();scrolls=0;
+const list=()=>d.getElementById('sc5-agenda-list').textContent;
+assert(list().includes('Atividade hoje'));w.agNav(1);await wait();assert.equal(w.agDia,tomorrow);assert(list().includes('Atividade amanhã'));assert(!list().includes('Atividade hoje'));assert.equal(scrolls,0,'day navigation must not scroll');w.agNav(-1);await wait();assert(list().includes('Atividade hoje'));
+w.setAgModo('semana');await wait();const title=d.getElementById('ag-titulo').textContent;w.agNav(1);await wait();assert.notEqual(d.getElementById('ag-titulo').textContent,title);assert(list().includes('Atividade próxima semana'));assert.equal(scrolls,0);w.agHoje();await wait();assert.equal(w.semanaOffset,0);
+d.querySelector('#sc5-unified [data-period="amanha"]').click();await wait();assert.equal(w.agModo,'dia');assert.equal(w.agDia,tomorrow);assert(list().includes('Atividade amanhã'));assert.equal(scrolls,0);assert.deepEqual(errors,[]);console.log('PASS: arrows update daily and weekly lists and headings, previous restores day, Today resets week, Tomorrow switches date/mode, no automatic scrolling.');})().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>dom.window.close());
