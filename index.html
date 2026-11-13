@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13i-sc11172"></script>
+<script src="./pwa-transport.js?v=2026-11-13j-sc11180"></script>
 <script>
-var VERSAO_TELA = '2026-11-13i';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.17.2'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13j';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.18.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12147,7 +12147,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13i-sc11172"></script>
+<script src="./pwa-install.js?v=2026-11-13j-sc11180"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12658,6 +12658,34 @@ function init(){document.documentElement.classList.add('sc126');const parent=$('
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
+
+<style id="sc128-theme-wallpapers">
+/* Imagens reais por tema. Esta camada vem após os estilos antigos que apagavam o fundo. */
+html[data-sc-theme="neural"]{ --sc128-wallpaper:url("./wallpaper-neural-11-18.webp");--sc128-base:#0b1028;--sc128-ink:#edf4ff;--sc128-muted:#bed0e5;--sc128-border:#24314f;--sc128-paper:rgba(23,34,56,.95);--sc128-top:rgba(18,28,48,.94);--sc70-wallpaper:var(--sc128-wallpaper);--sc72-wallpaper:var(--sc128-wallpaper)}
+html[data-sc-theme="neural"] .sc69-mini[data-id="neural"],.sc69-mini[data-id="neural"]{background-image:url("./wallpaper-neural-11-18.webp")!important;background-size:cover!important;background-position:center top!important}
+html[data-sc-theme="minimal"]{ --sc128-wallpaper:url("./wallpaper-minimal-11-18.webp");--sc128-base:#eef3f8;--sc128-ink:#1c3049;--sc128-muted:#52677e;--sc128-border:#d7e0ec;--sc128-paper:rgba(255,255,255,.95);--sc128-top:rgba(247,250,255,.93);--sc70-wallpaper:var(--sc128-wallpaper);--sc72-wallpaper:var(--sc128-wallpaper)}
+html[data-sc-theme="minimal"] .sc69-mini[data-id="minimal"],.sc69-mini[data-id="minimal"]{background-image:url("./wallpaper-minimal-11-18.webp")!important;background-size:cover!important;background-position:center top!important}
+html[data-sc-theme="glass"]{ --sc128-wallpaper:url("./wallpaper-glass-11-18.webp");--sc128-base:#e6eefb;--sc128-ink:#213250;--sc128-muted:#536883;--sc128-border:#cfdcf1;--sc128-paper:rgba(249,252,255,.91);--sc128-top:rgba(237,244,255,.90);--sc70-wallpaper:var(--sc128-wallpaper);--sc72-wallpaper:var(--sc128-wallpaper)}
+html[data-sc-theme="glass"] .sc69-mini[data-id="glass"],.sc69-mini[data-id="glass"]{background-image:url("./wallpaper-glass-11-18.webp")!important;background-size:cover!important;background-position:center top!important}
+html[data-sc-theme="executive"]{ --sc128-wallpaper:url("./wallpaper-executive-11-18.webp");--sc128-base:#0c151f;--sc128-ink:#f3f3ed;--sc128-muted:#c2cbd8;--sc128-border:#354455;--sc128-paper:rgba(25,36,49,.96);--sc128-top:rgba(17,29,41,.94);--sc70-wallpaper:var(--sc128-wallpaper);--sc72-wallpaper:var(--sc128-wallpaper)}
+html[data-sc-theme="executive"] .sc69-mini[data-id="executive"],.sc69-mini[data-id="executive"]{background-image:url("./wallpaper-executive-11-18.webp")!important;background-size:cover!important;background-position:center top!important}
+html[data-sc-theme="editorial"]{ --sc128-wallpaper:url("./wallpaper-editorial-11-18.webp");--sc128-base:#f3e6d7;--sc128-ink:#3c3047;--sc128-muted:#6c5a6f;--sc128-border:#dfcbbc;--sc128-paper:rgba(255,250,242,.96);--sc128-top:rgba(250,240,227,.94);--sc70-wallpaper:var(--sc128-wallpaper);--sc72-wallpaper:var(--sc128-wallpaper)}
+html[data-sc-theme="editorial"] .sc69-mini[data-id="editorial"],.sc69-mini[data-id="editorial"]{background-image:url("./wallpaper-editorial-11-18.webp")!important;background-size:cover!important;background-position:center top!important}
+html[data-sc-theme] body{
+ background-color:var(--sc128-base)!important;
+ background-image:var(--sc128-wallpaper)!important;
+ background-position:center top!important;background-repeat:no-repeat!important;
+ background-size:cover!important;background-attachment:fixed!important;
+ color:var(--sc128-ink)!important;
+}
+html[data-sc-theme]{--sc11-bg:var(--sc128-base)!important;--sc11-ink:var(--sc128-ink)!important;--sc11-muted:var(--sc128-muted)!important;--sc11-paper:var(--sc128-paper)!important;--sc11-border:var(--sc128-border)!important;--sc100-ink:var(--sc128-ink)!important;--sc100-muted:var(--sc128-muted)!important;--sc100-paper:var(--sc128-paper)!important;--tc-ink:var(--sc128-ink)!important;--tc-muted:var(--sc128-muted)!important;--tc-surface:var(--sc128-paper)!important;--tc-border:var(--sc128-border)!important}
+html[data-sc-theme] body main,html[data-sc-theme] body main>.max-w-6xl,html[data-sc-theme] body main>.max-w-6xl>.vista{background:transparent!important}
+html[data-sc-theme] body #topo,html[data-sc-theme] body #sc70-neural-hero,html[data-sc-theme] body #nav-movel{background:var(--sc128-top)!important;color:var(--sc128-ink)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+html[data-sc-theme] body #sc100-home .sc100-pane,html[data-sc-theme] body .sc126-list,html[data-sc-theme] body #modal-caixa{background:var(--sc128-paper)!important;color:var(--sc128-ink)!important;border-color:var(--sc128-border)!important}
+html[data-sc-theme] body #sc100-home .sc100-heading{color:var(--sc128-ink)!important}
+html[data-sc-theme] body #sc100-home .sc100-overline{color:var(--sc128-muted)!important}
+@media(prefers-reduced-transparency:reduce){html[data-sc-theme]{--sc128-paper:var(--sc128-base)!important;--sc128-top:var(--sc128-base)!important}}
+</style>
 
 </body></html>
 
