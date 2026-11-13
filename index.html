@@ -2051,7 +2051,7 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
 <div id="topo" class="sticky top-0 z-20 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
       <div class="max-w-6xl mx-auto px-4 lg:px-8 py-3 flex items-start gap-2">
         <div class="flex-1 min-w-0">
-          <form class="relative" onsubmit="vozEnviarFormulario(event,'')"><i class="fa-solid fa-bolt text-purple-700 absolute left-3 top-1/2 -translate-y-1/2 text-sm"></i><input id="captura" oninput="prevCaptura()" onkeydown="vozTeclaEnviar(event,'')" class="input pl-9 pr-3 py-2.5" placeholder="Fale ou escreva. A captura é automática." autocomplete="off" enterkeyhint="send"><button type="button" class="btn-mic hidden" data-mic="" onclick="ditar('')" aria-label="Ditar por voz"><i class="fa-solid fa-microphone"></i></button><button type="submit" hidden>Enviar</button></form>
+          <form class="relative" onsubmit="vozEnviarFormulario(event,'')"><i class="fa-solid fa-bolt text-purple-700 absolute left-3 top-1/2 -translate-y-1/2 text-sm"></i><input id="captura" oninput="prevCaptura()" onkeydown="vozTeclaEnviar(event,'')" class="input pl-9 pr-3 py-2.5" placeholder="Converse ou peça algo…" autocomplete="off" enterkeyhint="send"><button type="button" class="btn-mic hidden" data-mic="" onclick="ditar('')" aria-label="Ditar por voz"><i class="fa-solid fa-microphone"></i></button><button type="submit" hidden>Enviar</button></form>
           <div id="captura-prev" class="hidden mt-2"></div>
         </div>
         <button id="status-mini" onclick="retentarFila()" class="btn btn-s px-3 py-2.5 hidden" title="Gravações pendentes"></button>
@@ -2187,10 +2187,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-12l-sc11151"></script>
+<script src="./pwa-transport.js?v=2026-11-13a-sc1116"></script>
 <script>
-var VERSAO_TELA = '2026-11-12l';
-var VERSAO_STUDIO = '11.15.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13a';
+var VERSAO_STUDIO = '11.16'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -2653,7 +2653,15 @@ function salvarFila(cmd, remover){
   pendentes = fila.length;
   try {
     var chave = PREFIXO_FILA + cmd.cid;
-    if(remover) localStorage.removeItem(chave);
+    if(remover) {
+      localStorage.removeItem(chave);
+      if(cmd.sc120_group && /^sc120_lote_[a-zA-Z0-9]+$/.test(cmd.sc120_group)){
+        var loteIA=JSON.parse(localStorage.getItem(cmd.sc120_group)||'[]');
+        loteIA=loteIA.filter(function(c){return c.cid!==cmd.cid;});
+        if(loteIA.length)localStorage.setItem(cmd.sc120_group,JSON.stringify(loteIA));
+        else localStorage.removeItem(cmd.sc120_group);
+      }
+    }
     else localStorage.setItem(chave, JSON.stringify(cmd));
     window.sc60FilaNaoPersistida = false;
     try{document.documentElement.classList.remove('sc60-storage-risk');}catch(_){}
@@ -2691,6 +2699,11 @@ function lerFila(){
         } catch(e) {}
       });
   } catch(e) {}
+  // Conversa: recupera o lote inteiro após recarga, inclusive antes da primeira tentativa de rede.
+  try{Object.keys(localStorage).filter(function(k){return /^sc120_lote_[a-zA-Z0-9]+$/.test(k);}).forEach(function(k){
+    var group=JSON.parse(localStorage.getItem(k)||'[]');
+    if(Array.isArray(group))group.forEach(function(c){if(c&&c.cid&&c.sc120_group===k&&!comandos.has(c.cid))comandos.set(c.cid,c);});
+  });}catch(_){}
   // Inclui alterações desta aba que ainda estejam apenas em memória.
   fila.forEach(function(cmd){ if(!comandos.has(cmd.cid)) comandos.set(cmd.cid, cmd); });
   return Array.from(comandos.values());
@@ -12112,7 +12125,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-12l-sc11151"></script>
+<script src="./pwa-install.js?v=2026-11-13a-sc1116"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12245,78 +12258,249 @@ window.SC114={command,correct:vozCorrigir,commit};
 </script>
 <style>html.sc115-capture-active .sc90-route-intent{display:none!important}</style>
 <script id="sc115-auto-capture">
-/* Captura automática: pausa de digitação/ditado final -> IA -> registro quando completo. */
+/* Contrato compartilhado: toda ação passa pela mesma validação no servidor e na tela. */
+var SC120_FIELDS={
+ tarefas:['titulo','notas','area','projeto','meta_id','status','prioridade','data','hora','duracao','local','lembrete'],
+ projetos:['nome','area','descricao','status','prazo'],
+ eventos:['titulo','data','inicio','fim','area','local','notas','lembrete','concluido'],
+ notas:['titulo','conteudo','area','etiquetas'],
+ metas:['titulo','area','descricao','prazo','progresso','status'],
+ habitos:['nome','area','dias','ativo']
+};
+function sc120Date_(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;var d=new Date(s+'T12:00:00Z');return !isNaN(d)&&d.toISOString().slice(0,10)===s;}
+function sc120Plain_(x){return x&&typeof x==='object'&&!Array.isArray(x);}
+function sc120Fail_(s){throw new Error(s);}
+function sc120Schema_(){return {type:'object',properties:{resposta:{type:'string'},pergunta:{type:'string'},acoes:{type:'array',maxItems:20,items:{type:'object',properties:{acao:{type:'string',enum:['criar','alterar','excluir','registrar_habito','anexar_nota']},tabela:{type:'string',enum:Object.keys(SC120_FIELDS)},alvo:{type:'string'},ref:{type:'string'},campos:{type:'array',maxItems:15,items:{type:'object',properties:{campo:{type:'string'},valor:{type:'string'}},required:['campo','valor'],additionalProperties:false}}},required:['acao','tabela','alvo','ref','campos'],additionalProperties:false}}},required:['resposta','pergunta','acoes'],additionalProperties:false};}
+function sc120Validate_(r,ctx){
+ if(!sc120Plain_(r)||typeof r.resposta!=='string'||r.resposta.length>4000||typeof r.pergunta!=='string'||r.pergunta.length>600||!Array.isArray(r.acoes)||r.acoes.length>20)sc120Fail_('Resposta de conversa inválida.');
+ if(Object.keys(r).some(function(k){return ['resposta','pergunta','acoes'].indexOf(k)<0;}))sc120Fail_('Campo de resposta desconhecido.');
+ if(r.pergunta&&r.acoes.length)sc120Fail_('Uma pergunta pendente não pode executar ações.');
+ var refs=Object.create(null),touched=Object.create(null),records=ctx.registros||[];
+ var actions=r.acoes.map(function(a){
+  if(!sc120Plain_(a)||['criar','alterar','excluir','registrar_habito','anexar_nota'].indexOf(a.acao)<0||!Object.prototype.hasOwnProperty.call(SC120_FIELDS,a.tabela)||typeof a.alvo!=='string'||typeof a.ref!=='string'||!Array.isArray(a.campos)||a.campos.length>15||Object.keys(a).some(function(k){return ['acao','tabela','alvo','ref','campos'].indexOf(k)<0;}))sc120Fail_('Ação desconhecida.');
+  var old=null;
+  if(a.acao==='criar'){
+   if(a.alvo||!/^@[a-zA-Z0-9_-]{1,40}$/.test(a.ref)||refs[a.ref])sc120Fail_('Referência de criação inválida.');
+  }else{
+   if(a.ref||!a.alvo)sc120Fail_('Identificação da ação inválida.');
+   old=records.find(function(x){return x.tabela===a.tabela&&x.id===a.alvo;});
+   if(!old)sc120Fail_('O registro indicado não faz parte do contexto.');
+   var target=a.tabela+':'+a.alvo;if(touched[target])sc120Fail_('O mesmo registro foi alterado duas vezes no pedido.');touched[target]=true;
+  }
+  if(a.acao==='excluir'&&(['tarefas','eventos','notas'].indexOf(a.tabela)<0||a.campos.length))sc120Fail_('Para projetos, metas e hábitos, peça concluir ou desativar.');
+  if(a.acao==='registrar_habito'){
+   if(a.tabela!=='habitos'||a.campos.length!==2)sc120Fail_('Registro de hábito inválido.');
+   var check={};a.campos.forEach(function(f){if(!sc120Plain_(f)||['data','feito'].indexOf(f.campo)<0||typeof f.valor!=='string'||Object.prototype.hasOwnProperty.call(check,f.campo))sc120Fail_('Registro de hábito inválido.');check[f.campo]=f.valor;});
+   if(!sc120Date_(check.data)||['Sim','Não'].indexOf(check.feito)<0)sc120Fail_('Data ou conclusão de hábito inválida.');
+   return {acao:a.acao,tabela:a.tabela,alvo:a.alvo,ref:'',campos:[{campo:'data',valor:check.data},{campo:'feito',valor:check.feito}]};
+  }
+  var fields=Object.create(null);
+  a.campos.forEach(function(f){
+   if(!sc120Plain_(f)||typeof f.campo!=='string'||typeof f.valor!=='string'||Object.keys(f).some(function(k){return ['campo','valor'].indexOf(k)<0;})||SC120_FIELDS[a.tabela].indexOf(f.campo)<0||Object.prototype.hasOwnProperty.call(fields,f.campo))sc120Fail_('Campo de ação inválido.');
+   var k=f.campo,v=f.valor,max=['conteudo','notas','descricao'].indexOf(k)>=0?12000:500;
+   if(v.length>max)sc120Fail_('Conteúdo acima do limite.');
+   if(['titulo','nome'].indexOf(k)>=0&&(!v.trim()||v.length>300))sc120Fail_('Título inválido.');
+   if(['data','prazo'].indexOf(k)>=0&&v&&!sc120Date_(v))sc120Fail_('Data inexistente.');
+   if(['hora','inicio','fim'].indexOf(k)>=0&&v&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(v))sc120Fail_('Horário inválido.');
+   if(k==='duracao'&&v&&!/^(?:[1-9]\d{0,2}|1[0-3]\d\d|14[0-3]\d|1440)$/.test(v))sc120Fail_('Duração inválida.');
+   if(k==='lembrete'&&!/^(?:-1|0|[1-9]\d{0,3})$/.test(v))sc120Fail_('Lembrete inválido.');
+   if(k==='progresso'&&!/^(?:100|[1-9]?\d)$/.test(v))sc120Fail_('Progresso inválido.');
+   if(k==='prioridade'&&['alta','media','baixa'].indexOf(v)<0)sc120Fail_('Prioridade inválida.');
+   if(k==='ativo'&&['Sim','Não'].indexOf(v)<0)sc120Fail_('Situação de hábito inválida.');
+   if(k==='concluido'&&['Sim',''].indexOf(v)<0)sc120Fail_('Situação de evento inválida.');
+   var statuses={tarefas:['aberta','feita'],projetos:['ativo','concluido','pausado'],metas:['ativa','concluida','pausada']};
+   if(k==='status'&&(!statuses[a.tabela]||statuses[a.tabela].indexOf(v)<0))sc120Fail_('Situação inválida.');
+   if(k==='dias'&&!/^[0-6](?:,[0-6]){0,6}$/.test(v))sc120Fail_('Dias da semana inválidos.');
+   if(['projeto','meta_id'].indexOf(k)>=0&&v){
+    var tab=k==='projeto'?'projetos':'metas';
+    if(v.charAt(0)==='@'?(refs[v]!==tab):!records.some(function(x){return x.tabela===tab&&x.id===v;}))sc120Fail_('Vínculo com projeto ou meta inexistente.');
+   }
+   fields[k]=v;
+  });
+  if(a.acao==='anexar_nota'&&(a.tabela!=='notas'||a.campos.length!==1||a.campos[0].campo!=='conteudo'||!a.campos[0].valor.trim()))sc120Fail_('Acréscimo de nota inválido.');
+  if(a.acao==='alterar'&&old&&a.campos.some(function(f){return (old.camposResumidos||[]).indexOf(f.campo)>=0;}))sc120Fail_('O conteúdo é maior que o trecho disponível. Peça acrescentar à nota ou edite o texto completo.');
+  if(a.acao==='alterar'&&!a.campos.length)sc120Fail_('Alteração vazia.');
+  var merged=Object.assign({},old?old.campos:{},fields);
+  if(a.acao==='criar'&&!merged[a.tabela==='projetos'||a.tabela==='habitos'?'nome':'titulo'])sc120Fail_('Criação sem título.');
+  if(a.acao!=='excluir'){
+   if(merged.hora&&!merged.data)sc120Fail_('Informe o dia do horário solicitado.');
+   if(a.tabela==='eventos'&&(!merged.data||!merged.inicio||!merged.fim||merged.fim<=merged.inicio))sc120Fail_('O compromisso precisa de data e horário inicial e final no mesmo dia.');
+   if(a.tabela==='habitos'&&!merged.dias)sc120Fail_('Informe os dias da semana do hábito.');
+  }
+  if(a.acao==='criar')refs[a.ref]=a.tabela;
+  return {acao:a.acao,tabela:a.tabela,alvo:a.alvo,ref:a.ref,campos:a.campos.map(function(f){return {campo:f.campo,valor:f.valor};})};
+ });
+ return {resposta:r.resposta,pergunta:r.pergunta,acoes:actions};
+}
+
+/* Conversa compartilhada entre a barra e o modal; memória apenas nesta sessão. */
 (function(){'use strict';
 document.documentElement.classList.add('sc115-capture-active');
-const PAUSE=2500,states=new Map();
-const n=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-function state(suf){if(!states.has(suf))states.set(suf,{seq:0,busy:false,timer:0,pending:[],answer:'',last:''});return states.get(suf);}
-function paint(suf,text){const box=el('captura-prev'+suf);if(!box)return;box.innerHTML='';box.classList.add('sc115-auto');box.classList.remove('voz-em-revisao');if(!text){box.classList.add('hidden');return;}box.classList.remove('hidden');const p=document.createElement('p');p.className='subt';p.setAttribute('role','status');p.textContent=text;box.appendChild(p);}
-function clearInput(suf,field){state(suf).armed=false;field.value='';if(window.sc119ClearDraft)sc119ClearDraft(suf);}
-function projectDuplicate(item){return (D.projetos||[]).some(p=>n(p.nome)===n(item.titulo));}
-function exactDuplicate(r){const table={tarefa:'tarefas',evento:'eventos',nota:'notas',habito:'habitos',meta:'metas',alarme:'tarefas'}[r.tipo];return !!table&&(D[table]||[]).some(x=>n(x.titulo||x.nome)===n(r.titulo)&&(!['tarefas','eventos','metas'].includes(table)||String(x.data||x.prazo||'')===String(r.data||''))&&(!['tarefas','eventos'].includes(table)||String(x.hora||x.inicio||'')===String(r.inicio||'')));}
-function execute(cards){
- const issues=cards.map(vozErro).filter(Boolean);if(issues.length)throw Error(issues[0]);
- let count=0,duplicates=0;
- while(cards.length){const card=cards[0];
-  if(card.comando){const cmd=card.comando,t=obter('tarefas',cmd.target);if(!t.id||!cmd.candidates.some(c=>c.id===String(t.id)&&c.titulo===t.titulo))throw Error('A tarefa mudou. Diga novamente o título.');
-   if(cmd.action==='concluir'){if(!SC111.finished(t))alternarTarefa(t.id);else duplicates++;}
-   else if(cmd.action==='reabrir'){if(t.status==='feita')alternarTarefa(t.id);else duplicates++;}
-   else if(cmd.action==='reagendar')salvar('tarefas',{id:t.id,data:cmd.date});
-   else throw Error('Esse comando exige abrir o registro.');
-  }else{
-   const duplicate=card.item.tipo==='projeto'?projectDuplicate(card.item):exactDuplicate(card.item);
-   if(duplicate)duplicates++;else gravarCaptura(card.item,card.texto);
+const states=new Map(),PAUSE=2500,TTL=30*60*1000;
+let turns=[],lastResult='',lastTouched=[],lastUse=0,undo=null,inflight=false;
+const copy=x=>JSON.parse(JSON.stringify(x));
+const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const key=(tab,id)=>tab+':'+id;
+function state(suf){if(!states.has(suf))states.set(suf,{seq:0,timer:0,armed:false,answer:'',blockedUntil:0});return states.get(suf);}
+function paint(suf,text){const box=el('captura-prev'+suf);if(!box)return;box.innerHTML='';box.classList.add('sc115-auto');box.classList.remove('voz-em-revisao');box.classList[text?'remove':'add']('hidden');if(text){const p=document.createElement('p');p.className='subt';p.setAttribute('role','status');p.textContent=text;box.appendChild(p);}}
+function clear(suf,field){const s=state(suf);s.armed=false;s.last='';field.value='';if(window.sc119ClearDraft)sc119ClearDraft(suf);}
+function reset(){turns=[];lastResult='';lastTouched=[];lastUse=Date.now();}
+function remember(text,answer){turns.push({usuario:text.slice(0,3000),assistente:answer.slice(0,2000)});turns=turns.slice(-10);lastUse=Date.now();}
+function readonlySchedule(){
+ const occupied=[],seen=new Set();
+ if(typeof gcalCache==='object'&&gcalCache)Object.values(gcalCache).forEach(list=>{if(Array.isArray(list))list.forEach(e=>{const k=String(e.id)+'|'+e.data+'|'+e.inicio;if(seen.has(k)||(D.eventos||[]).some(local=>local.google_id===e.id))return;seen.add(k);if(!sc120Date_(String(e.data||'')))return;
+ const last=sc120Date_(String(e.fim_data||''))?e.fim_data:e.data;
+ for(let day=e.data,guard=0;day<=last&&guard<31;day=somaDias(day,1),guard++){
+  if(day===last&&day!==e.data&&(e.diaTodo||e.fim==='00:00'))break;
+  const start=day===e.data?String(e.inicio||'00:00'):'00:00',end=day===last?String(e.fim||'23:59'):'23:59';
+  occupied.push({titulo:String(e.titulo||'Google Agenda').slice(0,150),data:day,inicio:start,fim:end});
+ }});});
+ let rotina=[];try{rotina=JSON.parse(D.config.rotina||'[]');}catch(_){}if(!Array.isArray(rotina))rotina=[];
+ return {ocupacoes:occupied.slice(0,100),rotina:rotina.filter(r=>Array.isArray(r.dias)&&r.inicio&&r.fim).slice(0,40)};
+}
+function context(text){
+ if(Date.now()-lastUse>TTL)reset();
+ const words=norm(text+' '+turns.slice(-2).map(t=>t.usuario).join(' ')).split(/[^a-z0-9]+/).filter(w=>w.length>3);
+ const all=[];let order=0;
+ Object.keys(SC120_FIELDS).forEach(tab=>(D[tab]||[]).forEach(r=>{
+  if(!r.id)return;const fields={},camposResumidos=[];SC120_FIELDS[tab].forEach(k=>{if(r[k]!=null){const limit=['conteudo','notas','descricao'].includes(k)?500:300;fields[k]=String(r[k]).slice(0,limit);if(String(r[k]).length>limit)camposResumidos.push(k);}});
+  const title=norm(r.titulo||r.nome),content=norm(title+' '+(r.area||'')+' '+(r.notas||r.descricao||'').slice(0,500));
+  let score=words.reduce((n,w)=>n+(title.includes(w)?15:content.includes(w)?3:0),0);
+  if(lastTouched.includes(key(tab,r.id)))score+=100;
+  if((r.data||r.prazo||'')>=hojeISO())score+=5;
+  if(tab==='projetos'||tab==='metas')score+=3;
+  all.push({tabela:tab,id:String(r.id),campos:fields,camposResumidos,score,order:order++});
+ }));
+ all.sort((a,b)=>b.score-a.score||b.order-a.order);
+ const selected=[];let bytes=0;for(const r of all){const clean={tabela:r.tabela,id:r.id,campos:r.campos,camposResumidos:r.camposResumidos},size=JSON.stringify(clean).length;if(selected.length<200&&bytes+size<90000){selected.push(clean);bytes+=size;}}
+ return Object.assign(readonlySchedule(),{protocolo:2,hoje:hojeISO(),agora:pad2(new Date().getHours())+':'+pad2(new Date().getMinutes()),fuso:Intl.DateTimeFormat().resolvedOptions().timeZone,registros:selected,historico:copy(turns),ultimoResultado:lastResult,baseParcial:selected.length<all.length||D.config.google_agenda==='Sim',janela:{inicio:typeof diaIni==='function'?hhmm(diaIni()):'08:00',fim:typeof diaFim==='function'?hhmm(diaFim()):'20:00'}});
+}
+function values(a){const o={};a.campos.forEach(f=>o[f.campo]=f.valor);return o;}
+function current(tab,id){return (D[tab]||[]).find(r=>String(r.id)===String(id));}
+function snapshot(tab,r){const o={};SC120_FIELDS[tab].forEach(k=>o[k]=String(r&&r[k]!=null?r[k]:''));return JSON.stringify(o);}
+function uid(prefix){return prefix+Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
+function defaultFields(tab){return ({tarefas:{status:'aberta',prioridade:'media',lembrete:'-1'},projetos:{status:'ativo',cor:'#6366f1'},metas:{status:'ativa',progresso:'0'},habitos:{ativo:'Sim',cor:'#10b981'},eventos:{lembrete:'-1'},notas:{tipo:'nota'}})[tab];}
+function extra(tab){return tab==='eventos'&&cfgSim('google_criar')?{google:true}:{};}
+function duplicate(tab,fields,virtual){const title=norm(fields.titulo||fields.nome).trim();return (virtual[tab]||[]).find(r=>Object.keys(fields).every(k=>['titulo','nome'].includes(k)||String(r[k]||'')===String(fields[k]||''))&&norm(r.titulo||r.nome).trim()===title&&String(r.data||r.prazo||'')===String(fields.data||fields.prazo||'')&&String(r.hora||r.inicio||'')===String(fields.hora||fields.inicio||''));}
+function conflict(tab,record,id,virtual){
+ if(!['tarefas','eventos'].includes(tab)||!record.data)return;
+ const start=record.hora||record.inicio,mins=t=>Number(t.slice(0,2))*60+Number(t.slice(3)),a=start?mins(start):null;
+ const b=tab==='eventos'&&record.fim?mins(record.fim):a!==null&&Number(record.duracao)>0?a+Number(record.duracao):null;
+ if(a===null||b===null||record.status==='feita'||record.concluido==='Sim')return;
+ const schedule=readonlySchedule(),dow=new Date(record.data+'T12:00:00').getDay();
+ const occupied=schedule.ocupacoes.filter(o=>o.data===record.data).concat(schedule.rotina.filter(r=>r.dias.map(Number).includes(dow)));
+ for(const o of occupied){if(o.inicio&&o.fim&&a<mins(o.fim)&&b>mins(o.inicio))throw Error('Esse horário coincide com “'+(o.titulo||'sua rotina')+'”. Diga outro horário.');}
+
+ for(const otherTab of ['tarefas','eventos'])for(const o of virtual[otherTab]||[]){
+  if(otherTab===tab&&String(o.id)===String(id)||o.data!==record.data||o.status==='feita'||o.concluido==='Sim')continue;
+  const t=o.hora||o.inicio;if(!t)continue;const c=mins(t),d=otherTab==='eventos'&&o.fim?mins(o.fim):Number(o.duracao)>0?c+Number(o.duracao):null;
+  if(d!==null&&a<d&&b>c)throw Error('Esse horário coincide com “'+(o.titulo||'outro compromisso')+'”. Diga outro horário.');
+ }
+}
+function prepare(result,ctx,snapshots){
+ const checked=sc120Validate_(result,ctx),refs={},commands=[],changes=[],skipped=[];
+ const virtual={};Object.keys(SC120_FIELDS).forEach(t=>virtual[t]=copy(D[t]||[]));
+ for(const a of checked.acoes){
+  let old=a.acao==='criar'?null:current(a.tabela,a.alvo);
+  if(a.acao!=='criar'&&(!old||snapshot(a.tabela,old)!==snapshots[key(a.tabela,a.alvo)]))throw Error('O registro mudou enquanto eu analisava. Repita o pedido para usar a versão atual.');
+  if(a.acao==='excluir'&&a.tabela==='notas'&&(D.notas||[]).some(n=>String(n.pagina_pai||'')===a.alvo))throw Error('Essa página contém subpáginas. Mova-as antes de excluir.');
+  if(a.acao==='registrar_habito'){
+   const f=values(a),before=(D.registros||[]).some(r=>String(r.habito_id)===a.alvo&&r.data===f.data),after=f.feito==='Sim';
+   if(before===after){skipped.push(old.nome);continue;}
+   commands.push({tipo:'MARCAR_HABITO',habito_id:a.alvo,data:f.data,feito:after,cid:uid('ia'),tentativas:0});
+   changes.push({tabela:'habitos',id:a.alvo,before:copy(old),after:copy(old),checkin:{data:f.data,before,after}});continue;
   }
-  cards.shift();count++;
+  const fields=values(a);for(const k of ['projeto','meta_id'])if(fields[k]&&fields[k][0]==='@')fields[k]=refs[fields[k]];
+  if(a.acao==='anexar_nota')fields.conteudo=String(old.conteudo||'')+(old.conteudo?'\n':'')+fields.conteudo;
+  if(a.acao==='criar'){
+   const dupe=duplicate(a.tabela,fields,virtual);if(dupe){refs[a.ref]=String(dupe.id);lastTouched.push(key(a.tabela,dupe.id));skipped.push(dupe.titulo||dupe.nome);continue;}
+  }
+  const id=old?String(old.id):uid(a.tabela[0]+'ia');
+  if(a.acao==='criar')refs[a.ref]=id;
+  const after=a.acao==='excluir'?null:Object.assign({},old||defaultFields(a.tabela),fields,{id});
+  if(after&&(!old||['data','hora','inicio','fim','duracao'].some(k=>Object.prototype.hasOwnProperty.call(fields,k))))conflict(a.tabela,after,id,virtual);
+  if(old&&after&&snapshot(a.tabela,old)===snapshot(a.tabela,after)){skipped.push(old.titulo||old.nome);continue;}
+  const cmd=Object.assign({tipo:after?'SALVAR':'EXCLUIR',tabela:a.tabela,cid:uid('ia'),tentativas:0},extra(a.tabela));
+  if(after)cmd.itens=[after];else cmd.ids=[id];
+  if(a.tabela==='projetos'&&a.acao==='criar')cmd.sc120_noFolder=true;
+  commands.push(cmd);changes.push({tabela:a.tabela,id,before:old?copy(old):null,after:after?copy(after):null});
+  // Mantém a geração de próximas ocorrências e revisões da conclusão manual.
+  if(a.tabela==='tarefas'&&old&&old.status!=='feita'&&after&&after.status==='feita'){
+   let derived=[];
+   if(old.recorrencia&&old.data)derived.push(novaOcorrencia(old,proximaOcorrencia(old.data,old.recorrencia,hojeISO())));
+   if(typeof etiquetasDe==='function'&&etiquetasDe(old.etiquetas).includes('revisar'))derived=derived.concat(criarRevisoes(old));
+   for(const r of derived)if(!virtual.tarefas.some(t=>String(t.id)===String(r.id))){
+    commands.push({tipo:'SALVAR',tabela:'tarefas',itens:[r],cid:uid('ia'),tentativas:0});changes.push({tabela:'tarefas',id:r.id,before:null,after:copy(r)});virtual.tarefas.push(copy(r));
+   }
+  }
+  virtual[a.tabela]=virtual[a.tabela].filter(r=>String(r.id)!==id);if(after)virtual[a.tabela].push(after);
  }
- return {count,duplicates};
+ return {commands,changes,skipped};
 }
-function format(card){const r=card.item;return {tipo:r.tipo,titulo:r.titulo,data:r.data||'',hora:r.inicio||'',fim:r.fim||'',duracao:Number(r.duracao)||0,local:r.local||'',area:r.area||'',prioridade:r.prioridade||'media',conteudo:r.tipo==='nota'?String(card.texto||'').replace(/^n:\s*/,''):'',dias:r.dias||[],pergunta:card.pergunta||'',pendencia:card.bloqueio||''};}
-function consume(suf,text,result,field){const s=state(suf);
- if(result&&(!Array.isArray(result.itens)||!result.itens.length)){s.answer=result.resposta||'Pode explicar um pouco mais?';clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
- if(result&&result.itens&&result.itens.length)s.pending=result.itens.map(x=>({item:{tipo:x.tipo,titulo:x.titulo,data:x.data,inicio:x.hora,fim:x.fim,duracao:x.duracao,local:x.local,area:x.area,prioridade:x.prioridade,etiquetas:[],dias:x.dias,diasDitos:!!x.dias.length},texto:x.tipo==='nota'?'n: '+x.conteudo:text,pergunta:x.pergunta,opcoes:[],bloqueio:x.pendencia,origem:'Gemini'}));
- if(!s.pending.length){s.answer=result&&result.resposta||'Não identifiquei uma ação completa. Pode continuar falando ou escrevendo.';clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
- const issues=s.pending.map(c=>vozErro(c)||c.pergunta).filter(Boolean);
- if(issues.length){s.answer=issues[0];clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
- try{const count=execute(s.pending);s.answer=count.duplicates===count.count?'Esse registro já consta no aplicativo.':(count.count-count.duplicates)+' item(ns) adicionado(s) à fila de sincronização.';clearInput(suf,field);s.last='';if(window.sc119ClearDraft)sc119ClearDraft(suf);paint(suf,s.answer);}catch(e){s.answer=e.message;clearInput(suf,field);s.last='';paint(suf,s.answer);}
+// Um diário durável contém o lote inteiro. A fila retoma por CID sem repetir a gravação.
+function enqueue(commands){
+ if(!commands.length)return;
+ const group=uid('sc120_lote_');commands.forEach(c=>c.sc120_group=group);
+ try{localStorage.setItem(group,JSON.stringify(commands));}catch(_){throw Error('Não consegui guardar as ações neste aparelho. Sua mensagem foi mantida.');}
+ const celebrations=[];
+ commands.forEach(c=>{try{if(c.tipo==='SALVAR'&&typeof Celebracao!=='undefined')celebrations.push(Celebracao.captura(c.tabela,c.itens));}catch(_){}fila.push(c);efeitoLocal(c);});
+ celebrations.forEach(before=>{try{Celebracao.aposSalvar(before);}catch(_){}});
+ try{renderTudo();statusNuvem();drenarFila();}catch(_){/* Lote já durável: uma recarga o retoma. */}
 }
-function live(field){return field&&field.isConnected&&document.visibilityState!=='hidden'&&(!field.getClientRects||field.getClientRects().length>0);}
-function send(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);if(!live(field))return;
- const text=field.value.trim();if(!text||s.composing||!s.armed)return;
+function execute(result,ctx,snapshots){
+ const plan=prepare(result,ctx,snapshots);enqueue(plan.commands);
+ if(plan.changes.length){
+  undo={changes:plan.changes,at:Date.now()};lastTouched=plan.changes.map(x=>key(x.tabela,x.id));
+  lastResult=JSON.stringify(plan.changes.map(x=>({tabela:x.tabela,id:x.id,titulo:(x.after||x.before).titulo||(x.after||x.before).nome,acao:x.checkin?(x.checkin.after?'hábito marcado':'hábito desmarcado'):x.after?(x.before?'alterado':'criado'):'excluido'})));
+ }
+ const labels=plan.changes.slice(0,3).map(x=>'“'+((x.after||x.before).titulo||(x.after||x.before).nome)+'”').join(', ');
+ return plan.commands.length?plan.commands.length+' ação(ões) na fila: '+labels+(plan.changes.length>3?'…':'')+'. Pode dizer “desfazer”.':plan.skipped.length?'Os registros já estavam assim. Nenhuma duplicata foi criada.':result.pergunta||result.resposta||'Pode continuar.';
+}
+function undoLast(){
+ if(!undo||Date.now()-undo.at>TTL)throw Error('Não há um conjunto recente de ações para desfazer nesta sessão.');
+ // Verifica todo o conjunto antes de iniciar a reversão.
+ for(const x of undo.changes){if(x.checkin){const done=(D.registros||[]).some(r=>String(r.habito_id)===x.id&&r.data===x.checkin.data);if(done!==x.checkin.after)throw Error('O registro do hábito foi alterado depois.');continue;}const now=current(x.tabela,x.id);if(x.after?(!now||snapshot(x.tabela,now)!==snapshot(x.tabela,x.after)):!!now)throw Error('Um registro foi alterado depois. Não desfiz para preservar essa alteração.');}
+ const commands=undo.changes.slice().reverse().map(x=>{
+  if(x.checkin)return {tipo:'MARCAR_HABITO',habito_id:x.id,data:x.checkin.data,feito:x.checkin.before,cid:uid('undoia'),tentativas:0};
+  const c=Object.assign({tipo:x.before?'SALVAR':'EXCLUIR',tabela:x.tabela,cid:uid('undoia'),tentativas:0},extra(x.tabela));
+  if(x.before){const restored=copy(x.before);if(!x.after){if(x.tabela==='eventos')restored.google_id='';if(x.tabela==='tarefas'){restored.google_task_id='';restored.evento_google='';}}c.itens=[restored];}else c.ids=[x.id];return c;
+ });
+ enqueue(commands);undo=null;lastResult='O último conjunto foi desfeito localmente e aguarda sincronização.';lastTouched=[];return lastResult;
+}
+function live(f){return f&&f.isConnected&&document.visibilityState!=='hidden'&&(!f.getClientRects||f.getClientRects().length>0);}
+function schedule(suf){const s=state(suf);clearTimeout(s.timer);if(s.armed&&!s.composing)s.timer=setTimeout(()=>send(suf),PAUSE);}
+function send(suf){
+ suf=suf||'';const s=state(suf),field=el('captura'+suf);if(!live(field)||!s.armed||s.composing)return;
+ const text=field.value.trim();if(!text||typeof reconhecimento!=='undefined'&&reconhecimento)return;
  if(s.blockedUntil>Date.now()){paint(suf,s.answer);return;}
- if(typeof reconhecimento!=='undefined'&&reconhecimento)return;
- if(s.busy){schedule(suf);return;}if(s.last===text)return;
- clearTimeout(s.timer);s.seq++;const seq=s.seq;s.last=text;
- if(/^(cancelar|cancela|desistir|descartar|nova conversa)[.!]?$/i.test(text)){s.pending=[];s.answer='Entendido. A captura pendente foi descartada.';clearInput(suf,field);s.last='';paint(suf,s.answer);return;}
- if(/^(?:não|nao)\s+(?:salve|salvar|crie|criar|adicione|adicionar|agende|agendar)\b/i.test(text)){clearInput(suf,field);s.last='';paint(suf,'Entendido. Nenhuma ação executada.');return;}
- const command=SC114.command(text);
- if(command){const card=vozLocal(text,false);s.pending=[card];const err=vozErro(card);if(err){clearInput(suf,field);s.last='';paint(suf,err+(command.candidates.length>1?' '+command.candidates.map((c,i)=>(i+1)+'. '+c.titulo+(c.data?' ('+c.data+')':'')).join(' · '):''));return;}consume(suf,text,null,field);return;}
- // Escolha verbal de um registro quando o título corresponde a mais de uma tarefa.
- if(s.pending.length===1&&s.pending[0].comando){const card=s.pending[0],cmd=card.comando,choice=/^(?:a\s+|o\s+)?(primeira|primeiro|segunda|segundo|terceira|terceiro|\d+)[.!]?$/.exec(n(text));
-  if(choice){const i={primeira:0,primeiro:0,segunda:1,segundo:1,terceira:2,terceiro:2}[choice[1]]??Number(choice[1])-1;if(cmd.candidates[i]){cmd.target=cmd.candidates[i].id;consume(suf,text,null,field);return;}}
-  if(SC114.correct(card,text)){consume(suf,text,null,field);return;}
+ if(inflight){schedule(suf);return;}if(s.last===text)return;
+ clearTimeout(s.timer);s.last=text;
+ if(/^(nova conversa|cancelar|cancela|descartar)[.!]?$/i.test(text)){reset();clear(suf,field);s.answer='Conversa reiniciada.';paint(suf,s.answer);return;}
+ if(/^(desfazer|desfaça|desfaca|desfazer última ação|desfazer ultima acao)[.!]?$/i.test(text)){
+  try{s.answer=undoLast();remember(text,s.answer);clear(suf,field);}catch(e){s.answer=e.message;s.armed=false;s.last='';}paint(suf,s.answer);return;
  }
- s.busy=true;paint(suf,'Entendendo sua mensagem…');
- const ctx={hoje:hojeISO(),agora:pad2(new Date().getHours())+':'+pad2(new Date().getMinutes()),fuso:Intl.DateTimeFormat().resolvedOptions().timeZone,rascunhos:s.pending.filter(c=>!c.comando).map(format)};
+ const ctx=context(text),snapshots={};ctx.registros.forEach(r=>snapshots[key(r.tabela,r.id)]=snapshot(r.tabela,current(r.tabela,r.id)));
+ const seq=++s.seq;inflight=true;paint(suf,'Entendendo…');
+ const stale=()=>!live(field)||seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text;
  google.script.run.withSuccessHandler(result=>{
-  s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}
-  consume(suf,text,result,field);
- }).withFailureHandler(error=>{s.busy=false;if(!live(field)){s.last='';s.armed=false;return;}if(seq!==s.seq||field!==el('captura'+suf)||field.value.trim()!==text){schedule(suf);return;}s.last='';s.armed=false;const message=String(error&&error.message||error),quota=/SC116_429\[(\d+)\]\s*(.*)/.exec(message);
- if(quota){s.blockedUntil=Date.now()+Number(quota[1])*1000;s.answer=quota[2]+' Sua mensagem foi mantida.';}else{s.answer='Não consegui acessar a IA: '+message+'. Sua mensagem foi mantida.';}paint(suf,s.answer);}).capturaInteligente(text,ctx);
+  inflight=false;if(stale()){s.last='';if(!live(field))s.armed=false;else schedule(suf);return;}
+  try{s.answer=execute(result,ctx,snapshots);remember(text,s.answer);clear(suf,field);}catch(e){s.answer='Não executei: '+e.message;remember(text,s.answer);s.armed=false;s.last='';}
+  paint(suf,s.answer);
+ }).withFailureHandler(error=>{
+  inflight=false;if(stale()){s.last='';if(!live(field))s.armed=false;else schedule(suf);return;}
+  const msg=String(error&&error.message||error),q=/SC116_429\[(\d+)\]\s*(.*)/.exec(msg);if(q)s.blockedUntil=Date.now()+Number(q[1])*1000;
+  s.answer=(q?q[2]:'Não consegui concluir: '+msg)+' Sua mensagem foi mantida.';s.armed=false;s.last='';paint(suf,s.answer);
+ }).capturaInteligente(text,ctx);
 }
-function schedule(suf){const s=state(suf);clearTimeout(s.timer);if(!s.armed||s.composing)return;s.timer=setTimeout(()=>send(suf),PAUSE);}
-window.prevCaptura=function(suf){suf=suf||'';const s=state(suf),field=el('captura'+suf);s.seq++;clearTimeout(s.timer);
- if(!field||!field.value.trim()){s.armed=false;paint(suf,s.answer);return;}
- paint(suf,typeof reconhecimento!=='undefined'&&reconhecimento?'Ouvindo…':'Vou agir após uma pausa na digitação.');schedule(suf);
-};
-window.capturar=function(_shift,suf){suf=suf||'';state(suf).armed=true;send(suf);};window.vozPreparar=window.capturar;
-const oldOpen=window.abrirNovo;window.abrirNovo=function(){oldOpen.apply(this,arguments);const field=el('captura-m');if(field){field.placeholder='Diga ou escreva o que você quer fazer';el('modal-rodape').innerHTML='';paint('-m',state('-m').answer||'Captura automática: basta falar ou escrever.');}};
-function userInput(suf){suf=suf||'';state(suf).armed=true;prevCaptura(suf);}
-document.addEventListener('input',e=>{if(e.target.id==='captura'||e.target.id==='captura-m')userInput(e.target.id==='captura-m'?'-m':'');});
-document.addEventListener('compositionstart',e=>{if(!['captura','captura-m'].includes(e.target.id))return;const s=state(e.target.id==='captura-m'?'-m':'');s.seq++;clearTimeout(s.timer);s.composing=true;});
-document.addEventListener('compositionend',e=>{if(!['captura','captura-m'].includes(e.target.id))return;state(e.target.id==='captura-m'?'-m':'').composing=false;prevCaptura(e.target.id==='captura-m'?'-m':'');});
-window.SC115={send,state,input:userInput,voiceStart:function(suf){const s=state(suf||'');s.seq++;s.armed=false;clearTimeout(s.timer);},delay:PAUSE};
+window.prevCaptura=function(suf){suf=suf||'';const s=state(suf),f=el('captura'+suf);s.seq++;clearTimeout(s.timer);if(!f||!f.value.trim()){s.armed=false;paint(suf,s.answer);return;}paint(suf,typeof reconhecimento!=='undefined'&&reconhecimento?'Ouvindo…':'');schedule(suf);};
+function input(suf){suf=suf||'';state(suf).armed=true;prevCaptura(suf);}
+window.capturar=function(_,suf){suf=suf||'';state(suf).armed=true;send(suf);};window.vozPreparar=window.capturar;
+const oldOpen=window.abrirNovo;window.abrirNovo=function(){oldOpen.apply(this,arguments);const field=el('captura-m');if(field){field.placeholder='Converse ou peça algo…';const footer=el('modal-rodape');if(footer)footer.innerHTML='';paint('-m',state('-m').answer);}};
+document.addEventListener('input',e=>{if(['captura','captura-m'].includes(e.target.id))input(e.target.id==='captura-m'?'-m':'');});
+document.addEventListener('compositionstart',e=>{if(!['captura','captura-m'].includes(e.target.id))return;const s=state(e.target.id==='captura-m'?'-m':'');s.seq++;s.armed=false;clearTimeout(s.timer);s.composing=true;});
+document.addEventListener('compositionend',e=>{if(!['captura','captura-m'].includes(e.target.id))return;const suf=e.target.id==='captura-m'?'-m':'';state(suf).composing=false;input(suf);});
+window.SC115={send,state,input,voiceStart:function(suf){const s=state(suf||'');s.seq++;s.armed=false;clearTimeout(s.timer);},delay:PAUSE};
+window.SC120={context,prepare,execute,undoLast,state,reset,snapshot};
 })();
 
 </script>
