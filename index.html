@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13d-sc11163"></script>
+<script src="./pwa-transport.js?v=2026-11-13e-sc11164"></script>
 <script>
-var VERSAO_TELA = '2026-11-13d';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.16.3'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13e';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.16.4'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -8751,11 +8751,18 @@ html[data-sc69-theme="neural"] #sc62-notes-workspace,html.dark #sc62-notes-works
 @media(prefers-reduced-motion:reduce){#sc62-notes-workspace *{scroll-behavior:auto!important;transition:none!important}}
 
 </style>
+<style id="sc124-checklist-reading">
+#sc62-notes-workspace .np-reader button.np-taskbox{appearance:none;cursor:pointer;pointer-events:auto;width:20px;height:20px;min-width:20px;min-height:20px;padding:0;line-height:1;margin-top:3px;background:transparent;color:var(--np-text);border:1px solid var(--np-muted);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
+#sc62-notes-workspace .np-reader button.np-taskbox.done{background:var(--np-accent);color:#fff;border-color:var(--np-accent)}
+#sc62-notes-workspace .np-reader button.np-taskbox:focus-visible{outline:2px solid var(--np-accent);outline-offset:3px}
+#sc62-notes-workspace .np-reader .np-task-done .np-tasktext,#sc62-notes-workspace .np-reader .np-task-done .np-tasktext *{text-decoration-line:line-through!important;text-decoration-thickness:1.5px}
+</style>
 <script id="sc74-notes-pro">
 /* Studio 7.4 — Notas Pro. Usa D.notas/pagina_pai e o editor existente; sem nova tabela. */
 (function(){
 'use strict';
 var $ = id => document.getElementById(id);
+var renderedNote=null;
 var state={current:'',view:'paginas',query:'',filter:'todas',sort:'titulo',collapsed:false,expanded:{},recent:[],ready:false};
 var KEY='sc74_notes_ui_v1';
 try{var saved=JSON.parse(localStorage.getItem(KEY)||'{}');['current','view','filter','sort','collapsed','expanded','recent'].forEach(k=>{if(Object.prototype.hasOwnProperty.call(saved,k))state[k]=saved[k];});}catch(e){}
@@ -8814,21 +8821,36 @@ function inline(text){
 }
 function markdown(md){var rows=ordenarChecklistMd(md),html='',code=[],inCode=false;
  function flush(){if(code.length){html+='<pre>'+esc(code.join('\n'))+'</pre>';code=[];}}
- rows.forEach(({linha:line})=>{if(/^\s*```/.test(line)){if(inCode)flush();inCode=!inCode;return;}if(inCode){code.push(line);return;}
+ rows.forEach(({linha:line,indice:sourceIndex})=>{if(/^\s*```/.test(line)){if(inCode)flush();inCode=!inCode;return;}if(inCode){code.push(line);return;}
  var m;if(!line.trim()){html+='<div style="height:9px"></div>';return;}
  if((m=/^(#{1,4})\s+(.+)$/.exec(line))){html+='<h'+m[1].length+'>'+inline(m[2])+'</h'+m[1].length+'>';return;}
  if(/^\s*---+\s*$/.test(line)){html+='<hr>';return;}
- if((m=/^\s*[-*]\s*\[([ xX])\]\s?(.*)$/.exec(line))){var done=m[1]!==' ';html+='<div class="np-listline"><span class="np-taskbox'+(done?' done':'')+'" aria-label="'+(done?'Concluída':'Pendente')+'">'+(done?'✓':'')+'</span><span>'+inline(m[2])+'</span></div>';return;}
+ if((m=/^\s*[-*]\s*\[([ xX])\]\s?(.*)$/.exec(line))){var done=m[1]!==' ';html+='<div class="np-listline'+(done?' np-task-done':'')+'"><button type="button" class="np-taskbox'+(done?' done':'')+'" data-np="check" data-id="'+esc(state.current)+'" data-line="'+sourceIndex+'" role="checkbox" aria-checked="'+String(done)+'" aria-label="'+(done?'Reabrir item':'Concluir item')+'">'+(done?'✓':'')+'</button><span class="np-tasktext">'+inline(m[2])+'</span></div>';return;}
  if((m=/^\s*[-*•]\s+(.+)$/.exec(line))){html+='<div class="np-listline"><span aria-hidden="true">•</span><span>'+inline(m[1])+'</span></div>';return;}
  if((m=/^(\s*)(\d+)[.)]\s+(.*)$/.exec(line))){var nivel=Math.min(3,Math.floor(m[1].replace(/\t/g,'  ').length/2));html+='<div class="np-listline" style="margin-inline-start:'+(nivel*1.25)+'rem"><span>'+m[2]+'.</span><span>'+inline(m[3])+'</span></div>';return;}
  if((m=/^>\s?\[!\]\s?(.*)$/.exec(line))){html+='<blockquote>💡 '+inline(m[1])+'</blockquote>';return;}
  if((m=/^>\s?(.*)$/.exec(line))){html+='<blockquote>'+inline(m[1])+'</blockquote>';return;}
  html+='<p>'+inline(line)+'</p>';
  });if(inCode)flush();return html||'<p class="np-empty">Esta página ainda não tem conteúdo. Toque em Editar para começar.</p>';}
+// O índice aponta para a linha original, mesmo quando a leitura mostra concluídas no final.
+function toggleChecklist(id,index,expected){
+ var n=byId(id);if(!n||!Number.isInteger(index)||index<0)return false;
+ var raw=String(n.conteudo||'');
+ if(raw!==expected){setMsg('A página mudou. Confira a lista e toque novamente.');render();return false;}
+ var rows=ordenarChecklistMd(raw),row=rows.find(function(r){return r.indice===index;});
+ if(!row||!row.todo)return false;
+ var lines=raw.split('\n'),match=/^(\s*[-*]\s*\[)([ xX])(\])/.exec(lines[index]||'');
+ if(!match)return false;
+ lines[index]=lines[index].replace(/^(\s*[-*]\s*\[)([ xX])(\])/ ,function(_,a,done,b){return a+(done===' '?'x':' ')+b;});
+ var revised=lines.join('\n');
+ salvar('notas',{id:id,conteudo:revised});
+ if(String((byId(id)||{}).conteudo||'')!==revised){setMsg('A alteração não foi aplicada. Toque novamente para tentar.');return false;}
+ render();setMsg('Checklist atualizada no aparelho; confira a sincronização.');return true;
+}
 function dateLabel(n){var d=stamp(n);return d?new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short',year:'numeric'}).format(d):'Sem data de edição';}
 function crumbs(id){var path=ancestors(id);return '<nav class="np-crumbs" aria-label="Localização da página"><button type="button" data-np="open" data-id="">Início</button>'+path.map(n=>'<span>›</span><button type="button" data-np="open" data-id="'+esc(idOf(n))+'">'+esc(n.titulo||'Sem título')+'</button>').join('')+'</nav>';}
 function backlinkList(note){var named='[['+norm(note.titulo)+']]';return notes().filter(n=>idOf(n)!==idOf(note)&&norm(n.conteudo).includes(named));}
-function renderDoc(){var body=$('np-document');if(!body)return;var n=byId(state.current);if(state.current&&!n){state.current='';store();}
+function renderDoc(){var body=$('np-document');if(!body)return;var n=byId(state.current);renderedNote=n?{id:idOf(n),conteudo:String(n.conteudo||'')}:null;if(state.current&&!n){state.current='';store();}
  if(!n){var roots=kids('');body.innerHTML='<div class="np-welcome"><div class="np-welcome-icon">🧠</div><h2 class="np-doc-title">Seu espaço de conhecimento</h2><p>Registre ideias, organize assuntos em páginas e subpáginas e encontre tudo com rapidez.</p><button type="button" class="np-btn np-primary" data-np="new" data-id="">+ Criar primeira página</button></div>'+(roots.length?'<h3 class="np-list-title">Páginas principais</h3>'+roots.map(pageRow).join(''):'');return;}
  var children=kids(idOf(n)),back=backlinkList(n),path=ancestors(idOf(n));body.innerHTML=crumbs(idOf(n))+'<h2 class="np-doc-title">'+esc(n.titulo||'(sem título)')+'</h2><div class="np-doc-meta">'+(n.fixada==='Sim'?'<span class="np-badge">⭐ Favorita</span>':'')+'<span>'+esc(dateLabel(n))+'</span><span>· '+path.length+' nível(is)</span>'+(n.area?'<span class="np-badge">'+esc(n.area)+'</span>':'')+(n.etiquetas?'<span class="np-badge">'+esc(n.etiquetas)+'</span>':'')+'</div>'+
  '<div class="np-actions"><button class="np-btn np-primary" data-np="edit" data-id="'+esc(idOf(n))+'">✎ Editar página</button><button class="np-btn" data-np="new" data-id="'+esc(idOf(n))+'">+ Subpágina</button><button class="np-btn" data-np="favorite" data-id="'+esc(idOf(n))+'">'+(n.fixada==='Sim'?'★ Desafixar':'☆ Favoritar')+'</button><button type="button" class="np-btn" data-np="pin-home" aria-pressed="'+String(n.fixada_hoje==='Sim')+'" data-id="'+esc(idOf(n))+'">'+(n.fixada_hoje==='Sim'?'Remover da tela Hoje':'Fixar na tela Hoje')+'</button><button class="np-btn" data-np="duplicate" data-id="'+esc(idOf(n))+'">Duplicar</button><button class="np-btn" data-np="export" data-id="'+esc(idOf(n))+'">↓ Markdown</button><button class="np-btn" data-np="delete" data-id="'+esc(idOf(n))+'" title="Excluir a página">Excluir</button></div>'+
@@ -8851,7 +8873,14 @@ function delPage(id){var n=byId(id);if(!n)return;var c=kids(id);var msg='Excluir
 }
 function exportMarkdown(id){var n=byId(id);if(!n)return;var name=(n.titulo||'pagina').replace(/[<>:"/\\|?*\x00-\x1f]/g,'').trim().slice(0,70)||'pagina';var out='# '+String(n.titulo||'Sem título')+'\n\n'+String(n.conteudo||'');var blob=new Blob([out],{type:'text/markdown;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=name+'.md';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);setMsg('Arquivo Markdown preparado.');}
 function onClick(e){var btn=e.target.closest('[data-np]');if(!btn||!$('sc62-notes-workspace').contains(btn))return;var act=btn.dataset.np,id=btn.dataset.id||'';switch(act){
- case 'open':openPage(id);break;case 'new':createPage(id);break;case 'toggle':state.expanded[id]=!state.expanded[id];store();render();break;
+ case 'check':{
+ e.preventDefault();e.stopPropagation();
+ var index=Number(btn.dataset.line),expected=renderedNote&&renderedNote.id===id?renderedNote.conteudo:null;
+ if(expected!==null&&toggleChecklist(id,index,expected)){
+  var focus=$('np-document').querySelector('[data-np="check"][data-line="'+index+'"]');if(focus)try{focus.focus({preventScroll:true});}catch(_){}
+ }
+ break;
+ }case 'open':openPage(id);break;case 'new':createPage(id);break;case 'toggle':state.expanded[id]=!state.expanded[id];store();render();break;
  case 'edit':if(typeof abrirNota==='function')abrirNota(id);break;case 'favorite':favorite(id);break;case 'pin-home':fixarHoje(id);break;case 'duplicate':duplicate(id);break;case 'export':exportMarkdown(id);break;case 'delete':delPage(id);break;
  case 'missing':toast('Página não encontrada: '+(btn.dataset.title||''),true);break;
  }}
@@ -8876,7 +8905,7 @@ function init(){if(!makeUI())return;var prev=window.renderNotas;if(typeof prev==
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 window.sc62Pages={render:render,children:kids,validateParent:validParent,switchView:chooseView};
-window.sc74Notes={render:render,open:openPage,onNoteSaved:onSaved,notes:notes};
+window.sc74Notes={render:render,open:openPage,onNoteSaved:onSaved,notes:notes,toggleChecklist:toggleChecklist,renderMarkdown:markdown};
 })();
 
 </script>
@@ -12126,7 +12155,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13d-sc11163"></script>
+<script src="./pwa-install.js?v=2026-11-13e-sc11164"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12506,3 +12535,4 @@ window.SC120={context,prepare,execute,undoLast,state,reset,snapshot};
 
 </script>
 </body></html>
+
