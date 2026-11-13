@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13k-sc11190"></script>
+<script src="./pwa-transport.js?v=2026-11-13l-sc11191"></script>
 <script>
-var VERSAO_TELA = '2026-11-13k';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.19.0'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13l';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.19.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12147,7 +12147,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13k-sc11190"></script>
+<script src="./pwa-install.js?v=2026-11-13l-sc11191"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12733,6 +12733,7 @@ html.sc126 #sc117-fab,html.sc126 #sc5-fab,html.sc126 #fab{display:none!important
 html.sc126 #topo>div:not(#sc129-header){padding:6px 10px 9px!important}
 html.sc126 #captura{padding-right:90px!important;min-height:46px!important;font-size:16px!important}
 html.sc126 #topo .btn-mic{right:43px!important}
+.sc129-history .sc130-history-icon{display:block!important;width:22px!important;height:22px!important;margin:auto;fill:none!important;stroke:currentColor!important;pointer-events:none}
 .sc129-history{position:absolute;right:3px;top:50%;transform:translateY(-50%);min-height:40px;min-width:40px;color:var(--sc11-accent);border-left:1px solid var(--sc128-border);font-size:20px;background:transparent}
 html.sc126 #sc100-home{padding-bottom:0!important}html.sc126 #sc100-home .sc100-header{margin:4px 0 10px!important;padding:0!important}html.sc126 #sc100-home .sc100-heading{font-size:24px!important;line-height:1.2!important;margin:3px 0!important}
 html.sc126 #sc100-home .sc100-context{display:none!important}html.sc126 #sc100-home .sc100-layout{gap:10px!important}html.sc126 #sc100-home .sc100-pane{border-radius:16px!important;padding:13px!important}html.sc126 #sc100-home .sc100-next-title{font-size:17px!important}html.sc126 #sc100-home .sc100-next-time{font-size:14px!important}
@@ -12748,7 +12749,7 @@ html.sc126 #nav-movel .nav-m{width:auto!important;flex:1!important;min-height:51
 (function(){'use strict';
 function init(){const $=id=>document.getElementById(id),top=$('topo');if(!top||!window.SC126)return;
  const head=document.createElement('div');head.id='sc129-header';head.innerHTML='<strong>2º Cérebro</strong><div><button type="button" id="sc129-settings" aria-label="Ajustes"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></div>';const search=top.querySelector('button[onclick="abrirBusca()"]');if(search)head.lastElementChild.prepend(search);top.prepend(head);$('sc129-settings').onclick=()=>irPara('config');
- const input=$('captura'),form=input?.closest('form');if(form){const history=document.createElement('button');history.type='button';history.className='sc129-history';history.setAttribute('aria-label','Histórico da conversa');history.innerHTML='<i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>';history.onclick=()=>SC126.conversation();form.appendChild(history)}
+ const input=$('captura'),form=input?.closest('form');if(form){const history=document.createElement('button');history.type='button';history.className='sc129-history';history.setAttribute('aria-label','Histórico da conversa');history.innerHTML='<svg class="sc130-history-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10a9 9 0 1 1 1.8 7.4M3 4v6h6"/><path d="M12 7v5l3 2"/></svg>';history.onclick=()=>SC126.conversation();form.appendChild(history)}
  const status=document.createElement('div');status.id='sc129-sync';status.setAttribute('role','status');status.setAttribute('aria-live','polite');$('v-hoje').parentNode.after(status);
  function update(){let dead=[];try{dead=JSON.parse(localStorage.getItem('sc_fila_mortos_v1')||'[]')}catch(_){}const pending=typeof fila!=='undefined'&&fila.length>0,quarantined=Array.isArray(dead)&&dead.length>0,online=navigator.onLine!==false;status.dataset.pending=String(pending||quarantined);status.textContent=pending?(online?'Sincronizando…':'Pendente · sem conexão'):!online?'Sem conexão':typeof atualizando!=='undefined'&&atualizando?'Atualizando…':typeof ultimaSync!=='undefined'&&ultimaSync?'✓ Salvo':'Aguardando conexão';if(quarantined)status.textContent='Há pendências para conferir nos ajustes';if(pending&&typeof falhasSeguidas!=='undefined'&&falhasSeguidas>=2&&!enviando)status.textContent='Pendente · toque para tentar novamente'}
  status.onclick=()=>{try{const dead=JSON.parse(localStorage.getItem('sc_fila_mortos_v1')||'[]');if(Array.isArray(dead)&&dead.length){irPara('config');return}}catch(_){}if(typeof fila!=='undefined'&&fila.length&&typeof retentarFila==='function')retentarFila()};const old=window.statusNuvem;if(typeof old==='function')window.statusNuvem=function(){const r=old.apply(this,arguments);update();return r};window.addEventListener('online',update);window.addEventListener('offline',update);window.SC129={update};update();
