@@ -2187,11 +2187,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13l-sc11191"></script>
+<script src="./pwa-transport.js?v=2026-11-13m-sc11192"></script>
 <script>
-var VERSAO_TELA = '2026-11-13l';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.19.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13m';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.19.2'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -12147,7 +12147,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13l-sc11191"></script>
+<script src="./pwa-install.js?v=2026-11-13m-sc11192"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12642,7 +12642,7 @@ function renderHome(){const host=$('sc100-home');if(!host)return;let cal=$('sc12
  if(cal){const now=today();cal.innerHTML='<div class="sc129-date">'+button('‹','data-sc126-day="'+somaDias(now,-1)+'" aria-label="Agenda de ontem"')+button(new Date(now+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long'})+' ▾','data-sc126-route="agenda"')+button('›','data-sc126-day="'+somaDias(now,1)+'" aria-label="Agenda de amanhã"')+'</div>';}
  let finished=$('sc129-finished');if(!finished){finished=document.createElement('details');finished.id='sc129-finished';finished.className='sc126-details';host.appendChild(finished)}const completed=rows('tarefas').filter(t=>done(t)&&typeof dataConcl==='function'&&dataConcl(t)===today());finished.innerHTML='<summary>Concluídas hoje · '+completed.length+'</summary>'+list(completed.map(t=>row('tarefas',t,meta(t),true)).join(''),'Nenhuma tarefa concluída hoje.');
 
- let hs=$('sc126-home-habits');if(!hs){hs=document.createElement('section');hs.id='sc126-home-habits';host.appendChild(hs)}const due=habits();hs.innerHTML=due.length?'<div class="sc100-pane"><div class="sc100-pane-heading">Hábitos de hoje</div>'+due.map(x=>{const marked=habitoFeito(x.id,today());return '<div class="sc126-row"><button type="button" class="sc126-check" data-sc126-habit="'+esc(x.id)+'" aria-pressed="'+marked+'" aria-label="'+(marked?'Desmarcar ':'Concluir ')+esc(x.nome)+'">'+(marked?'☑':'☐')+'</button><button class="sc126-row-main" '+openAttr('habitos',x.id)+'><strong>'+esc(x.nome)+'</strong><small>'+esc(sequencia(x))+' dia(s) de sequência</small></button></div>'}).join('')+'</div>':'';
+ let hs=$('sc126-home-habits');if(!hs){hs=document.createElement('section');hs.id='sc126-home-habits';host.appendChild(hs)}const due=habits();hs.innerHTML=due.length?'<div class="sc100-pane"><div class="sc100-pane-heading">Hábitos de hoje</div>'+due.map(x=>{const marked=habitoFeito(x.id,today());return '<div class="sc126-row" data-sc131-habit="'+esc(x.id)+'"><button type="button" class="sc126-check" data-sc126-habit="'+esc(x.id)+'" aria-pressed="'+marked+'" aria-label="'+(marked?'Desmarcar ':'Concluir ')+esc(x.nome)+'">'+(marked?'☑':'☐')+'</button><button class="sc126-row-main" '+openAttr('habitos',x.id)+'><strong>'+esc(x.nome)+'</strong><small>'+esc(sequencia(x))+' dia(s) de sequência</small></button></div>'}).join('')+'</div>':'';
  const go=host.querySelector('[data-sc100-action="tarefas"]');if(go){go.onclick=e=>{e.stopImmediatePropagation();organize='tarefas';irPara('organizar')}}
 }
 function contextBar(){let bar=$('sc126-context-bar');if(!bar){bar=document.createElement('div');bar.id='sc126-context-bar';$('v-hoje').parentNode.insertBefore(bar,$('v-hoje'))}const v=vistaAtual;bar.innerHTML=['agenda','tarefas','metas','notas','config'].includes(v)?button('‹ '+(v==='config'?'Voltar':v==='agenda'?'Hoje':v==='notas'?'Biblioteca':'Organizar'),'data-sc126-route="'+(v==='config'?'hoje':tabFor(v))+'"','sc126-back'):'';}
@@ -12757,6 +12757,40 @@ function init(){const $=id=>document.getElementById(id),top=$('topo');if(!top||!
  if(window.SC100&&SC100.chooseContext)SC100.chooseContext('tudo');SC126.refresh();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
+<style id="sc131-habit-swipe">
+#sc126-home-habits .sc126-row{touch-action:pan-y;position:relative;transition:transform .16s ease-out,background-color .16s ease-out;border-radius:12px}
+#sc126-home-habits .sc131-dragging{transition:none;user-select:none;-webkit-user-select:none}
+#sc126-home-habits .sc131-right{background:rgba(16,185,129,.16)!important}
+#sc126-home-habits .sc131-left{background:rgba(125,95,215,.16)!important}
+#sc126-home-habits .sc131-dragging::after{content:attr(data-swipe-hint);position:absolute;right:8px;bottom:2px;font-size:11px;color:var(--sc11-ink);background:var(--sc11-paper);padding:2px 7px;border-radius:8px;pointer-events:none}
+@media(prefers-reduced-motion:reduce){#sc126-home-habits .sc126-row{transition:none!important}}
+</style>
+<script id="sc131-habit-swipe-controller">
+(function(){'use strict';
+let gesture=null,blocked=null;
+const rowOf=n=>n&&n.closest?n.closest('#sc126-home-habits [data-sc131-habit]'):null;
+function reset(){const a=gesture;gesture=null;if(!a)return;a.row.style.transform='';a.row.classList.remove('sc131-dragging','sc131-right','sc131-left');delete a.row.dataset.swipeHint;try{if(a.row.hasPointerCapture?.(a.pointer))a.row.releasePointerCapture(a.pointer)}catch(_){}}
+function down(e){if(e.isPrimary===false){reset();return}if(e.button!==0)return;const row=rowOf(e.target);if(!row||e.target.closest('input,textarea,select,a'))return;reset();gesture={row,id:row.dataset.sc131Habit,pointer:e.pointerId,x:e.clientX,y:e.clientY,locked:false};}
+function move(e){const a=gesture;if(!a||e.pointerId!==a.pointer)return;if(!a.row.isConnected){reset();return}const dx=e.clientX-a.x,dy=e.clientY-a.y;
+ if(!a.locked&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)*1.15){reset();return}
+ if(!a.locked&&Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.35){a.locked=true;try{a.row.setPointerCapture?.(a.pointer)}catch(_){}}
+ if(!a.locked)return;if(e.cancelable)e.preventDefault();a.row.classList.add('sc131-dragging');a.row.classList.toggle('sc131-right',dx>0);a.row.classList.toggle('sc131-left',dx<0);a.row.style.transform='translateX('+Math.max(-85,Math.min(85,dx*.8))+'px)';a.row.dataset.swipeHint=dx>0?'Concluir hoje':'Desfazer hoje';
+}
+function up(e){const a=gesture;if(!a||e.pointerId!==a.pointer)return;const dx=e.clientX-a.x,dy=e.clientY-a.y,threshold=Math.max(70,Math.min(110,a.row.getBoundingClientRect().width*.26));const valid=a.row.isConnected&&a.locked&&Math.abs(dx)>=threshold&&Math.abs(dx)>Math.abs(dy)*1.35;
+ if(a.locked)blocked={id:a.id,until:Date.now()+600};reset();if(!valid)return;if(e.cancelable)e.preventDefault();e.stopPropagation();
+ const day=hojeISO(),habit=typeof obter==='function'?obter('habitos',a.id):null;if(!habit||!habit.id||habit.ativo==='Não')return;
+ const wanted=dx>0,marked=habitoFeito(a.id,day);if(wanted===marked)return;
+ marcarHabito(a.id,day);if(window.SC126)SC126.refresh();if(typeof toast==='function')toast(wanted?'Hábito marcado como feito hoje.':'Marcação de hoje desfeita.');
+}
+document.addEventListener('pointerdown',down,{capture:true,passive:true});
+document.addEventListener('pointermove',move,{capture:true,passive:false});
+document.addEventListener('pointerup',up,{capture:true,passive:false});
+document.addEventListener('pointercancel',e=>{if(gesture?.pointer===e.pointerId)reset()},{capture:true,passive:true});
+window.addEventListener('blur',reset);document.addEventListener('visibilitychange',()=>{if(document.hidden)reset()});
+document.addEventListener('click',e=>{if(!blocked||Date.now()>blocked.until||e.detail===0)return;const row=rowOf(e.target);if(row&&row.dataset.sc131Habit===blocked.id){e.preventDefault();e.stopImmediatePropagation()}},true);
 })();
 </script>
 
