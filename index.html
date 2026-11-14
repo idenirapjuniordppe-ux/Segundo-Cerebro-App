@@ -1769,30 +1769,6 @@ html[data-sc-theme] #modal.sc75-note #ne75-fav[aria-pressed="true"]{color:var(--
 #modal.sc75-note #modal-rodape .btn-p{color:#ffffff!important;background:linear-gradient(120deg,#205ba9,#4034a0)!important}
 html[data-sc-theme="executive"] #modal.sc75-note #modal-rodape .btn-p{color:#192133!important;background:linear-gradient(120deg,#ffe6ad,#e4af4c)!important}
 html[data-sc-theme="editorial"] #modal.sc75-note #modal-rodape .btn-p{background:#315e38!important;color:#fff!important}
-/* Toggle opcional de leitura reforçada: nenhum registro de usuário é alterado. */
-.sc76-reading-control{margin-top:13px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
- padding:13px 15px;border:1px solid var(--tc-border);border-radius:15px;background:var(--tc-surface);color:var(--tc-ink)}
-.sc76-reading-copy{flex:1;min-width:150px}.sc76-reading-copy strong{font-size:15px;display:block}
-.sc76-reading-copy small{font-size:13px;line-height:1.45;color:var(--tc-muted);display:block;margin-top:3px}
-#sc76-reading-toggle{min-height:44px;min-width:100px;border:2px solid var(--tc-border);border-radius:12px;
- padding:9px 13px;background:var(--tc-soft);color:var(--tc-ink);font-size:14px;font-weight:760}
-#sc76-reading-toggle[aria-pressed="true"]{background:var(--tc-ink);color:var(--tc-surface);border-color:var(--tc-ink)}
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) :where(.subt):not(.sc-nunca),
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) :where(.rot):not(.sc-nunca),
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) :where(.sc5-muted):not(.sc-nunca),
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) :where(.np-messages):not(.sc-nunca),
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) :where(.np-footer-tip):not(.sc-nunca),
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) :where(.np-empty):not(.sc-nunca){font-size:15px!important;line-height:1.65!important}
-html.sc76-reading #sc62-notes-workspace :where(.np-reader):not(.sc-nunca),
-html.sc76-reading #sc62-notes-workspace :where(.np-listrow):not(.sc-nunca),
-html.sc76-reading #sc62-notes-workspace :where(.np-document):not(.sc-nunca){font-size:17px!important;line-height:1.75!important}
-html.sc76-reading #modal.sc75-note :where(#ed):not(#sc-nunca),
-html.sc76-reading #modal.sc75-note :where(.ne75-preview):not(#sc-nunca),
-html.sc76-reading #modal.sc75-note :where(.ne75-tool):not(#sc-nunca),
-html.sc76-reading #modal.sc75-note :where(.ne75-prop):not(#sc-nunca),
-html.sc76-reading #modal.sc75-note :where(.ne75-note-title small):not(#sc-nunca){font-size:17px!important;line-height:1.7!important}
-html.sc76-reading #modal.sc75-note #ed .blk .b-t{font-size:17px!important}
-html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) .card{box-shadow:0 4px 15px rgba(15,35,65,.12)!important}
 @media(max-width:600px){
  #modal.sc75-note #modal-titulo{font-size:18px!important}
  #modal.sc75-note .ne75-editor-head small{font-size:13px!important}
@@ -1801,7 +1777,6 @@ html.sc76-reading :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) 
 #modal.sc75-note :where(.ne75-preview):not(#sc-nunca),
 #modal.sc75-note :where(.ne75-prop input):not(#sc-nunca),
 #modal.sc75-note :where(.ne75-prop select):not(#sc-nunca){font-size:16px!important}
- .sc76-reading-control{align-items:stretch}#sc76-reading-toggle{align-self:center}
 }
 @media(prefers-contrast:more){html[data-sc-theme] :where(.card):not(.sc-nunca),
 html[data-sc-theme] :where(.s4-panel):not(.sc-nunca),
@@ -2120,7 +2095,7 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
             <div class="sc69-heading"><span class="sc69-heading-icon" aria-hidden="true"><i class="fa-solid fa-palette"></i></span><div><h2 id="sc69-title">Escolher tema</h2><p>Selecione um dos cinco estilos. A mudança é imediata e não altera seus dados.</p></div></div>
             <div class="sc69-theme-grid" id="sc69-theme-options" role="group" aria-label="Temas do aplicativo"></div>
             <p class="sc69-theme-caption" id="sc69-theme-status" aria-live="polite">O tema fica salvo neste aparelho.</p>
-            <div class="sc76-reading-control"><div class="sc76-reading-copy"><strong>Leitura reforçada</strong><small>Textos maiores, cartões sólidos e mais espaço entre linhas. Mantém seu tema e o tamanho escolhido nas notas.</small></div><button type="button" id="sc76-reading-toggle" aria-pressed="false" title="Ativar ou desativar leitura reforçada">Ativar</button></div>
+            
           </section>
           <div class="card p-5 space-y-3"><h2 class="font-bold">Geral</h2>
             <div><label class="rot">Seu nome</label><input id="cf-nome" class="input"></div>
@@ -2187,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-13y-sc11241"></script>
+<script src="./pwa-transport.js?v=2026-11-13z-sc11242"></script>
 <script>
-var VERSAO_TELA = '2026-11-13y';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.24.1'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
+var VERSAO_TELA = '2026-11-13z';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.24.2'; // Studio com Dia Vivo, Mapa do Conhecimento e correção de contrastes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 var D = { tarefas:[], projetos:[], eventos:[], notas:[], metas:[], habitos:[], registros:[], estudos:[], financas:[], config:{}, ia:{} };
 var vistaAtual = 'hoje', filtroTf = { lista:'hoje', projeto:'', area:'' }, filtroNtEtq = '', pendentes = 0, fila = [], ultimaSync = 0, ultimoErroFila = '', enviando = false, seqAplicado = 0, falhasSeguidas = 0, timerFila = null, atualizando = false, semanaOffset = 0, gcalCache = {}, rotinaEd = null, triagem = null;
@@ -9092,16 +9067,7 @@ window.sc68AcaoHoje=act;
 })();
 
 </script>
-<script id="sc76-reading-mode">
-(function(){'use strict';
- var KEY='sc76-reading-v1';
- function stored(){try{return localStorage.getItem(KEY)==='1';}catch(e){return false;}}
- function apply(on){document.documentElement.classList.toggle('sc76-reading',!!on);var b=document.getElementById('sc76-reading-toggle');if(b){b.setAttribute('aria-pressed',String(!!on));b.setAttribute('aria-label',on?'Desativar leitura reforçada':'Ativar leitura reforçada');b.textContent=on?'Desativar':'Ativar';}}
- function init(){apply(stored());var b=document.getElementById('sc76-reading-toggle');if(b&&!b.dataset.bound){b.dataset.bound='1';b.addEventListener('click',function(){var on=!document.documentElement.classList.contains('sc76-reading');try{localStorage.setItem(KEY,on?'1':'0');}catch(e){}apply(on);});}}
- window.addEventListener('storage',function(e){if(e.key===KEY||e.key===null)apply(stored());});
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script><style id="sc77-contraste-global">
+<style id="sc77-contraste-global">
 /* Studio 7.7 — contraste global: Hoje, Agenda, Tarefas, Notas, Metas, Ajustes, navegação e diálogos.
    Sem mudanças em dados, gestos, autenticação ou sincronização. */
 html[data-sc-theme]{
@@ -9265,16 +9231,6 @@ html[data-sc-theme] #nav-movel :where([aria-current="page"]):not(.sc-nunca):not(
  color:var(--sc77-on-active)!important;background:var(--sc77-active-bg)!important;
 }
 html[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config) .sc69-theme-state{font-size:14px!important}
-/* Leitura reforçada cobre TODO o aplicativo, não somente Notas. */
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.subt):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.rot):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.sc5-muted):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.np-footer-tip):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.np-empty):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.text-xs):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] :is(#v-hoje,#v-agenda,#v-tarefas,#v-notas,#v-metas,#v-config,#topo,#modal) :where(.text-sm):not(.sc-nunca){font-size:15px!important;line-height:1.65!important}
-html.sc76-reading[data-sc-theme] #nav-movel :where(.nav-m):not(.sc-nunca),
-html.sc76-reading[data-sc-theme] #nav-movel :where(.nav-i):not(.sc-nunca){font-size:14px!important}
 /* Foco visual e uso sob iluminação forte. */
 html[data-sc-theme] :where(button):focus-visible:not(sc-nunca),
 html[data-sc-theme] :where(input):focus-visible:not(sc-nunca),
@@ -9323,8 +9279,6 @@ html[data-sc-theme] aside:has(#nav-lateral) :where(#status-nuvem):not(#sc-nunca)
 html[data-sc-theme] #nav-lateral :where(.nav-i.ativo):not(.sc-nunca):not(.sc-nunca),
 html[data-sc-theme] #nav-lateral :where(.nav-i.active):not(.sc-nunca):not(.sc-nunca),
 html[data-sc-theme] #nav-lateral :where([aria-current="page"]):not(.sc-nunca):not(.sc-nunca){background:var(--sc77-active-bg)!important;color:var(--sc77-on-active)!important}
-html.sc76-reading[data-sc-theme] #hoje-data{font-size:16px!important;line-height:1.65!important}
-html.sc76-reading[data-sc-theme] #v-hoje>.studio-hero #hoje-data{font-size:16px!important;line-height:1.65!important}
 
 </style>
 
@@ -12160,7 +12114,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-13y-sc11241"></script>
+<script src="./pwa-install.js?v=2026-11-13z-sc11242"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13047,24 +13001,6 @@ html.sc126.sc11-active.sc100-active[data-sc-theme] #toasts .toast.bg-red-600{bac
 @media(prefers-reduced-transparency:reduce){html.sc126.sc11-active.sc100-active[data-sc-theme]{--sc128-paper:var(--sc141-solid)!important;--sc128-top:var(--sc141-solid)!important}}
 @media(forced-colors:active){html.sc126.sc11-active.sc100-active[data-sc-theme] body::before{display:none}html.sc126.sc11-active.sc100-active[data-sc-theme] body{background:Canvas!important;color:CanvasText!important}}
 </style>
-<style id="sc142-reading-refined">
-/* Optional reading presentation only: no changes to saved note formatting. */
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme]{--sc128-paper:var(--sc141-solid)!important;--sc128-top:var(--sc141-solid)!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] body::before{opacity:.35!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.vista,#topo,#modal){line-height:1.6}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.subt,.rot,.sc5-muted,.sc5-agday,.sc5-agrow-main small,.sc126-row small,.sc100-task-main small,.sc126-count,.np-list-main small,.np-doc-meta,.sc138-snippet,.text-xs,.text-sm,.np-empty,.np-footer-tip){font-size:15px!important;line-height:1.65!important;opacity:1!important;color:var(--sc128-ink)!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.sc126-row,.sc100-task-main,.sc5-agrow-main,.np-list-main){min-width:0;overflow-wrap:anywhere}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.sc126-row strong,.sc100-task-main strong,.sc5-agrow-main strong,.np-list-main strong){font-size:17px!important;line-height:1.6!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.np-reader,.np-md,.np-check-text,#sc138-inline .b-t,#modal .blk .b-t){font-size:max(18px,var(--sc-note-size,16px))!important;line-height:1.8!important;overflow-wrap:anywhere}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.np-reader p,.np-reader li,.np-reader blockquote){line-height:1.8!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(input:not([type=checkbox]):not([type=radio]),textarea,select){font-size:17px!important;line-height:1.6!important;max-width:100%;box-sizing:border-box}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(.btn,.np-btn,.sc126-tools button,.sc138-note-filters button,.sc138-note-head button,.sc129-date button,#sc76-reading-toggle){min-height:48px!important;height:auto;white-space:normal}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] #nav-movel .nav-m{font-size:14px!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] :is(button,input,textarea,select,a,[contenteditable=true]):focus-visible{outline:3px solid var(--sc11-accent)!important;outline-offset:3px!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] .sc76-reading-control{flex-wrap:wrap;gap:12px}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] .sc76-reading-copy{flex:1 1 180px;min-width:0}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] .sc76-reading-copy small{font-size:15px!important;line-height:1.65!important}
-html.sc126.sc11-active.sc100-active.sc76-reading[data-sc-theme] .np-reader :is(pre,table){max-width:100%;overflow-x:auto}
-</style>
+
 </body></html>
 
