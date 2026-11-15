@@ -1,8 +1,8 @@
 /* 2º Cérebro Studio 9.0 — cache isolado da interface; NUNCA armazena respostas Google. */
-const VERSION='2026-11-15a';
-const CACHE='segundo-cerebro-2026-11-15a-sc11320-'+encodeURIComponent(self.registration.scope);
+const VERSION='2026-11-15b';
+const CACHE='segundo-cerebro-2026-11-15b-sc11330-'+encodeURIComponent(self.registration.scope);
 const PREFIX='segundo-cerebro-';
-const ESSENCIAIS=['./hero-neural-11-21.webp','./hero-minimal-11-21.webp','./hero-glass-11-21.webp','./hero-executive-11-21.webp','./hero-editorial-11-21.webp','./wallpaper-neural-11-21.webp','./wallpaper-minimal-11-21.webp','./wallpaper-glass-11-21.webp','./wallpaper-executive-11-21.webp','./wallpaper-editorial-11-21.webp','./index.html','./pwa-transport.js?v=2026-11-15a-sc11320','./pwa-install.js?v=2026-11-15a-sc11320'];
+const ESSENCIAIS=['./hero-neural-11-21.webp','./hero-minimal-11-21.webp','./hero-glass-11-21.webp','./hero-executive-11-21.webp','./hero-editorial-11-21.webp','./wallpaper-neural-11-21.webp','./wallpaper-minimal-11-21.webp','./wallpaper-glass-11-21.webp','./wallpaper-executive-11-21.webp','./wallpaper-editorial-11-21.webp','./index.html','./pwa-transport.js?v=2026-11-15b-sc11330','./pwa-install.js?v=2026-11-15b-sc11330'];
 const OPCIONAIS=['./offline.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
