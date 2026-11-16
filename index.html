@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-16a-sc11373"></script>
+<script src="./pwa-transport.js?v=2026-11-16b-sc11374"></script>
 <script>
-var VERSAO_TELA = '2026-11-16a';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.3'; // Planner: estado, rotina e feedback
+var VERSAO_TELA = '2026-11-16b';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.4'; // Planner: estado, rotina e feedback
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -4765,7 +4765,8 @@ function edNoteFormatHtml(){
  var as=function(icon,label,action,kind,mark){return btn(edNoteIcon(icon)+'<span>'+h(label)+'</span>',label,action,kind,mark);};
  var blocks=ED_NOTE_BLOCKS.map(function(b){return as(b[1],b[2],b[0],'block','block:'+b[0]);}).join('');
  var extras=[
- ['S','Riscado','fmt:strike','strike'],['code','Código','fmt:code','code'],['[[ ]]','Link para outra nota','fmt:nota'],
+ ['link','Inserir ou editar link','fmt:link','link'],['[[ ]]','Link para outra nota','fmt:nota'],
+ ['S','Riscado','fmt:strike','strike'],['code','Código','fmt:code','code'],
  ['Tₓ','Limpar formatação','fmt:limpar'],['number','Opções de numeração','num'],['⇤','Diminuir recuo','block:rec'],
  ['⇥','Aumentar recuo','block:avanca'],['＋','Inserir data ou hora','insert'],['×','Fechar teclado e menus','close']
  ].map(function(b){return as(b[0],b[1],b[2],'command',b[3]);}).join('');
@@ -4776,15 +4777,15 @@ function edNoteFormatHtml(){
  };
  var panel=function(id,label,content){return '<div class="ed-note-panel" id="ed-note-'+id+'" data-ed-note-panel="'+id+'" hidden><div class="ed-note-panel-title">'+label+'</div>'+content+'</div>';};
  return '<div class="ed-note-tools" id="ed-note-tools"><div class="ed-note-main" role="group" aria-label="Comandos de formatação">'+
-  btn('<span id="ed-note-block-label">Texto normal</span>'+edNoteIcon('chevron'),'Tipo de bloco','blocks','menu')+
+  btn('<span id="ed-note-block-label">Texto</span>'+edNoteIcon('chevron'),'Tipo de bloco','blocks','menu')+
   btn(edNoteIcon('bold'),'Negrito (Ctrl+B)','fmt:bold','command','bold')+
   btn(edNoteIcon('italic'),'Itálico (Ctrl+I)','fmt:italic','command','italic')+
-  btn('<span class="ed-note-color-icon" aria-hidden="true">A</span>','Cor do texto','ink','menu')+
-  btn(edNoteIcon('mark'),'Marca-texto','mark','menu')+
-  btn(edNoteIcon('link'),'Inserir ou editar link (Ctrl+K)','fmt:link','command','link')+
-  btn(edNoteIcon('more'),'Mais opções','more','menu')+'</div>'+
+  btn('<span class="ed-note-color-icon" aria-hidden="true">A</span><span class="ed-note-touch-label" aria-hidden="true">Cor</span>','Cor do texto','ink','menu')+
+  btn(edNoteIcon('mark')+'<span class="ed-note-touch-label" aria-hidden="true">Marcar</span>','Marca-texto','mark','menu')+
+  btn('<span class="ed-note-more-label">Mais</span>'+edNoteIcon('more'),'Mais opções','more','menu')+'</div>'+
   panel('blocks','Tipo de bloco','<div class="ed-note-options">'+blocks+'</div>')+
-  panel('more','Mais opções','<div class="ed-note-options">'+extras+'</div>')+
+  panel('more','Mais opções','<div class="ed-note-options">'+
+    as('Aa','Tipo de bloco','blocks','goto')+extras+'</div>')+
   panel('ink','Cor do texto',palette('ink',[['Azul','#2563eb'],['Roxo','#7c3aed'],['Verde','#16835d'],['Vermelho','#c43c4e']],'#2563eb'))+
   panel('mark','Marca-texto',palette('mark',[['Amarelo','#fff3a3'],['Rosa','#ffc4e0'],['Verde','#c4f0d6'],['Laranja','#ffd2ab']],'#fff3a3'))+'</div>';
 }
@@ -4792,6 +4793,18 @@ function edNoteMenu(key){
  var n=el('ed-note-tools'); if(!n) return;
  n.querySelectorAll('[data-ed-note-menu]').forEach(function(b){b.setAttribute('aria-expanded',String(b.dataset.edNoteMenu===key));});
  n.querySelectorAll('[data-ed-note-panel]').forEach(function(p){p.hidden=p.dataset.edNotePanel!==key;});
+}
+function edNoteDockPosicionar(dock){
+ var inline=dock.closest('#sc138-inline');
+ if(!inline || !dock.classList.contains('ed-note-dock'))return false;
+ var vv=window.visualViewport, nav=el('nav-movel'), navRect=nav&&nav.getBoundingClientRect();
+ var scaleOk=!vv||Math.abs(vv.scale-1)<.02;
+ var gap=scaleOk&&vv?Math.max(0,window.innerHeight-vv.height-vv.offsetTop):0;
+ var keyboard=gap>120;
+ var navGap=!keyboard&&navRect&&navRect.height&&navRect.top<window.innerHeight?Math.max(0,window.innerHeight-navRect.top):0;
+ dock.style.setProperty('--ed-note-bottom',(Math.max(gap,navGap)+(keyboard?3:7))+'px');
+ dock.style.setProperty('--ed-note-room',Math.max(96,(scaleOk&&vv?vv.height:window.innerHeight)-118)+'px');
+ return true;
 }
 function edNoteCloseAux(){
  ['ed-link','ed-nota','ed-ins'].forEach(function(id){var x=el(id);if(x)x.style.display='none';});
@@ -4803,6 +4816,7 @@ function edNoteSignalChange(){
 }
 function edNoteBind(){
  var n=el('ed-note-tools');if(!n||n.dataset.edNoteBound)return;n.dataset.edNoteBound='1';
+ edDockPosicionar();
  n.addEventListener('pointerdown',function(e){
   if(e.target.closest('button,input[type=color]'))edGuardarSelecao();
   if(e.pointerType==='mouse'&&e.target.closest('button'))e.preventDefault();
@@ -4811,8 +4825,14 @@ function edNoteBind(){
   var b=e.target.closest('button');if(!b||!n.contains(b))return;
   var d=b.dataset;
   if(d.edNoteMenu){var next=b.getAttribute('aria-expanded')==='true'?'':d.edNoteMenu;edNoteCloseAux();edNoteMenu(next);return;}
-  if(d.edNoteInk){edCorAplicar(d.edNoteInk);edNoteSignalChange();return;}
-  if(d.edNoteMark){edMarcaAplicar(d.edNoteMark);edNoteSignalChange();return;}
+  if(d.edNoteGoto){
+   var keyboardChoice=e.detail===0;
+   edNoteMenu(d.edNoteGoto);
+   if(keyboardChoice)n.querySelector('[data-ed-note-panel="'+d.edNoteGoto+'"] button')?.focus({preventScroll:true});
+   return;
+  }
+  if(d.edNoteInk){edNoteMenu('');edCorAplicar(d.edNoteInk);edNoteSignalChange();return;}
+  if(d.edNoteMark){edNoteMenu('');edMarcaAplicar(d.edNoteMark);edNoteSignalChange();return;}
   if(!d.edNoteBlock&&!d.edNoteCommand)return;
   var holder=b.closest('[data-ed-note-panel]');
   var trigger=holder&&n.querySelector('[data-ed-note-menu="'+holder.dataset.edNotePanel+'"]');
@@ -4831,17 +4851,28 @@ function edNoteBind(){
  n.addEventListener('change',function(e){
   if(e.target.id==='ed-text-color')edCorAplicar(e.target.value);
   else if(e.target.id==='ed-mark-color')edMarcaAplicar(e.target.value);
- });
- n.addEventListener('keydown',function(e){
-  if(e.key!=='Escape')return;
-  var shown=n.querySelector('[data-ed-note-menu][aria-expanded="true"]');
-  if(shown){e.preventDefault();e.stopPropagation();edNoteMenu('');shown.focus();}
+  else return;
+  edNoteMenu('');edNoteSignalChange();
  });
 }
+document.addEventListener('pointerdown',function(e){
+ var n=el('ed-note-tools');if(n&&!n.contains(e.target))edNoteMenu('');
+});
+document.addEventListener('keydown',function(e){
+ if(e.key!=='Escape')return;
+ var n=el('ed-note-tools'), shown=n&&n.querySelector('[data-ed-note-menu][aria-expanded="true"]');
+ if(!shown)return;
+ var restore=n.contains(document.activeElement);
+ e.preventDefault();e.stopPropagation();edNoteMenu('');
+ if(restore){
+  var b=shown.getClientRects().length?shown:n.querySelector('[data-ed-note-menu="more"]');
+  b?.focus({preventScroll:true});
+ }
+},true);
 function edNoteRefresh(tp,on){
  var n=el('ed-note-tools');if(!n)return;
  var current=ED_NOTE_BLOCKS.find(function(row){return row[0]===tp;});
- el('ed-note-block-label').textContent=current?current[2]:'Texto normal';
+ el('ed-note-block-label').textContent=current&&current[0]!=='p'?current[2]:'Texto';
  n.querySelectorAll('[data-ed-note-state]').forEach(function(b){
   var k=b.dataset.edNoteState;
   b.setAttribute('aria-pressed',String(k.indexOf('block:')===0?k.slice(6)===(tp||'p'):!!on[k]));
@@ -4900,6 +4931,7 @@ function edFechar(){ edPainel(false); edNumMenu(false); var a = document.activeE
 function edDockSolto(dk, w){ dk.classList.remove('fx'); dk.style.bottom = ''; w.style.minHeight = ''; }
 function edDockPosicionar(){
   var dk = el('ed-dock'), w = el('ed-dockw'); if(!dk || !w) return;
+  if(edNoteDockPosicionar(dk)){edDockSolto(dk,w);return;}
   var estreito = !document.documentElement.classList.contains('w-sm'), ins = el('ed-ins'), aberto = !!ins && ins.style.display !== 'none';
   aberto = aberto || !!(el('ed-num') && !el('ed-num').hidden);
   var a = document.activeElement, foco = !!(a && a.closest && (a.closest('#ed') || a.closest('#ed-dock'))), vv = window.visualViewport;
@@ -4915,6 +4947,7 @@ function edDockPosicionar(){
     if(foco && s && s.rangeCount && cb){ var rc = s.getRangeAt(0).getClientRects()[0]; if(rc && rc.bottom > r.top - 6) cb.scrollTop += rc.bottom - r.top + 10; }
   } catch(e){}
 }
+window.addEventListener('resize',edDockPosicionar);
 if(window.visualViewport){ window.visualViewport.addEventListener('resize', edDockPosicionar); window.visualViewport.addEventListener('scroll', edDockPosicionar); }
 
 function edBarraAtualizar(){
@@ -12295,7 +12328,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-16a-sc11373"></script>
+<script src="./pwa-install.js?v=2026-11-16b-sc11374"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13119,7 +13152,7 @@ function flush(){if(!editing)return true;clearTimeout(timer);const editor=$('sc1
 function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader');if(reader)reader.innerHTML=sc74Notes.renderMarkdown(note(id)?.conteudo||'');edAlvo='f-cont';return true}
 function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;return !finish()}
 function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||'');try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&draft.base===content&&confirm('Recuperar o rascunho de edição desta nota?'))content=draft.text;}catch(_){}
- editing={id:String(id),base:String(n.conteudo||'')};reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><details class="sc138-format"><summary>Formatação</summary>'+edBarraHtml(true)+'</details><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
+ editing={id:String(id),base:String(n.conteudo||'')};reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><div class="sc138-format">'+edBarraHtml(true)+'</div><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
  edAlvo='sc138-content';edIniciar(content);edRaiz().dataset.notaColunas=notaColunas(n.colunas_nota);if(typeof scInitNoteSize==='function')scInitNoteSize();
  const schedule=()=>{status('Guardando…');clearTimeout(timer);timer=setTimeout(flush,650)};reader.addEventListener('input',schedule);reader.addEventListener('change',schedule);reader.addEventListener('click',e=>{if(e.target.closest('#ed,#ed-ins,#ed-num'))schedule()});const first=edRaiz().querySelector('[contenteditable]');first?.focus();}
 function selected(){const sel=window.getSelection();if(!sel||sel.isCollapsed||!sel.rangeCount)return;const el=sel.anchorNode?.nodeType===1?sel.anchorNode:sel.anchorNode?.parentElement;const end=sel.focusNode?.nodeType===1?sel.focusNode:sel.focusNode?.parentElement;if(!el?.closest('#np-document .np-reader')||!end?.closest('#np-document .np-reader'))return;selection=sel.toString().trim();if(selection.length>1000)return;if(!selection)return;selectionNote=editing?.id||$('np-document')?.querySelector('.np-crumbs button:last-child')?.dataset.id||'';selectionRange=sel.getRangeAt(0).cloneRange();let bar=$('sc138-selection');if(!bar){bar=document.createElement('div');bar.id='sc138-selection';bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','Ações do trecho selecionado');bar.innerHTML='<button type="button" data-sc138-format="bold" aria-label="Negrito"><b>B</b></button><button type="button" data-sc138-format="mark" aria-label="Destacar texto">▰</button><button type="button" data-sc138-format="link" aria-label="Inserir link">↗</button><button type="button" data-sc138-task>Criar tarefa</button><button type="button" data-sc138-dismiss aria-label="Fechar ações do trecho">×</button>';$('np-document').appendChild(bar)}bar.hidden=false;}
@@ -13553,19 +13586,20 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-sc154-resc
 const row=e.target.closest('.sc126-row');if(row&&!e.target.closest('button,input,select,textarea,a,label')){const target=row.querySelector('[data-sc126-open]');if(target){e.preventDefault();SC126.detail(target.dataset.sc126Open,target.dataset.id);}}},false);
 window.SC154={open,save};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();</script>
-<style id="sc156-note-format">
+<style id="sc157-note-format">
 .ed-note-tools{--en-paper:var(--sc141-solid,var(--ne-panel,#f8faff));--en-ink:var(--sc128-ink,var(--ne-ink,#242e44));--en-edge:var(--sc128-border,var(--ne-line,#c6cfdf));--en-soft:var(--sc11-soft,#e8e0f5);--en-accent:var(--sc11-accent,#573b91);container-type:inline-size;color:var(--en-ink);min-width:0}
 .ed-note-tools [hidden]{display:none!important}
 html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible!important;touch-action:auto!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;min-height:0}
 .ed-note-main,.ed-note-panel{box-sizing:border-box;background:var(--en-paper);border:1px solid var(--en-edge);border-radius:11px;padding:5px}
-.ed-note-main{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+.ed-note-main{display:flex;align-items:center;gap:3px;flex-wrap:wrap;min-width:0}
 .ed-note-tools button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:35px;min-height:35px;padding:4px 7px;font:inherit;font-size:13px;color:var(--en-ink)!important;background:transparent!important;border:1px solid transparent!important;border-radius:7px}
 .ed-note-tools button:hover,.ed-note-tools button[aria-pressed=true],.ed-note-tools button[aria-expanded=true]{color:var(--en-accent)!important;background:var(--en-soft)!important}
 .ed-note-tools button:focus-visible,.ed-note-custom:focus-within{outline:2px solid var(--en-accent);outline-offset:1px}
 .ed-note-tools svg{width:17px;height:17px;flex:none}
-.ed-note-tools button[data-ed-note-menu=blocks]{min-width:131px;justify-content:space-between;background:var(--en-paper)!important;border-color:var(--en-edge)!important;white-space:nowrap;margin-right:4px}
-.ed-note-color-icon{font-weight:700;border-bottom:2px solid currentColor;line-height:1.15}
-.ed-note-panel{margin-top:5px}
+.ed-note-tools button[data-ed-note-menu=blocks]{min-width:89px;max-width:100%;justify-content:space-between;background:var(--en-paper)!important;border-color:var(--en-edge)!important;white-space:nowrap;margin-right:4px}
+.ed-note-color-icon{font-weight:700;border-bottom:3px solid var(--en-accent);line-height:1.15}
+.ed-note-tools .ed-note-touch-label{display:none}
+.ed-note-panel{margin-top:5px;overscroll-behavior:contain}
 .ed-note-panel-title{padding:3px 7px;font-size:12px;color:var(--sc128-muted,var(--en-ink));font-weight:600}
 .ed-note-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}
 .ed-note-options button{justify-content:flex-start;text-align:left}
@@ -13573,15 +13607,35 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
 .ed-note-palette i{width:11px;height:11px;border-radius:50%;background:var(--ed-swatch);border:1px solid var(--en-edge)}
 .ed-note-custom{box-sizing:border-box;display:inline-flex;align-items:center;gap:5px;min-height:35px;margin-left:3px;font-size:13px}
 .ed-note-custom input{min-width:29px;width:29px;height:29px;padding:2px;background:var(--en-paper);border:1px solid var(--en-edge);border-radius:5px}
-html body .sc138-format:has(.ed-note-dock)>summary{font-size:14px;min-height:38px}
-@container (max-width:460px){
- .ed-note-tools button[data-ed-note-menu=blocks]{flex-basis:100%;margin-right:0}
- .ed-note-main>button:not([data-ed-note-menu=blocks]){flex:1 1 0;min-width:32px;min-height:42px}
- .ed-note-options{grid-template-columns:minmax(0,1fr)}
+#sc138-inline .sc138-format{margin:5px 0 10px;background:transparent!important}
+#sc138-inline #ed-dock.ed-note-dock{background:transparent!important}
+#np-document:has(#sc138-inline) #sc138-selection [data-sc138-format]{display:none}
+.ed-note-tools #ed-note-block-label{min-width:0;max-width:15ch;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){
+ #sc138-inline{padding-bottom:72px}
+ #sc138-inline .sc138-format{margin:0}
+ html body #sc138-inline .sc138-format #ed-dock.ed-note-dock{
+  position:fixed!important;inset:auto max(6px,env(safe-area-inset-right,0px)) var(--ed-note-bottom,88px) max(6px,env(safe-area-inset-left,0px));
+  max-width:480px!important;width:auto;margin-inline:auto;z-index:45;
+  padding:0;background:transparent!important;box-shadow:0 4px 18px #0002;border-radius:11px
+ }
+ #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:3px;gap:1px}
+ #sc138-inline .ed-note-main>button{padding:4px 1px;min-width:0;min-height:46px;flex-direction:column;gap:1px}
+ #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks]{display:none}
+ #sc138-inline .ed-note-tools .ed-note-touch-label,#sc138-inline .ed-note-more-label{display:block;font-size:11px;line-height:1.1}
+ #sc138-inline .ed-note-more-label{order:1}
+ #sc138-inline .ed-note-tools{position:relative;container-type:normal}
+ #sc138-inline .ed-note-panel{position:absolute;inset:auto 0 calc(100% + 5px);margin:0;max-height:min(300px,var(--ed-note-room,230px));overflow-y:auto;box-shadow:0 4px 18px #0002}
+ #sc138-inline .ed-note-options button{min-height:44px}
+ #sc138-inline .ed-note-panel button,#sc138-inline .ed-note-custom{min-height:44px}
+ #sc138-inline #ed-dock.ed-note-dock :is(#ed-num,#ed-ins,#ed-nota,#ed-link){position:absolute;inset:auto 0 calc(100% + 5px);max-height:min(300px,var(--ed-note-room,230px));overflow:auto;padding:6px;margin:0;background:var(--sc141-solid,var(--sc128-paper,#fcfcff))!important;border:1px solid var(--sc128-border,#c6cfdf);border-radius:11px}
+ #sc138-inline #ed-link{flex-wrap:wrap}
+ #sc138-inline #ed-link #ed-url{flex:1 0 100%}
+ #sc138-inline .ed-note-custom input,#sc138-inline #ed-url,#sc138-inline #ed-nota-q{font-size:16px}
+ #np-document:has(#sc138-inline) #sc138-selection{bottom:145px}
 }
 @media(pointer:coarse){
  .ed-note-tools button{min-height:44px}
- .ed-note-main>button:not([data-ed-note-menu=blocks]){min-height:44px}
 }
 </style>
 </body></html>
