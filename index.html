@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-16b-sc11374"></script>
+<script src="./pwa-transport.js?v=2026-11-16c-sc11375"></script>
 <script>
-var VERSAO_TELA = '2026-11-16b';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.4'; // Planner: estado, rotina e feedback
+var VERSAO_TELA = '2026-11-16c';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.5'; // Planner: estado, rotina e feedback
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -2746,10 +2746,18 @@ function efeitoLocal(cmd){
   }
 }
 
-function enviar(cmd){
+function enfileirarComando(cmd, exigirPersistencia){
   if(!cmd.cid) cmd.cid = Date.now().toString(36) + Math.random().toString(36).slice(2,10);
   cmd.tentativas = 0;
-  fila.push(cmd); salvarFila(cmd); statusNuvem();
+  fila.push(cmd);
+  if(!salvarFila(cmd) && exigirPersistencia){
+    fila.pop(); pendentes = fila.length;
+    return false;
+  }
+  return true;
+}
+function enviar(cmd){
+  enfileirarComando(cmd,false); statusNuvem();
   drenarFila();
 }
 
@@ -2823,7 +2831,7 @@ function drenarFila(){
 window.addEventListener('online', function(){ falhasSeguidas = 0; drenarFila(); statusNuvem(); });
 window.addEventListener('offline', statusNuvem);
 
-function salvar(tabela, itens, extra){
+function salvar(tabela, itens, extra, exigirPersistencia){
   itens = [].concat(itens);
   if(tabela==='tarefas'||tabela==='eventos')itens=itens.map(function(o){var old=(D[tabela]||[]).find(function(x){return x.id===o.id;})||{};return Object.assign(o,{alerta_status:tabela==='tarefas'||(extra&&extra.google)?'pendente':old.alerta_status||'',alerta_erro:''});});
   itens.forEach(function(o){
@@ -2833,10 +2841,12 @@ function salvar(tabela, itens, extra){
   if(window.sc119Remember && !sc119Remember(tabela,itens.map(function(x){return x.id;}),'edit'))return;
   var antesCelebracao = Celebracao.captura(tabela,itens);
   var cmd = Object.assign({ tipo:'SALVAR', tabela:tabela, itens:itens }, extra||{});
+  if(exigirPersistencia && !enfileirarComando(cmd,true)) return false;
   if(window.SC151FX)SC151FX.track(cmd);
   efeitoLocal(cmd); renderTudo();
-  enviar(cmd);
+  if(exigirPersistencia) drenarFila(); else enviar(cmd);
   Celebracao.aposSalvar(antesCelebracao);
+  return true;
 }
 
 function excluir(tabela, ids, extra){
@@ -12328,7 +12338,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-16b-sc11374"></script>
+<script src="./pwa-install.js?v=2026-11-16c-sc11375"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13142,13 +13152,45 @@ function snippet(n,q){let text=resumoNota(n.conteudo||'').replace(/\s+/g,' ').tr
 function open(id){if(!finish())return;irPara('notas');sc62Pages.switchView('paginas');sc74Notes.open(id)}
 function status(text){const x=$('sc138-save');if(x)x.textContent=text}
 function draftKey(id){return 'sc138-draft:'+String(id)}
-function flush(){if(!editing)return true;clearTimeout(timer);const editor=$('sc138-inline');if(!editor)return true;edSync();const text=$('sc138-content')?.value;if(text==null||text===editing.base)return true;
- try{localStorage.setItem(draftKey(editing.id),JSON.stringify({text,base:editing.base,at:Date.now()}))}catch(_){status('Não foi possível guardar o rascunho.');return false}
+function flush(){
+ if(!editing)return true;
+ clearTimeout(timer);
+ const id=editing.id, editor=$('sc138-inline');
+ const field=$('sc138-content');
+ if(!editor||!field)return false;
+ edSync();
+ const text=field.value, key=draftKey(id);
+ if(text===editing.base){
+  if(editing.draftOwned){
+   try{localStorage.removeItem(key);editing.draftOwned=false;}catch(_){}
+  }
+  return true;
+ }
+ try{
+  localStorage.setItem(key,JSON.stringify({text,base:editing.base,at:Date.now()}));
+  editing.draftOwned=true;
+ }catch(_){
+  status('Não foi possível guardar o rascunho. A edição continua aberta.');
+  return false;
+ }
  if(text.length>48000){status('Limite de 48 mil caracteres; divida em subpáginas.');return false}
- const n=note(editing.id);if(!n||String(n.conteudo||'')!==editing.base){status('A nota mudou em outro lugar. Seu rascunho está preservado.');return false}
- const id=editing.id;editing.base=text;salvar('notas',{id,conteudo:text});
- if(String(note(id)?.conteudo||'')!==text){status('Não foi possível salvar. Seu rascunho está preservado.');return false}
- localStorage.removeItem(draftKey(id));status('Guardado no aparelho · sincronização na fila');return true}
+ const n=note(id);
+ if(!n||String(n.conteudo||'')!==editing.base){
+  status('A nota mudou em outro lugar. Seu rascunho está preservado.');
+  return false;
+ }
+ let accepted=false;
+ try{accepted=salvar('notas',{id,conteudo:text},null,true)===true;}catch(_){}
+ if(!accepted||String(note(id)?.conteudo||'')!==text){
+  status('Não foi possível salvar. Rascunho preservado. Tente novamente.');
+  return false;
+ }
+ // A base só avança quando o texto está no estado local e a fila foi guardada.
+ editing.base=text;
+ try{localStorage.removeItem(key);editing.draftOwned=false;}catch(_){}
+ status('Guardado no aparelho · sincronização na fila');
+ return true;
+}
 function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader');if(reader)reader.innerHTML=sc74Notes.renderMarkdown(note(id)?.conteudo||'');edAlvo='f-cont';return true}
 function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;return !finish()}
 function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||'');try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&draft.base===content&&confirm('Recuperar o rascunho de edição desta nota?'))content=draft.text;}catch(_){}
