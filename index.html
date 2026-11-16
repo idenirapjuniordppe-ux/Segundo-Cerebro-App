@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-15f-sc11370"></script>
+<script src="./pwa-transport.js?v=2026-11-15g-sc11371"></script>
 <script>
-var VERSAO_TELA = '2026-11-15f';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.0'; // Planner: estado, rotina e feedback
+var VERSAO_TELA = '2026-11-15g';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.1'; // Planner: estado, rotina e feedback
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -11216,7 +11216,7 @@ html.sc100-active.dark .sc100-btn.primary,html.sc100-active[data-sc-theme="execu
 .sc100-settings label{font-size:12px;color:var(--sc100-ink);font-weight:700;display:block;margin-top:10px}
 .sc100-settings select{min-height:43px;width:100%;max-width:400px;margin-top:5px;border-radius:10px;background:var(--sc100-base);border:1px solid var(--sc100-edge);color:var(--sc100-ink);padding:8px 12px}
 @media(min-width:900px){
-  html.sc100-active #nav-movel{display:none!important}
+  html.sc100-active:not(.sc126) #nav-movel{display:none!important}
   html.sc100-active main{padding-bottom:35px!important}
   html.sc100-active #v-hoje{max-width:1090px;margin:auto;padding:0 10px}
   .sc100-layout{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
@@ -11245,7 +11245,7 @@ html.sc100-active[data-sc-theme] body #sc70-neural-hero{background:var(--sc100-p
 html.sc100-active[data-sc-theme] #sc100-home{background:transparent!important;box-shadow:none!important;border:0!important}
 html.sc100-active #sc100-home::before,html.sc100-active #sc100-home::after{content:none!important;display:none!important}
 @media(min-width:900px){
- html.sc100-active[data-sc-theme] body #nav-movel{display:none!important}
+ html.sc100-active[data-sc-theme]:not(.sc126) body #nav-movel{display:none!important}
  .sc100-primary{grid-row:auto}
 }
 @media(max-width:899px){
@@ -11461,7 +11461,7 @@ html.sc11-active :where(button):focus-visible:not(sc-nunca),
 html.sc11-active :where(input):focus-visible:not(sc-nunca),
 html.sc11-active :where(select):focus-visible:not(sc-nunca),
 html.sc11-active :where(textarea):focus-visible:not(sc-nunca){outline:3px solid var(--sc11-accent)!important;outline-offset:2px!important}
-@media(min-width:900px){html.sc11-active #nav-movel{display:none!important}html.sc11-active .sc100-layout{grid-template-columns:minmax(0,1.45fr) minmax(260px,.85fr)!important;align-items:start!important}html.sc11-active .sc100-primary{grid-column:1;grid-row:auto!important}html.sc11-active .sc100-tasks{grid-column:1;grid-row:auto}html.sc11-active .sc100-space-pane{grid-column:2;grid-row:1/span 2}html.sc11-active .sc100-hint-pane{grid-column:2}html.sc11-active .sc100-note-pane{grid-column:2}html.sc11-active main{padding-bottom:40px!important}}
+@media(min-width:900px){html.sc11-active:not(.sc126) #nav-movel{display:none!important}html.sc11-active .sc100-layout{grid-template-columns:minmax(0,1.45fr) minmax(260px,.85fr)!important;align-items:start!important}html.sc11-active .sc100-primary{grid-column:1;grid-row:auto!important}html.sc11-active .sc100-tasks{grid-column:1;grid-row:auto}html.sc11-active .sc100-space-pane{grid-column:2;grid-row:1/span 2}html.sc11-active .sc100-hint-pane{grid-column:2}html.sc11-active .sc100-note-pane{grid-column:2}html.sc11-active main{padding-bottom:40px!important}}
 @media(max-width:899px){html.sc11-active #nav-superior{display:none!important}html.sc11-active #nav-movel{left:0!important;right:0!important;transform:none!important;width:100%!important}html.sc11-active main{padding-bottom:116px!important}html.sc11-active #topo > div{padding:9px 13px!important}html.sc11-active #sc70-neural-hero{height:56px!important;max-height:56px!important;padding:6px 15px!important}html.sc11-active .sc100-layout{grid-template-columns:1fr!important}html.sc11-active #v-hoje{padding:0 10px!important}}
 @media(max-width:440px){html.sc11-active .sc100-pane{padding:16px!important;border-radius:20px!important}html.sc11-active .sc100-task{gap:8px!important}html.sc11-active .sc100-task-time{flex-basis:54px!important}html.sc11-active .sc100-heading{font-size:27px!important}html.sc11-active .sc100-spaces button{min-height:70px!important;font-size:12px!important}html.sc11-active .vista:not(#v-hoje){padding-left:0!important;padding-right:0!important}}
 @media(prefers-reduced-motion:reduce){html.sc11-active *,html.sc11-active *::before,html.sc11-active *::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
@@ -12155,7 +12155,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-15f-sc11370"></script>
+<script src="./pwa-install.js?v=2026-11-15g-sc11371"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
