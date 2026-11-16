@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-15g-sc11371"></script>
+<script src="./pwa-transport.js?v=2026-11-15h-sc11372"></script>
 <script>
-var VERSAO_TELA = '2026-11-15g';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.1'; // Planner: estado, rotina e feedback
+var VERSAO_TELA = '2026-11-15h';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.2'; // Planner: estado, rotina e feedback
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -8809,7 +8809,31 @@ window.sc62ParentOptions=function(id,chosen){
  return '<select id="f-pagina-pai" class="input" aria-label="Página-mãe">'+out+'</select><p class="subt mt-1">Mover uma página não apaga suas subpáginas. Não é permitido criar ciclos.</p>';
 };
 function recordRecent(id){if(!id)return;state.recent=[String(id)].concat(state.recent.filter(x=>String(x)!==String(id))).slice(0,12);store();}
-function openPage(id){state.current=String(id||'');ancestors(id).forEach(n=>{state.expanded[idOf(n)]=true;});recordRecent(id);if(window.innerWidth<761)state.collapsed=true;store();render();}
+function openPage(id,options){
+ id=String(id||'');
+ if(id&&!byId(id)){setMsg('Página não encontrada.');return false;}
+ if(id!==state.current&&window.SC138Notes&&!SC138Notes.finish())return false;
+ const sidebar=$('np-sidebar'), scroll=sidebar?.scrollTop||0;
+ state.current=id;
+ ancestors(id).forEach(n=>{state.expanded[idOf(n)]=true;});
+ recordRecent(id);
+ const compact=window.matchMedia('(max-width: 760px)').matches;
+ if(compact)state.collapsed=true;
+ store();render();
+ if(sidebar&&!compact)sidebar.scrollTop=scroll;
+ if(options?.reveal!==false&&id){
+  const title=$('np-document')?.querySelector('.np-doc-title');
+  if(title&&title.getClientRects().length){
+   title.tabIndex=-1;title.focus({preventScroll:true});
+   const top=$('topo')?.getBoundingClientRect().bottom||0,r=title.getBoundingClientRect();
+   if(r.top<Math.max(0,top)||r.bottom>window.innerHeight-88){
+    title.style.scrollMarginTop=Math.max(16,top+16)+'px';
+    title.scrollIntoView({block:'start',behavior:'instant'});
+   }
+  }
+ }
+ return true;
+}
 function createPage(p,template){var obj={pagina_pai:String(p||''),titulo:'',conteudo:''};if(template){obj.titulo='Nova página';obj.conteudo=template;}if(typeof abrirNota==='function')abrirNota(obj);}
 function chooseView(view){state.view=view==='lista'?'lista':'paginas';store();showView();render();}
 function showView(){if(!state.ready)return;var pages=state.view==='paginas';$('sc62-pages-view').classList.toggle('np-hide',!pages);['nt-trilha','nt-etiquetas','nt-lista','sc5-note-search','s4-knowledge'].forEach(id=>{var a=$(id);if(a)a.classList.toggle('np-hide',pages);});$('np-tab-pages').setAttribute('aria-selected',String(pages));$('np-tab-list').setAttribute('aria-selected',String(!pages));}
@@ -8872,7 +8896,7 @@ function renderDoc(){var body=$('np-document');if(!body)return;if(window.SC138No
  if(!n){var roots=kids('');body.innerHTML='<div class="np-welcome"><div class="np-welcome-icon">🧠</div><h2 class="np-doc-title">Seu espaço de conhecimento</h2><p>Registre ideias, organize assuntos em páginas e subpáginas e encontre tudo com rapidez.</p><button type="button" class="np-btn np-primary" data-np="new" data-id="">+ Criar primeira página</button></div>'+(roots.length?'<h3 class="np-list-title">Páginas principais</h3>'+roots.map(pageRow).join(''):'');return;}
  var children=kids(idOf(n)),back=backlinkList(n),path=ancestors(idOf(n));body.innerHTML=crumbs(idOf(n))+'<h2 class="np-doc-title">'+esc(n.titulo||'(sem título)')+'</h2><div class="np-doc-meta">'+(n.fixada==='Sim'?'<span class="np-badge">⭐ Favorita</span>':'')+'<span>'+esc(dateLabel(n))+'</span><span>· '+path.length+' nível(is)</span>'+(n.area?'<span class="np-badge">'+esc(n.area)+'</span>':'')+(n.etiquetas?'<span class="np-badge">'+esc(n.etiquetas)+'</span>':'')+'</div>'+
  '<div class="np-actions"><button class="np-btn np-primary" data-np="edit" data-id="'+esc(idOf(n))+'">✎ Editar página</button><button class="np-btn" data-np="new" data-id="'+esc(idOf(n))+'">+ Subpágina</button><button class="np-btn" data-np="favorite" data-id="'+esc(idOf(n))+'">'+(n.fixada==='Sim'?'★ Desafixar':'☆ Favoritar')+'</button><button type="button" class="np-btn" data-np="pin-home" aria-pressed="'+String(n.fixada_hoje==='Sim')+'" data-id="'+esc(idOf(n))+'">'+(n.fixada_hoje==='Sim'?'Remover da tela Hoje':'Fixar na tela Hoje')+'</button><button class="np-btn" data-np="duplicate" data-id="'+esc(idOf(n))+'">Duplicar</button><button class="np-btn" data-np="export" data-id="'+esc(idOf(n))+'">↓ Markdown</button><button class="np-btn" data-np="delete" data-id="'+esc(idOf(n))+'" title="Excluir a página">Excluir</button></div>'+
- '<div class="np-reader" data-nota-colunas="'+notaColunas(n.colunas_nota)+'">'+markdown(n.conteudo)+'</div>'+ (children.length?'<h3 class="np-list-title">Subpáginas · '+children.length+'</h3>'+children.map(pageRow).join(''):'<p class="np-footer-tip">Esta página não contém subpáginas. Você pode criar uma acima ou no painel lateral.</p>')+
+ '<div class="np-reader" data-nota-colunas="'+notaColunas(n.colunas_nota)+'">'+(String(n.conteudo||'').trim()?markdown(n.conteudo):'<p class="np-empty">Esta nota ainda está sem conteúdo.</p>')+'</div>'+ (children.length?'<h3 class="np-list-title">Subpáginas · '+children.length+'</h3>'+children.map(pageRow).join(''):'<p class="np-footer-tip">Esta página não contém subpáginas. Você pode criar uma acima ou no painel lateral.</p>')+
  (back.length?'<section class="np-linkgroup"><h3>↩ Referências a esta página · '+back.length+'</h3>'+back.slice(0,12).map(x=>'<button data-np="open" data-id="'+esc(idOf(x))+'">← '+esc(x.titulo||'Sem título')+'</button>').join('')+'</section>':'');
 }
 function pageRow(n){var count=kids(idOf(n)).length;return '<button type="button" class="np-listrow" data-np="open" data-id="'+esc(idOf(n))+'"><span aria-hidden="true">📄</span><span class="np-list-main"><strong>'+esc(n.titulo||'(sem título)')+'</strong><small>'+(count?count+' subpágina(s) · ':'')+esc(dateLabel(n))+'</small></span><span aria-hidden="true">›</span></button>';}
@@ -8906,7 +8930,7 @@ function makeUI(){var view=$('v-notas'),list=$('nt-lista');if(!view||!list)retur
  var host=$('sc62-notes-workspace');if(!host){host=document.createElement('div');host.id='sc62-notes-workspace';list.parentNode.insertBefore(host,$('nt-trilha')||list);}
  host.innerHTML='<div class="np-top"><div><div class="np-title">Biblioteca de conhecimento</div><div class="np-subtitle" id="np-subtitle"></div></div><div class="np-top-actions"><button type="button" class="np-btn" id="np-template">Modelos</button><button type="button" class="np-btn np-primary" data-np="new" data-id="">+ Nova página</button></div></div>'+
  '<div class="np-tabs" role="tablist" aria-label="Visualização das notas"><button id="np-tab-pages" role="tab" type="button" aria-controls="sc62-pages-view">▦ Páginas</button><button id="np-tab-list" role="tab" type="button" aria-controls="nt-lista">☰ Todas as notas</button></div>'+
- '<div id="sc62-pages-view"><div class="np-toolbar-mobile"><button type="button" class="np-btn" id="np-toggle" aria-controls="np-sidebar" aria-expanded="false">☰ Explorar páginas</button></div><div class="np-layout"><aside class="np-sidebar" id="np-sidebar" aria-label="Árvore de páginas"><input type="search" id="np-search" class="np-search" placeholder="Buscar em títulos e conteúdos…" aria-label="Buscar páginas"><div class="np-filters" role="group" aria-label="Filtrar páginas"><button type="button" class="np-filter" id="np-filter-todas" data-filter="todas">Todas</button><button type="button" class="np-filter" id="np-filter-favoritos" data-filter="favoritos">Favoritas</button><button type="button" class="np-filter" id="np-filter-recentes" data-filter="recentes">Recentes</button></div><div class="np-section-title">Estrutura <select id="np-sort" aria-label="Ordenar páginas"><option value="titulo">A–Z</option><option value="recente">Recentes</option></select></div><div class="np-tree" id="np-tree"></div><div class="np-section-title">Favoritas</div><div id="np-favorites"></div><div class="np-section-title">Recentes</div><div id="np-recent"></div></aside><div class="np-document" id="np-document" role="region" aria-label="Conteúdo da página" aria-live="polite"></div></div><p class="np-messages" id="np-msg" aria-live="polite">As alterações são guardadas localmente primeiro e sincronizadas conforme a conexão.</p></div>';
+ '<div id="sc62-pages-view"><div class="np-toolbar-mobile"><button type="button" class="np-btn" id="np-toggle" aria-controls="np-sidebar" aria-expanded="false">☰ Explorar páginas</button></div><div class="np-layout"><aside class="np-sidebar" id="np-sidebar" aria-label="Árvore de páginas"><input type="search" id="np-search" class="np-search" placeholder="Buscar em títulos e conteúdos…" aria-label="Buscar páginas"><div class="np-filters" role="group" aria-label="Filtrar páginas"><button type="button" class="np-filter" id="np-filter-todas" data-filter="todas">Todas</button><button type="button" class="np-filter" id="np-filter-favoritos" data-filter="favoritos">Favoritas</button><button type="button" class="np-filter" id="np-filter-recentes" data-filter="recentes">Recentes</button></div><div class="np-section-title">Estrutura <select id="np-sort" aria-label="Ordenar páginas"><option value="titulo">A–Z</option><option value="recente">Recentes</option></select></div><div class="np-tree" id="np-tree"></div><div class="np-section-title">Favoritas</div><div id="np-favorites"></div><div class="np-section-title">Recentes</div><div id="np-recent"></div></aside><div class="np-document" id="np-document" role="region" aria-label="Conteúdo da página"></div></div><p class="np-messages" id="np-msg" aria-live="polite" role="status">As alterações são guardadas localmente primeiro e sincronizadas conforme a conexão.</p></div>';
  host.addEventListener('click',onClick);
  $('np-tab-pages').onclick=()=>chooseView('paginas');$('np-tab-list').onclick=()=>chooseView('lista');
  $('np-template').onclick=()=>{if(typeof abrirModelos==='function')abrirModelos('nota');};
@@ -12155,7 +12179,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-15g-sc11371"></script>
+<script src="./pwa-install.js?v=2026-11-15h-sc11372"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12938,7 +12962,14 @@ html.sc126 body:has(#v-notas:not(.hidden)) #sc126-context-bar{display:none!impor
 
 html.sc126[data-sc-theme] #sc62-notes-workspace{--np-bg:var(--sc128-base);--np-panel:var(--sc128-paper);--np-text:var(--sc128-ink);--np-muted:var(--sc128-muted);--np-border:var(--sc128-border);--np-accent:var(--sc11-accent);--np-soft:var(--sc11-soft);background:transparent!important;color:var(--np-text)}
 html.sc126 #sc62-notes-workspace .np-top,html.sc126 #sc62-notes-workspace .np-tabs,html.sc126 #sc62-notes-workspace .np-doc-meta,html.sc126 #sc62-notes-workspace .np-footer-tip{display:none!important}
-html.sc126 #sc62-notes-workspace .np-layout{display:block!important}html.sc126 #np-sidebar{display:none!important}html.sc126 #np-sidebar[data-collapsed="false"]{display:block!important;margin-bottom:12px}
+html.sc126 #sc62-notes-workspace .np-layout{display:grid!important;grid-template-columns:minmax(220px,300px) minmax(0,1fr);align-items:start}
+html.sc126 #sc62-notes-workspace #np-sidebar{display:block!important;margin:0;max-height:min(63vh,720px);scrollbar-gutter:stable}
+html.sc126 #sc62-notes-workspace .np-doc-title:focus{outline:none}
+@media(max-width:760px){
+ html.sc126 #sc62-notes-workspace .np-layout{grid-template-columns:minmax(0,1fr)}
+ html.sc126 #sc62-notes-workspace #np-sidebar{max-height:47vh}
+ html.sc126 #sc62-notes-workspace #np-sidebar[data-collapsed="true"]{display:none!important}
+}
 html.sc126 #np-document{padding:16px!important;background:var(--sc128-paper)!important;color:var(--sc128-ink)!important;border:1px solid var(--sc128-border);border-radius:16px;min-height:50vh}
 html.sc126 #sc62-notes-workspace .np-doc-title{font-size:26px;line-height:1.25;margin:12px 0 16px;overflow-wrap:anywhere}
 html.sc126 #sc62-notes-workspace .np-reader{color:var(--sc128-ink)!important;font-size:16px;line-height:1.65;cursor:text}
@@ -12970,7 +13001,7 @@ function flush(){if(!editing)return true;clearTimeout(timer);const editor=$('sc1
  if(String(note(id)?.conteudo||'')!==text){status('Não foi possível salvar. Seu rascunho está preservado.');return false}
  localStorage.removeItem(draftKey(id));status('Guardado no aparelho · sincronização na fila');return true}
 function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader');if(reader)reader.innerHTML=sc74Notes.renderMarkdown(note(id)?.conteudo||'');edAlvo='f-cont';return true}
-function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;finish();return false}
+function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;return !finish()}
 function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||'');try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&draft.base===content&&confirm('Recuperar o rascunho de edição desta nota?'))content=draft.text;}catch(_){}
  editing={id:String(id),base:String(n.conteudo||'')};reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><details class="sc138-format"><summary>Formatação</summary>'+edBarraHtml(true)+'</details><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
  edAlvo='sc138-content';edIniciar(content);edRaiz().dataset.notaColunas=notaColunas(n.colunas_nota);if(typeof scInitNoteSize==='function')scInitNoteSize();
