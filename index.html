@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-17d-sc113712"></script>
+<script src="./pwa-transport.js?v=2026-11-17e-sc113713"></script>
 <script>
-var VERSAO_TELA = '2026-11-17d';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.12'; // Remove a ajuda de instalação redundante
+var VERSAO_TELA = '2026-11-17e';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.13'; // proteção de dados, recorrências e testes
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -2188,7 +2188,75 @@ var MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agos
 function minCfg(chave, padrao){ var m = /^(\d{1,2}):(\d{2})$/.exec(String(D.config[chave]||'')); return m ? (+m[1])*60 + (+m[2]) : padrao; }
 function diaIni(){ return minCfg('dia_inicio', 5*60); }
 function diaFim(){ var f = minCfg('dia_fim', 22*60), i = diaIni(); return f >= i + 60 ? f : Math.min(24*60, i + 60); }
-var CHAVE_CACHE = 'sc_cache_v1', CHAVE_FILA = 'sc_fila_v1', PREFIXO_FILA = 'sc_fila_cmd_v2:';
+var CHAVE_CACHE='',CHAVE_FILA='',PREFIXO_FILA='';
+var sc166Conta='',sc166Escopo='',sc166Geracao=0,sc166Confirmado=false,sc166AvisoLegado=false;
+function sc166Nome(u){return String(u||'').trim().toLowerCase();}
+function sc166Namespace(){return window.__PWA&&window.scPwaStorageScope?window.scPwaStorageScope():'apps-script:'+location.pathname;}
+function sc166QuarentenaKey(){return sc166Escopo?'sc_fila_mortos_v2:'+sc166Escopo:'sc166_quarentena_sem_conta';}
+function sc166Vincular(u,verificado){
+  var nome=sc166Nome(u),escopo=nome?encodeURIComponent(sc166Namespace())+':'+encodeURIComponent(nome):'';
+  if(!escopo)return false;
+  var mudou=!!sc166Escopo&&sc166Escopo!==escopo;
+  if(mudou)sc166LimparTela();
+  sc166Conta=nome;sc166Escopo=escopo;sc166Confirmado=!!verificado;
+  CHAVE_CACHE='sc_cache_v2:'+escopo;
+  CHAVE_FILA='sc_fila_v2:'+escopo;
+  PREFIXO_FILA='sc_fila_cmd_v3:'+escopo+':';
+  try{
+    var marcador=window.scPwaSessionMarker&&window.scPwaSessionMarker();
+    window.sc166MarcadorVinculado=marcador||'';
+    if(verificado&&marcador)localStorage.setItem('sc166_marcador_sessao',JSON.stringify({nome:nome,marcador:marcador,origem:sc166Namespace()}));
+  }catch(e){}
+  return mudou;
+}
+function sc166Bootstrap(){
+  if(!window.__PWA||!window.scPwaAutenticado||!window.scPwaAutenticado())return false;
+  try{
+    var prova=JSON.parse(localStorage.getItem('sc166_marcador_sessao')||'null');
+    var atual=window.scPwaSessionMarker&&window.scPwaSessionMarker();
+    if(prova&&prova.nome&&atual&&prova.marcador===atual&&prova.origem===sc166Namespace()){
+      sc166Vincular(prova.nome,false);return true;
+    }
+  }catch(e){}
+  return false;
+}
+function sc166LimparTela(){
+  var marcadorAnterior=window.sc166MarcadorVinculado;
+  window.dispatchEvent(new Event('sc166:conta-saindo'));
+  try{rascSalvar();}catch(e){}
+  sc166Geracao++;sc166Conta='';sc166Escopo='';sc166Confirmado=false;
+  CHAVE_CACHE=CHAVE_FILA=PREFIXO_FILA='';
+  fila=[];pendentes=0;seqAplicado=0;ultimaSync=0;ultimoErroFila='';enviando=false;falhasSeguidas=0;atualizando=false;
+  clearTimeout(timerFila);gcalCache={};
+  try{
+    var prova=JSON.parse(localStorage.getItem('sc166_marcador_sessao')||'null');
+    if(!prova||prova.marcador===marcadorAnterior)localStorage.removeItem('sc166_marcador_sessao');
+  }catch(e){}
+  try{rasc=null;fecharModal();var m=el('modal-corpo');if(m)m.replaceChildren();}catch(e){}
+  D={tarefas:[],projetos:[],eventos:[],notas:[],metas:[],habitos:[],registros:[],estudos:[],financas:[],config:{},ia:{}};
+  if(window.SC120)SC120.reset();
+  ['', '-m'].forEach(function(s){var f=el('captura'+s),p=el('captura-prev'+s);if(f)f.value='';if(p)p.replaceChildren();});
+  window.dispatchEvent(new Event('sc166:conta-limpa'));
+  try{renderTudo();statusNuvem();}catch(e){}
+}
+window.sc166PrepareLogout=function(){if(sc166Escopo)sc166LimparTela();};
+function sc166ChavesLegadas(){
+  return Object.keys(localStorage).filter(function(k){return ['sc_cache_v1','sc_fila_v1','sc_fila_mortos_v1','sc_rasc'].includes(k)||k.indexOf('sc_fila_cmd_v2:')===0||/^sc120_lote_[a-zA-Z0-9]+$/.test(k)||/^sc119_(history|draft):[^:|]+:/.test(k)||k.startsWith('sc138-draft:');});
+}
+function sc166ExportarLegado(){
+  try{
+    var dados={};sc166ChavesLegadas().forEach(function(k){dados[k]=localStorage.getItem(k);});
+    if(!Object.keys(dados).length){toast('Nenhum dado antigo sem conta encontrada neste aparelho.');return;}
+    if(!confirm('Esta cópia pode conter dados de uma conta anterior. Deseja salvar para conferir localmente?'))return;
+    downloadFile('segundo-cerebro-dados-locais-antigos.json','application/json;charset=utf-8',JSON.stringify({schema:'sc166-legado',dados:dados},null,2));
+  }catch(e){toast('Não foi possível exportar os dados locais antigos.',true);}
+}
+function sc166AvisarLegado(){
+  if(sc166AvisoLegado||!sc166Conta)return;
+  try{if(sc166ChavesLegadas().some(function(k){return k!=='sc_cache_v1'&&k!=='sc_rasc';})){
+    sc166AvisoLegado=true;toast('Alterações antigas sem conta identificada foram preservadas neste aparelho. Não foram reenviadas.',true,{rotulo:'Exportar para conferir',fn:sc166ExportarLegado});
+  }}catch(e){}
+}
 
 /* ───────── utilidades ───────── */
 function el(id){ return document.getElementById(id); }
@@ -2613,21 +2681,29 @@ function toast(msg, erro, acao){
 
 /* ───────── dados / cache / sincronização ───────── */
 function salvarCache(){
+  if(!sc166Conta)return;
   try { var o = {}; ['tarefas','projetos','eventos','notas','metas','habitos','registros','estudos','financas','config'].forEach(function(k){ o[k] = D[k]; }); o.salvoEm = Date.now(); localStorage.setItem(CHAVE_CACHE, JSON.stringify(o)); } catch(e){}
 }
-function lerCache(){ try { var s = localStorage.getItem(CHAVE_CACHE); return s ? JSON.parse(s) : null; } catch(e){ return null; } }
+function lerCache(){ if(!sc166Conta)return null;try { var s = localStorage.getItem(CHAVE_CACHE); return s ? JSON.parse(s) : null; } catch(e){ return null; } }
 
 function aplicarDados(r, deCache){
-  if(!r) return;
-  // Resposta mais antiga que a já aplicada (chegou fora de ordem): descarta
-  if(!deCache && r.seq != null){ if(r.seq < seqAplicado) return; seqAplicado = r.seq; }
+  if(!r||(!deCache&&!sc166Nome(r.usuario))|| (deCache&&!sc166Escopo))return false;
+  if(!deCache){
+    // Respostas atrasadas da própria conta não substituem um estado mais novo.
+    if(sc166Conta===sc166Nome(r.usuario)&&r.seq!=null&&r.seq<seqAplicado)return false;
+    var mudou=sc166Vincular(r.usuario,true);
+    if(mudou||!fila.length){fila=lerFila();pendentes=fila.length;}
+    if(r.seq!=null)seqAplicado=r.seq;
+    sc166AvisarLegado();
+  }
   if(deCache){ if(r.salvoEm) ultimaSync = r.salvoEm; } else ultimaSync = Date.now();
   ['tarefas','projetos','eventos','notas','metas','habitos','registros','estudos','financas'].forEach(function(k){ if(r[k]) D[k] = r[k]; });
   if(r.config) D.config = r.config;
-  D.versaoServidor = r.versaoServidor; D.usuario = r.usuario; D.protegido = r.protegido;
+  D.versaoServidor = r.versaoServidor; D.usuario = sc166Conta; D.protegido = r.protegido;
   // Cache guarda a base confirmada; a fila é reaplicada sobre ela ao reabrir o app.
   if(!deCache) salvarCache();
   fila.forEach(efeitoLocal);
+  return true;
 }
 function rotuloSync(){
   if(!ultimaSync) return 'ainda não sincronizado';
@@ -2660,12 +2736,13 @@ function statusNuvem(){
 
 /* ───────── fila de gravações (sobrevive a offline, recarga e falhas) ───────── */
 function salvarFila(cmd, remover){
+  if(!sc166Escopo||cmd.sc166_owner!==sc166Escopo)return false;
   pendentes = fila.length;
   try {
     var chave = PREFIXO_FILA + cmd.cid;
     if(remover) {
       localStorage.removeItem(chave);
-      if(cmd.sc120_group && /^sc120_lote_[a-zA-Z0-9]+$/.test(cmd.sc120_group)){
+      if(cmd.sc120_group && cmd.sc120_group.startsWith(sc166PrefixoLote())){
         var loteIA=JSON.parse(localStorage.getItem(cmd.sc120_group)||'[]');
         loteIA=loteIA.filter(function(c){return c.cid!==cmd.cid;});
         if(loteIA.length)localStorage.setItem(cmd.sc120_group,JSON.stringify(loteIA));
@@ -2684,13 +2761,15 @@ function salvarFila(cmd, remover){
     return false;
   }
 }
+function sc166PrefixoLote(){return 'sc166_lote:'+sc166Escopo+':';}
 function lerFila(){
+  if(!sc166Escopo)return [];
   var comandos = new Map();
   try {
     var antiga;
     try { antiga = JSON.parse(localStorage.getItem(CHAVE_FILA) || '[]'); } catch(e) {}
     if(Array.isArray(antiga)){
-      antiga.forEach(function(cmd){ if(cmd && cmd.cid) comandos.set(cmd.cid, cmd); });
+      antiga.forEach(function(cmd){ if(cmd && cmd.cid && cmd.sc166_owner===sc166Escopo) comandos.set(cmd.cid, cmd); });
       if(comandos.size){
         try {
           comandos.forEach(function(cmd, id){
@@ -2705,17 +2784,17 @@ function lerFila(){
       .forEach(function(chave){
         try {
           var cmd = JSON.parse(localStorage.getItem(chave));
-          if(cmd && cmd.cid) comandos.set(cmd.cid, cmd);
+          if(cmd && cmd.cid && cmd.sc166_owner===sc166Escopo) comandos.set(cmd.cid, cmd);
         } catch(e) {}
       });
   } catch(e) {}
   // Conversa: recupera o lote inteiro após recarga, inclusive antes da primeira tentativa de rede.
-  try{Object.keys(localStorage).filter(function(k){return /^sc120_lote_[a-zA-Z0-9]+$/.test(k);}).forEach(function(k){
+  try{Object.keys(localStorage).filter(function(k){return k.startsWith(sc166PrefixoLote());}).forEach(function(k){
     var group=JSON.parse(localStorage.getItem(k)||'[]');
-    if(Array.isArray(group))group.forEach(function(c){if(c&&c.cid&&c.sc120_group===k&&!comandos.has(c.cid))comandos.set(c.cid,c);});
+    if(Array.isArray(group))group.forEach(function(c){if(c&&c.cid&&c.sc120_group===k&&c.sc166_owner===sc166Escopo&&!comandos.has(c.cid))comandos.set(c.cid,c);});
   });}catch(_){}
   // Inclui alterações desta aba que ainda estejam apenas em memória.
-  fila.forEach(function(cmd){ if(!comandos.has(cmd.cid)) comandos.set(cmd.cid, cmd); });
+  fila.forEach(function(cmd){ if(cmd.sc166_owner===sc166Escopo&&!comandos.has(cmd.cid)) comandos.set(cmd.cid, cmd); });
   return Array.from(comandos.values());
 }
 
@@ -2773,46 +2852,56 @@ function efeitoLocal(cmd){
 }
 
 function enfileirarComando(cmd, exigirPersistencia){
+  if(!sc166Escopo){toast('Conecte a conta Google antes de gravar alterações.',true);return false;}
+  cmd.sc166_owner=sc166Escopo;
   if(!cmd.cid) cmd.cid = Date.now().toString(36) + Math.random().toString(36).slice(2,10);
   cmd.tentativas = 0;
   fila.push(cmd);
-  if(!salvarFila(cmd) && exigirPersistencia){
+  if(!salvarFila(cmd)){
     fila.pop(); pendentes = fila.length;
     return false;
   }
   return true;
 }
 function enviar(cmd){
-  enfileirarComando(cmd,false); statusNuvem();
-  drenarFila();
+  if(!enfileirarComando(cmd,true)){toast('Alteração não gravada no aparelho; tente novamente.',true);return false;}
+  statusNuvem();drenarFila();return true;
 }
 
 function reintegrarQuarentena(){
-  var q=[];try{q=JSON.parse(localStorage.getItem('sc_fila_mortos_v1')||'[]');}catch(e){}
-  if(!Array.isArray(q)||!q.length){toast('Nenhuma alteração em quarentena.');return;}
+  var q=[];try{q=JSON.parse(localStorage.getItem(sc166QuarentenaKey())||'[]');}catch(e){}
+  q=Array.isArray(q)?q.filter(function(c){return c&&c.sc166_owner===sc166Escopo;}):[];
+  if(!sc166Escopo||!q.length){toast('Nenhuma alteração em quarentena.');return;}
   var conferir=q.filter(function(c){return c&&c.verificar;}).length;
   if(!confirm('Reenviar '+q.length+' alteração(ões) em quarentena? Confira conflitos antes de continuar.'+(conferir?'\n\n'+conferir+' delas pode(m) já ter criado algo no Google Agenda/Tarefas. Se você conferiu e não está lá, pode reenviar; se já está, reenviar pode duplicar.':'')))return;
   // 12h: tira os campos que só existem no aparelho (o servidor compara o conteúdo pelo cid) e,
   // no que estava "em verificação", avisa o servidor que o reenvio foi confirmado.
   q=q.map(function(c){var cmd=Object.assign({},c),ver=!!cmd.verificar;if(/CID_REUTILIZADO/.test(String(cmd.erroQuarentena||''))){cmd.cid=Date.now().toString(36)+Math.random().toString(36).slice(2,10);ver=false;}delete cmd.erroQuarentena;delete cmd.dataQuarentena;delete cmd.verificar;cmd.tentativas=0;if(ver)cmd.forcarReenvio=true;return cmd;});
-  q.forEach(function(c){var i=fila.findIndex(function(x){return x.cid===c.cid;});if(i<0)fila.push(c);else fila[i]=c;});
-  var restantes = q.filter(function(cmd){ return !salvarFila(cmd); });
+  var restantes = q.filter(function(c){
+    if(!salvarFila(c))return true;
+    var i=fila.findIndex(function(x){return x.cid===c.cid;});if(i<0)fila.push(c);else fila[i]=c;
+    return false;
+  });
+  pendentes=fila.length;
   try{
-    if(restantes.length) localStorage.setItem('sc_fila_mortos_v1', JSON.stringify(restantes));
-    else localStorage.removeItem('sc_fila_mortos_v1');
+    if(restantes.length) localStorage.setItem(sc166QuarentenaKey(), JSON.stringify(restantes));
+    else localStorage.removeItem(sc166QuarentenaKey());
   }catch(e){}
-  falhasSeguidas=0;drenarFila();toast('Alterações reinseridas na fila.');
+  falhasSeguidas=0;drenarFila();toast(restantes.length?'Parte das alterações continua em quarentena.':'Alterações reinseridas na fila.',!!restantes.length);
 }
 function retentarFila(){
   toast(fila.length + ' alteração(ões) ainda não chegaram ao Google/planilha.' + (ultimoErroFila ? ' Último erro: ' + ultimoErroFila : ' Tentando enviar…'), !!ultimoErroFila);
   falhasSeguidas = 0; drenarFila();
 }
 function drenarFila(){
-  if(enviando || !fila.length){ statusNuvem(); return; }
+  if(!sc166Confirmado||enviando||!fila.length){ statusNuvem(); return; }
   if(navigator.onLine === false){ statusNuvem(); return; }   // espera o evento "online"
   clearTimeout(timerFila);
-  var cmd = fila[0]; enviando = true; statusNuvem();
+  var cmd=fila[0],geracao=sc166Geracao;
+  if(cmd.sc166_owner!==sc166Escopo)return;
+  enviando=true;statusNuvem();
   function falhaGravacao(e){
+      if(geracao!==sc166Geracao)return;
       enviando = false; falhasSeguidas++;
       var msg = erroHumano(e); ultimoErroFila = msg;
       if(navigator.onLine === false){ statusNuvem(); return; }
@@ -2825,10 +2914,10 @@ function drenarFila(){
       // Agora ela vai para a quarentena (Ajustes → Segurança, sincronização e recuperação) e as outras seguem.
       if(emVerificacao || cmd.tentativas >= 6){
         try {
-          var q = JSON.parse(localStorage.getItem('sc_fila_mortos_v1') || '[]');
+          var q = JSON.parse(localStorage.getItem(sc166QuarentenaKey()) || '[]');
           if(!Array.isArray(q)) q=[];
           if(!q.some(function(c){return c.cid===cmd.cid;})) q.push(Object.assign({},cmd,{erroQuarentena:msg,dataQuarentena:new Date().toISOString()},emVerificacao?{verificar:true}:{}));
-          localStorage.setItem('sc_fila_mortos_v1',JSON.stringify(q));
+          localStorage.setItem(sc166QuarentenaKey(),JSON.stringify(q));
         } catch(ex) { toast('Não foi possível guardar a quarentena. Alteração mantida na fila.',true);statusNuvem();return; }
         fila = fila.filter(function(c){ return c.cid !== cmd.cid; }); salvarFila(cmd,true); falhasSeguidas = 0;
         toast(emVerificacao ? 'Uma alteração pode ter sido gravada pela metade no Google (Agenda/Tarefas). Ela ficou guardada em Ajustes → Segurança, sincronização e recuperação para você conferir; as demais seguem sendo enviadas.' : 'Alteração preservada em quarentena: ' + msg,true);
@@ -2841,8 +2930,20 @@ function drenarFila(){
   }
   google.script.run
     .withSuccessHandler(function(r){
-      if(!r || typeof r!=='object' || r.erro){falhaGravacao(new Error(r&&r.erro ? r.erro : 'Resposta inválida do servidor; operação mantida.'));return;}
+      if(geracao!==sc166Geracao)return;
+      if(r&&r.usuario&&sc166Nome(r.usuario)!==sc166Conta){sc166LimparTela();recarregar(true);return;}
+      if(!r || typeof r!=='object' || r.erro||!sc166Nome(r.usuario)){falhaGravacao(new Error(r&&r.erro ? r.erro : 'Resposta inválida do servidor; operação mantida.'));return;}
       enviando = false; falhasSeguidas = 0; ultimoErroFila = '';
+      // Conversão em duas etapas: o backend confirmou o evento; só então enfileirar a retirada da tarefa.
+      if(cmd.sc166_conversao_tarefa){
+        var confirmado=Array.isArray(r.eventos)&&r.eventos.find(function(e){return String(e.id)===String(cmd.sc166_conversao_evento);});
+        if(confirmado&&(!cmd.google||(confirmado.google_id&&confirmado.alerta_status!=='falha'))){
+          var retirar={tipo:'EXCLUIR',tabela:'tarefas',ids:[String(cmd.sc166_conversao_tarefa)],cid:'conv-del-'+cmd.cid};
+          if(!fila.some(function(c){return c.cid===retirar.cid;})&&!enfileirarComando(retirar,true))
+            toast('Compromisso confirmado, mas a tarefa original foi mantida porque não foi possível guardar a exclusão.',true);
+        }
+        else toast('Não foi possível confirmar o compromisso no destino escolhido. A tarefa original foi mantida.',true);
+      }
       fila = fila.filter(function(c){ return c.cid !== cmd.cid; }); salvarFila(cmd,true);
       if(r && r.aviso) toast(r.aviso, true); else if(r && r.info) toast(r.info);
       if(cmd.tabela==='eventos') gcalCache = {};
@@ -2852,25 +2953,33 @@ function drenarFila(){
       if(fila.length) drenarFila();
     })
     .withFailureHandler(falhaGravacao)
-    .enviarComando(cmd);
+    .enviarComando(sc166ComandoServidor(cmd));
 }
-window.addEventListener('online', function(){ falhasSeguidas = 0; drenarFila(); statusNuvem(); });
+function sc166ComandoServidor(cmd){
+  var payload=Object.assign({},cmd);
+  delete payload.sc166_owner;delete payload.sc166_conversao_tarefa;delete payload.sc166_conversao_evento;delete payload.sc120_group;
+  return payload;
+}
+window.addEventListener('online', function(){falhasSeguidas=0;if(!sc166Confirmado)recarregar(true);else drenarFila();statusNuvem();});
 window.addEventListener('offline', statusNuvem);
 
 function salvar(tabela, itens, extra, exigirPersistencia){
   itens = [].concat(itens);
   if(tabela==='tarefas'||tabela==='eventos')itens=itens.map(function(o){var old=(D[tabela]||[]).find(function(x){return x.id===o.id;})||{};return Object.assign(o,{alerta_status:tabela==='tarefas'||(extra&&extra.google)?'pendente':old.alerta_status||'',alerta_erro:''});});
   itens.forEach(function(o){
-    if(!o.id) o.id = tabela.charAt(0) + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+    if(!o.id){
+     var suf=Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+     o.id=tabela==='tarefas'&&o.recorrencia?'sc166r-'+suf:tabela.charAt(0)+suf;
+   }
   });
   if(tabela==='tarefas'&&window.SC145&&!SC145.guard(itens))return;
   if(window.sc119Remember && !sc119Remember(tabela,itens.map(function(x){return x.id;}),'edit'))return;
   var antesCelebracao = Celebracao.captura(tabela,itens);
   var cmd = Object.assign({ tipo:'SALVAR', tabela:tabela, itens:itens }, extra||{});
-  if(exigirPersistencia && !enfileirarComando(cmd,true)) return false;
+  if(!enfileirarComando(cmd,true))return false;
   if(window.SC151FX)SC151FX.track(cmd);
   efeitoLocal(cmd); renderTudo();
-  if(exigirPersistencia) drenarFila(); else enviar(cmd);
+  drenarFila();
   Celebracao.aposSalvar(antesCelebracao);
   return true;
 }
@@ -2879,21 +2988,21 @@ function excluir(tabela, ids, extra){
   ids = [].concat(ids).map(String);
   if(window.sc119Remember && !sc119Remember(tabela,ids,'delete'))return;
   var cmd = Object.assign({ tipo:'EXCLUIR', tabela:tabela, ids:ids }, extra||{});
+  if(!enfileirarComando(cmd,true))return false;
   if(window.SC151FX)SC151FX.track(cmd);
-  efeitoLocal(cmd); renderTudo();
-  enviar(cmd);
+  efeitoLocal(cmd); renderTudo();drenarFila();return true;
 }
 
 // Exclui já e oferece "Desfazer" por 7 s (tarefas, eventos, notas, metas)
 function excluirComDesfazer(tabela, id, rotulo){
   var item = Object.assign({}, obter(tabela, id)); if(!item.id) return;
   var filhosDiretos = tabela==='notas' ? (D.notas||[]).filter(function(n){return String(n.pagina_pai||'')===String(id);}).map(function(n){return Object.assign({},n);}) : [];
-  excluir(tabela, id, tabela==='eventos' ? { google:true } : null);
+  if(!excluir(tabela, id, tabela==='eventos' ? { google:true } : null))return;
   toast(rotulo || 'Excluído', false, { rotulo:'Desfazer', fn:function(){
     var r = Object.assign({}, item), ex = null;
     if(tabela==='eventos' && r.google_id){ r.google_id = ''; ex = { google:true }; }
     if(tabela==='tarefas'){r.google_task_id='';r.evento_google='';}
-    salvar(tabela, tabela==='notas' ? [r].concat(filhosDiretos) : r, ex); toast('Restaurado.');
+    if(salvar(tabela,tabela==='notas'?[r].concat(filhosDiretos):r,ex))toast('Restaurado no aparelho.');
   }});
 }
 // Projetos e hábitos têm efeitos colaterais (pasta no Drive, registros): mantêm confirmação
@@ -2907,12 +3016,18 @@ function excluirItem(tabela, id){
 
 function salvarConfig(dados){
   var cmd = { tipo:'SALVAR_CONFIG', dados:dados };
+  if(!enfileirarComando(cmd,true))return false;
   if(window.SC151FX)SC151FX.track(cmd);
-  efeitoLocal(cmd); renderTudo();
-  enviar(cmd);
+  efeitoLocal(cmd);renderTudo();drenarFila();return true;
 }
 function recarregar(forcar, aviso){
-  google.script.run.withSuccessHandler(function(r){ if((forcar || el('modal').classList.contains('hidden'))){ aplicarDados(r); renderTudo(); processarVoz(); if(aviso) toast('Atualizado.'); } }).withFailureHandler(function(){ if(aviso) toast('Sem resposta do servidor.', true); }).getDados(!!aviso);
+  var geracao=sc166Geracao;
+  google.script.run.withSuccessHandler(function(r){
+    if(geracao!==sc166Geracao||!(forcar||el('modal').classList.contains('hidden'))||!aplicarDados(r))return;
+    el('carregando').classList.add('hidden');renderTudo();processarVoz();
+    if(aviso)toast('Atualizado.');
+    if(fila.length)drenarFila();
+  }).withFailureHandler(function(){if(geracao===sc166Geracao&&aviso)toast('Sem resposta do servidor.',true);}).getDados(!!aviso);
 }
 
 /* ───────── navegação / tema ───────── */
@@ -3301,21 +3416,29 @@ function proximaOcorrencia(data, rec, hoje){
   return n;
 }
 function chaveSerie(t){ return [norm(t.titulo), t.recorrencia, t.area||'', t.projeto||''].join('|'); }
+function sc166OrigemSerie(t){
+  var id=String(t.id||''),orig=String(t.recorrencia_origem||'');
+  var match=/^sc166r-([a-z0-9]{5,40})(?:-\d{8})?$/.exec(id);
+  if(match)return match[1];
+  return /^[a-z0-9]{5,40}$/.test(orig)?orig:'';
+}
+function sc166Serie(t){var origem=sc166OrigemSerie(t);return origem?'orig:'+origem:'legada:'+chaveSerie(t);}
 // Id determinístico: o mesmo "próximo" criado em dois aparelhos (ou duas vezes) vira o mesmo registro
 function idRecorrencia(t, data){
+  var origem=sc166OrigemSerie(t);if(origem)return 'sc166r-'+origem+'-'+data.replace(/-/g,'');
   var k = chaveSerie(t) + '@' + data, x = 5381;
   for(var i=0;i<k.length;i++) x = ((x*33) ^ k.charCodeAt(i)) >>> 0;
   return 'rc' + x.toString(36) + data.replace(/-/g,'');
 }
 function novaOcorrencia(t, data){
-  return { id:idRecorrencia(t, data), titulo:t.titulo, notas:t.notas, area:t.area, projeto:t.projeto, prioridade:t.prioridade, hora:t.hora, meta_id:t.meta_id, lembrete:t.lembrete, duracao:t.duracao, local:t.local, recorrencia:t.recorrencia, etiquetas:t.etiquetas, status:'aberta', data:data };
+  return { id:idRecorrencia(t, data), recorrencia_origem:sc166OrigemSerie(t), titulo:t.titulo, notas:t.notas, area:t.area, projeto:t.projeto, prioridade:t.prioridade, hora:t.hora, meta_id:t.meta_id, lembrete:t.lembrete, duracao:t.duracao, local:t.local, recorrencia:t.recorrencia, etiquetas:t.etiquetas, status:'aberta', data:data };
 }
 // Séries abertas cujo último item ficou para trás e não têm nenhuma ocorrência de hoje em diante: cria a próxima
 function recorrenciasFaltantes(tarefas, hoje){
   var series = {}, novas = [];
   tarefas.forEach(function(t){
-    if(t.status==='feita' || !t.recorrencia || !t.data) return;
-    var k = chaveSerie(t), g = series[k] || (series[k] = { ultima:t, futura:false });
+    if(sc155Lifecycle(t)!=='open'||!t.recorrencia||!t.data)return;
+    var k = sc166Serie(t), g = series[k] || (series[k] = { ultima:t, futura:false });
     if(t.data >= hoje) g.futura = true;
     if(t.data > g.ultima.data) g.ultima = t;
   });
@@ -3330,7 +3453,7 @@ function recorrenciasFaltantes(tarefas, hoje){
 // ==== /RECORRENCIA ====
 function gerarRecorrencias(){
   var novas = recorrenciasFaltantes(D.tarefas, hojeISO());
-  if(novas.length){ salvar('tarefas', novas); toast(novas.length===1 ? 'Recorrência: criei a próxima ocorrência de "'+novas[0].titulo+'".' : 'Recorrência: criei '+novas.length+' próximas ocorrências.'); }
+  if(novas.length&&salvar('tarefas',novas)){toast(novas.length===1 ? 'Recorrência: criei a próxima ocorrência de "'+novas[0].titulo+'".' : 'Recorrência: criei '+novas.length+' próximas ocorrências.'); }
 }
 function alternarTarefa(id, forcar){
   var t = obter('tarefas', id); if(!t.id || !['open','done'].includes(sc155Lifecycle(t))) return;
@@ -5284,8 +5407,8 @@ function recentesHtml(){
 /* ───────── rascunhos automáticos (notas e tarefas) ───────── */
 var rasc = null, rascTimer = null;
 var RASC_CAMPOS = { tarefa:['f-tit','f-not','f-area','f-proj','f-data','f-hora','f-lemb','f-dur','f-prio','f-rec','f-etq','f-meta','f-loc'], nota:['f-tit','f-cont','f-area','f-tipo','f-etq','f-pagina-pai'] };
-function rascLer(){ try { var o = JSON.parse(lsGet('sc_rasc') || '{}') || {}; Object.keys(o).forEach(function(k){ if(!o[k] || Date.now() - o[k].t > 7 * 864e5) delete o[k]; }); return o; } catch(e){ return {}; } }
-function rascGravar(o){ lsSet('sc_rasc', Object.keys(o).length ? JSON.stringify(o) : null); }
+function rascLer(){ try { var o = JSON.parse(sc166Escopo&&lsGet('sc_rasc_v2:'+sc166Escopo) || '{}') || {}; Object.keys(o).forEach(function(k){ if(!o[k] || Date.now() - o[k].t > 7 * 864e5) delete o[k]; }); return o; } catch(e){ return {}; } }
+function rascGravar(o){ if(sc166Escopo)lsSet('sc_rasc_v2:'+sc166Escopo,Object.keys(o).length ? JSON.stringify(o) : null); }
 function rascSnap(tipo){
   if(edRaiz()) edSync();
   var o = {}; RASC_CAMPOS[tipo].forEach(function(c){ o[c] = val(c); });
@@ -5840,9 +5963,9 @@ function marcarHabito(hid, dia){ vibra(10);
   cmd.cid = Date.now().toString(36) + Math.random().toString(36).slice(2,10);
   var hab = obter('habitos',hid);
   var anterior = cmd.feito && hab.id ? sequencia(hab) : 0;
+  if(!enfileirarComando(cmd,true))return false;
   if(window.SC151FX)SC151FX.track(cmd);
-  efeitoLocal(cmd); renderTudo();
-  enviar(cmd);
+  efeitoLocal(cmd);renderTudo();drenarFila();
   if(cmd.feito&&window.SC151FX)SC151FX.localHabit(hid);
   if(cmd.feito && hab.id) Celebracao.habito(hab,anterior,sequencia(hab));
 }
@@ -5972,7 +6095,7 @@ function abrirTarefa(x){
     linha2(campo('Data', inp('f-data', t.data, 'date')), campo('Hora', inp('f-hora', t.hora, 'time'))) +
     campo('Local', inp('f-loc', t.local)) + blocoLocal('f-hora') +
     linha2(campo('Avisar no celular', selHtml('f-lemb', [['','Sem aviso'],['0','No horário'],['10','10 min antes'],['30','30 min antes'],['60','1 h antes'],['1440','1 dia antes']], id ? t.lembrete : '10')), campo('Duração', selHtml('f-dur', [['','Não definir'],['15','15 min'],['30','30 min'],['45','45 min'],['60','1 h'],['90','1 h 30'],['120','2 h'],['180','3 h']], t.duracao || ''))) +
-    '<p class="subt -mt-1">O aviso toca pelo Google Agenda do celular. Sem hora, ele vem no horário padrão do dia (Ajustes). A duração ocupa espaço na agenda do dia.</p>' +
+    '<p class="subt -mt-1">Para receber aviso de tarefa, informe data e hora. Sem hora, o aplicativo não configura lembrete dessa tarefa. O aviso depende do Google Agenda e das notificações do Android.</p>' +
     '<div id="f-est" class="subt"></div>' +
     '<div class="flex gap-1.5 flex-wrap"><button type="button" class="chip chip-f" onclick="'+C('encaixarNoModal',id)+'">⏱ Sugerir o próximo horário livre</button><button type="button" class="chip chip-f" onclick="criarAlarmeRelogio()">🔔 Avisar no horário</button>' + (id ? '<button type="button" class="chip chip-f" onclick="'+C('virarCompromisso',id)+'">📅 Virar compromisso</button>' : '') + (id ? '' : '<button type="button" class="chip chip-f" onclick="abrirModelos(\'tarefa\')">📋 Modelos</button>') + '<button type="button" class="chip chip-f" onclick="salvarComoModelo(\'tarefa\')">+ Salvar como modelo</button>' + (id ? '<button type="button" class="chip chip-f" onclick="'+C('duplicarTarefa',id,'hoje')+'">⧉ Duplicar p/ hoje</button><button type="button" class="chip chip-f" onclick="'+C('duplicarTarefa',id,'amanha')+'">⧉ Duplicar p/ amanhã</button>' : '') + '</div>' +
     (id ? campo('Tempo já feito (min)', inp('f-feito', tempoFeito(t) || '', 'number', 'min="0" max="9999" placeholder="0"')) : '') +
@@ -5998,12 +6121,15 @@ function virarCompromisso(id){
   if(!data){ toast('Defina a data antes: compromisso precisa de dia.', true); return; }
   var lb = v('f-lemb', t.lembrete);
   var ev = { titulo:tit, data:data, inicio:hora || '', fim:hora ? calcularFim(hora, '', dur) : '', area:v('f-area', t.area) || areaAuto(tit), local:String(v('f-loc', t.local || '')).trim(), notas:v('f-not', t.notas || ''), lembrete:hora ? (lb === '' || lb == null ? '30' : lb) : '' };
-  var extra = cfgSim('google_criar') ? { google:true } : null;
-  try { rascLimpar(); } catch(e){}
+  ev.id='sc166conv-'+String(t.id);
+  if(fila.some(function(c){return c.sc166_conversao_evento===ev.id||(c.tipo==='EXCLUIR'&&c.tabela==='tarefas'&&(c.ids||[]).includes(String(t.id)));})){
+    toast('A conversão já está na fila de sincronização.',true);return;
+  }
+  var extra=Object.assign({},cfgSim('google_criar')?{google:true}:{},{sc166_conversao_tarefa:String(t.id),sc166_conversao_evento:ev.id});
+  if(!salvar('eventos',ev,extra,true)){toast('Conversão não iniciada; a tarefa foi preservada.',true);return;}
+  try{rascLimpar();}catch(e){}
   fecharModal();
-  salvar('eventos', ev, extra);
-  excluir('tarefas', t.id);
-  toast('Virou compromisso: ' + tit + ' · ' + dataBonita(data) + (hora ? ' ' + hora : ' (sem horário)'), false, { rotulo:'Abrir', fn:function(){ abrirEvento(ev.id); } });
+  toast('Compromisso solicitado. A tarefa será retirada somente após o servidor confirmar a gravação.',false,{rotulo:'Abrir',fn:function(){abrirEvento(ev.id);}});
   if(!hora) setTimeout(function(){ abrirEvento(ev.id); toast('Defina o horário do compromisso.'); }, 250);
 }
 function criarAlarmeRelogio(){
@@ -6027,7 +6153,7 @@ function salvarTarefaModal(id, outra){
   if(!o.hora) o.lembrete = '';
   else { var ajT = ajustarLembrete(o.data, o.hora, o.lembrete); o.lembrete = ajT.lembrete; if(ajT.aviso) toast(ajT.aviso); }
   if(id) o.id = id; else { if(!o.area) o.area = areaAuto(o.titulo + ' ' + o.notas); o.status = 'aberta'; lsSet('sc_ult_area', o.area || null);  }
-  salvar('tarefas', o); rascLimpar(); saidaAuto('tarefas', o, null);
+  if(!salvar('tarefas',o))return;rascLimpar();saidaAuto('tarefas', o, null);
   if(outra && !id){ toast('Salva. Próxima:'); abrirTarefa({ area:o.area, projeto:o.projeto, data:o.data, prioridade:o.prioridade, duracao:o.duracao }); } else fecharModal();
 }
 
@@ -6113,7 +6239,7 @@ function salvarEventoModal(id){
   if(id) o.id = id;
   var extra = {};
   if(marcado('f-g')) extra.google = true; else if(ev.google_id) extra.tirarDoGoogle = true;
-  salvar('eventos', o, extra); fecharModal(); saidaAuto('eventos', o, extra.google ? { google:true } : null);
+  if(!salvar('eventos',o,extra))return;fecharModal();saidaAuto('eventos', o, extra.google ? { google:true } : null);
 }
 
 /* ───────── modais: projeto, nota, meta, hábito ───────── */
@@ -6182,7 +6308,7 @@ function salvarNotaModal(id, manter){
   if(typeof sc62ValidateParent==='function' && !sc62ValidateParent(id,paiEscolhido)){toast('Não é possível colocar uma página dentro de si mesma ou de suas subpáginas.',true);return;}
   var o = { titulo:tit, conteudo:val('f-cont'), colunas_nota:edColunas(), area:val('f-area'), tipo:val('f-tipo'), etiquetas:val('f-etq'), fixada: marcado('f-fix')?'Sim':'', fixada_hoje: marcado('f-fix-hoje')?'Sim':'', pagina_pai:paiEscolhido };
   if(id){ o.id = id; if(!o.fixada_hoje) o.ordem_hoje = ''; }
-  salvar('notas', o); if(window.sc74Notes&&window.sc74Notes.onNoteSaved)window.sc74Notes.onNoteSaved(o); rascLimpar(); if(manter) toast('Nota salva no aparelho; confira a sincronização.'); else fecharModal();
+  if(!salvar('notas',o))return;if(window.sc74Notes&&window.sc74Notes.onNoteSaved)window.sc74Notes.onNoteSaved(o); rascLimpar(); if(manter) toast('Nota salva no aparelho; confira a sincronização.'); else fecharModal();
 }
 
 function abrirMeta(x){
@@ -7061,14 +7187,14 @@ function enviarResumoEmail(){
 }
 function arquivarConcluidas(){
   if(!confirm('Mover para a aba "Arquivo" as tarefas concluídas há mais de 90 dias? (Tarefas recorrentes ficam.)')) return;
-  var cmd = { tipo:'ARQUIVAR' }; enviar(cmd); manutMsg(true, 'Pedido enviado. O resultado aparece no aviso.');
+  var cmd = { tipo:'ARQUIVAR' }; if(!enviar(cmd))return;manutMsg(true, 'Pedido enviado. O resultado aparece no aviso.');
 }
 function renomearAreaUI(){
   var de = val('rn-de'), para = val('rn-para').trim();
   if(!de || !para){ manutMsg(false, 'Escolha a área e digite o novo nome.'); return; }
   if(de===para){ manutMsg(false, 'O novo nome é igual ao atual.'); return; }
   if(!confirm('Renomear "'+de+'" para "'+para+'" em tarefas, projetos, eventos, notas, metas, hábitos e rotina?')) return;
-  var cmd = { tipo:'RENOMEAR_AREA', de:de, para:para }; efeitoLocal(cmd); renderTudo(); enviar(cmd); el('rn-para').value = '';
+  var cmd = { tipo:'RENOMEAR_AREA', de:de, para:para }; if(!enviar(cmd))return;efeitoLocal(cmd);renderTudo();el('rn-para').value = '';
 }
 function fazerBackupAgora(){
   var box = el('cf-diag'); box.innerHTML = '<span class="subt"><i class="fa-solid fa-rotate fa-spin mr-1"></i>Copiando a planilha…</span>';
@@ -8194,15 +8320,18 @@ window.addEventListener('error', function(e){
 });
 function iniciar(){
   aplicarTemaInicial(); montarNav(); agDia = hojeISO(); irPara('hoje');
-  fila = lerFila(); pendentes = fila.length;
-  var c = lerCache(), comCache = !!(c && c.config && c.tarefas);
+  sc166Bootstrap();fila = sc166Conta ? lerFila() : []; pendentes = fila.length;
+  var c = lerCache(), comCache = !!(c && c.config && c.tarefas), geracao=sc166Geracao;
   if(comCache){ try { aplicarDados(c, true); el('carregando').classList.add('hidden'); atualizando = true; renderTudo(); setTimeout(tratarAtalho, 200); } catch(eC){ seguro('Dados salvos no aparelho', function(){ throw eC; }); } }
   google.script.run
     .withSuccessHandler(function(r){
-      atualizando = false;
-      seguro('Dados do servidor', function(){ aplicarDados(r); });
-      el('carregando').classList.add('hidden'); renderTudo();
-      if(r) gerarRecorrencias();
+      if(geracao!==sc166Geracao)return;
+      atualizando=false;
+      if(!r||!sc166Nome(r.usuario)){statusNuvem();toast('O servidor não confirmou a identidade da conta. Conecte novamente para sincronizar.',true);return;}
+      aplicarDados(r);
+      el('carregando').classList.add('hidden');renderTudo();
+      if(r && sc166Conta) gerarRecorrencias();
+      if(fila.length)drenarFila();
       if(r) setTimeout(function(){ tratarAtalho(); mostrarNovidades(); }, 300);
       if(r) processarVoz();
       if(r) setTimeout(verificarPWA, 4000);
@@ -8211,6 +8340,7 @@ function iniciar(){
       if(r && r.versaoServidor && !sc123VersoesCompativeis(VERSAO_TELA,r.versaoServidor)) toast('Versões incompatíveis: tela ' + VERSAO_TELA + ' / servidor ' + r.versaoServidor + '. Atualize os dois arquivos e publique uma nova versão.', true);
     })
     .withFailureHandler(function(e){
+      if(geracao!==sc166Geracao)return;
       atualizando = false; statusNuvem();
       if(comCache) toast('Sem resposta do servidor: mostrando os dados salvos neste aparelho.', true);
       else el('carregando').innerHTML = '<p class="text-sm text-red-600 max-w-sm text-center">Não consegui abrir os dados: ' + h(erroHumano(e)) + '</p><button onclick="location.reload()" class="btn btn-p">Tentar de novo</button>';
@@ -8581,14 +8711,18 @@ function noteToolbar(){if(!$('ed')||$('sc5-note-bar'))return;const bar=document.
 }
 
 /* Studio 5.6: conservative, recoverable import. The UI never equates queued with server-confirmed. */
-const SC56_SESSION='sc56_restore_progress_v1';
-const SC56_DEAD='sc_fila_mortos_v1';
+function sc56SessionKey(){return 'sc56_restore_progress_v2:'+sc166Escopo;}
+window.addEventListener('sc166:conta-limpa',()=>{
+ backupPending=null;
+ const preview=$('sc5-restore-preview');if(preview)preview.replaceChildren();
+ const prog=$('sc56-progress');if(prog)prog.textContent='';
+});
 let restoreChoice='skip',restoreProgress=null;
 function localJson(key){try{let v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}}
 function snapshot(){
  const data={};DATA_KEYS.forEach(k=>data[k]=Array.isArray(D[k])?D[k].map(x=>({...x})):[]);
  return {app:'Segundo Cerebro',schema:'sc56-recovery-1',exportado_em:new Date().toISOString(),dados:data,
- fila_pendente:lerFila(),fila_quarentena:localJson(SC56_DEAD)};
+ fila_pendente:lerFila(),fila_quarentena:localJson(sc166QuarentenaKey())};
 }
 function safeExport(){
  if(typeof D==='undefined')return;
@@ -8623,12 +8757,12 @@ function recoveryUI(){
  cfg.insertBefore(panel,cfg.firstElementChild.nextSibling);
  $('sc5-export').onclick=safeExport;$('sc5-restore-file').onchange=readRecovery;
  $('sc56-retry').onclick=()=>{if(typeof reintegrarQuarentena==='function'){reintegrarQuarentena();}refreshRecovery();};
- $('sc56-export-queue').onclick=()=>{const obj={app:'Segundo Cerebro',exportado_em:new Date().toISOString(),fila_pendente:lerFila(),fila_quarentena:localJson(SC56_DEAD)};downloadFile('segundo-cerebro-pendencias-'+hojeISO()+'.json','application/json;charset=utf-8',JSON.stringify(obj,null,2));};
+ $('sc56-export-queue').onclick=()=>{const obj={app:'Segundo Cerebro',exportado_em:new Date().toISOString(),fila_pendente:lerFila(),fila_quarentena:localJson(sc166QuarentenaKey())};downloadFile('segundo-cerebro-pendencias-'+hojeISO()+'.json','application/json;charset=utf-8',JSON.stringify(obj,null,2));};
  refreshRecovery();
 }
 function refreshRecovery(){
  const x=$('sc5-sync-status');if(!x)return;
- const queue=lerFila(),dead=localJson(SC56_DEAD);
+ const queue=lerFila(),dead=localJson(sc166QuarentenaKey());
  x.textContent=queue.length+' operação(ões) pendente(s) · '+dead.length+' em quarentena · '+(navigator.onLine?'rede disponível':'offline')+'.';
  // 12h: lista o que está em quarentena (antes só aparecia a contagem)
  if(dead.length){const ul=document.createElement('ul');ul.className='sc12h-quarentena';ul.style.cssText='margin:.5rem 0 0;padding-left:1.1rem;font-size:.9em';
@@ -8640,7 +8774,7 @@ function refreshRecovery(){
   x.appendChild(ul);}
  const b=$('sc56-retry');if(b)b.disabled=!dead.length;
  const prog=$('sc56-progress');if(!prog)return;
- let session=null;try{session=JSON.parse(localStorage.getItem(SC56_SESSION)||'null');}catch(e){}
+ let session=null;try{session=JSON.parse(localStorage.getItem(sc56SessionKey())||'null');}catch(e){}
  if(!session||!Array.isArray(session.cids))return;
  const pending=new Set([...queue,...dead].map(c=>c.cid));
  const remaining=session.cids.filter(cid=>pending.has(cid)).length;
@@ -8650,7 +8784,7 @@ function refreshRecovery(){
 function readRecovery(e){
  backupPending=null;const file=e.target.files?.[0],out=$('sc5-restore-preview');if(!file||!out)return;
  if(file.size>15*1024*1024){out.textContent='Limite de 15 MB por arquivo.';return;}
- const r=new FileReader();r.onload=()=>{try{
+ const geracao=sc166Geracao;const r=new FileReader();r.onload=()=>{if(geracao!==sc166Geracao)return;try{
   const parsed=validRecords(JSON.parse(String(r.result)));backupPending=parsed;
   out.innerHTML='<p><strong>Backup validado:</strong> '+parsed.total+' registro(s); <strong>'+parsed.conflicts+' com ID já existente</strong>. Nenhuma alteração foi executada.</p>'+ 
   '<label class="sc56-label" for="sc56-conflict">Registros com mesmo ID</label><select id="sc56-conflict" class="input"><option value="skip">Preservar os atuais (recomendado)</option><option value="replace">Substituir pelos registros do backup (risco de sobrescrita)</option></select>'+ 
@@ -8660,10 +8794,10 @@ function readRecovery(e){
  r.onerror=()=>out.textContent='Não foi possível ler o arquivo.';r.readAsText(file);
 }
 function restore(){
- if(!backupPending||typeof D==='undefined'||typeof enviar!=='function')return;
+ if(!backupPending||!sc166Confirmado||typeof enviar!=='function')return;
  const policy=$('sc56-conflict')?.value||'skip';const sets=backupPending.sets;
  if(!navigator.onLine){toast('Conecte-se para iniciar a importação; o backup continua selecionado.',true);return;}
- if(localJson(SC56_DEAD).length||lerFila().length){toast('Resolva antes as alterações pendentes e a quarentena.',true);return;}
+ if(localJson(sc166QuarentenaKey()).length||lerFila().length){toast('Resolva antes as alterações pendentes e a quarentena.',true);return;}
  const current=new Set();DATA_KEYS.forEach(k=>(D[k]||[]).forEach(o=>current.add(k+':'+o.id)));
  const operations=[];DATA_KEYS.forEach(k=>{let list=sets[k].filter(o=>policy==='replace'||!current.has(k+':'+o.id));for(let i=0;i<list.length;i+=50)operations.push({tipo:'UPSERT_LOTE',sobrescrever:policy==='replace',dados:{[k]:list.slice(i,i+50)}});});
  if(!operations.length){toast('Não há registros novos a importar.');return;}
@@ -8672,8 +8806,8 @@ function restore(){
  safeExport();
  const ids=[];
  try{
-  for(const op of operations){enviar(op);ids.push(op.cid);}
-  localStorage.setItem(SC56_SESSION,JSON.stringify({started:new Date().toISOString(),cids:ids,policy}));
+  for(const op of operations){if(!enviar(op))throw Error('o aparelho recusou a gravação local');ids.push(op.cid);}
+  localStorage.setItem(sc56SessionKey(),JSON.stringify({started:new Date().toISOString(),cids:ids,policy}));
   backupPending=null;const out=$('sc5-restore-preview');if(out)out.textContent=operations.length+' lote(s) adicionados à fila. Confira o arquivo baixado e aguarde confirmação de sincronização. Não limpe os dados.';
   refreshRecovery();
  }catch(e){toast('Falha ao enfileirar: '+e.message+'; verifique a fila e preserve o backup.',true);refreshRecovery();}
@@ -8813,7 +8947,7 @@ function create(){var root=$('v-config');if(!root||$('sc60-diagnostics'))return;
 var div=document.createElement('section');div.id='sc60-diagnostics';div.innerHTML='<h2>Estado do aplicativo</h2><div id="sc60-diagnostic-content" aria-live="polite"></div><p class="sc60-help">O status indica alterações guardadas neste dispositivo; a confirmação definitiva depende da resposta do servidor Google.</p><div class="sc60-actions"><button type="button" id="sc60-retry">Tentar sincronizar</button><button type="button" id="sc60-export">Exportar pendências</button><button type="button" id="sc60-search">Buscar no sistema</button></div>';
 var googlePanel=$('sc58-google');if(googlePanel)googlePanel.insertAdjacentElement('afterend',div);else root.insertBefore(div,root.firstElementChild);
 $('sc60-retry').onclick=function(){if(typeof retentarFila==='function')retentarFila();render();};
-$('sc60-export').onclick=function(){var pending=lerFila(),dead=storageArray('sc_fila_mortos_v1');
+$('sc60-export').onclick=function(){var pending=lerFila(),dead=storageArray(sc166QuarentenaKey());
 
 var backup={app:'Segundo Cerebro',tipo:'exportacao-de-emergencia',data:new Date().toISOString(),fila:pending,quarentena:dead};
 downloadFile('segundo-cerebro-pendencias-'+new Date().toISOString().slice(0,10)+'.json',
@@ -8821,7 +8955,7 @@ downloadFile('segundo-cerebro-pendencias-'+new Date().toISOString().slice(0,10)+
 $('sc60-search').onclick=function(){if(typeof abrirBusca==='function')abrirBusca();};render();}
 function render(){var node=$('sc60-diagnostic-content');if(!node)return;
 var pending=typeof fila!=='undefined'?fila.length:lerFila().length;
-var dead=storageArray('sc_fila_mortos_v1').length;
+var dead=storageArray(sc166QuarentenaKey()).length;
 var offline=navigator.onLine===false;
 var danger=window.sc60FilaNaoPersistida===true;
 node.innerHTML='<div class="sc60-diagnostic-row"><span>Conexão</span><strong>'+(offline?'Sem rede':'Rede disponível')+'</strong></div>'+
@@ -9724,7 +9858,7 @@ html[data-sc-theme] :where(textarea):not(sc-nunca){border-color:ButtonText!impor
     ideia=ideia===true||ideia==='true';
     if(!confirm((ideia?'Converter em nota de ideia e arquivar ':'Mover para a aba Arquivo ')+selecionadas.length+' item(ns)?')) return;
     var cmd={tipo:'ARQUIVAR',tabela:'tarefas',ids:selecionadas,ideias:ideia===true||ideia==='true'};
-    efeitoLocal(cmd);enviar(cmd);renderTudo();
+    if(!enviar(cmd))return;efeitoLocal(cmd);renderTudo();
     if(origem==='revisao') abrirRevisao();else abrirEntrada();
   }
   function planos(){return lista(D.config.planner_metas,[]);}
@@ -9766,7 +9900,7 @@ html[data-sc-theme] :where(textarea):not(sc-nunca){border-color:ButtonText!impor
     var novas=sessoesNovas(p,base,new Set(D.tarefas.map(function(t){return t.id;})),hojeISO());
     if(!novas.length){toast('As sessões futuras dessa semana já foram geradas ou a semana terminou.');return;}
     var cmd={tipo:'UPSERT_LOTE',sobrescrever:false,dados:{tarefas:novas}};
-    efeitoLocal(cmd);enviar(cmd);renderTudo();abrirMetas();toast(novas.length+' sessão(ões) adicionada(s).');
+    if(!enviar(cmd))return;efeitoLocal(cmd);renderTudo();abrirMetas();toast(novas.length+' sessão(ões) adicionada(s).');
   }
   function removerPlano(id){
     if(!confirm('Remover o modelo semanal? As sessões já agendadas ficam na agenda.'))return;
@@ -11891,7 +12025,7 @@ window.SC118={get enabled(){return true;},name:'Gestos no Hoje'};
 /* Studio 11.9: recuperação local de tarefas/notas e rascunho da sessão. */
 (function(){
 'use strict';
-function scope(){let c='';try{c=localStorage.getItem('sc_pwa_cfg_v1')||'';}catch(_){}return encodeURIComponent(location.pathname+'|'+c);}
+function scope(){let c='';try{c=localStorage.getItem('sc_pwa_cfg_v1')||'';}catch(_){}return encodeURIComponent(location.pathname+'|'+c)+'|'+sc166Escopo;}
 function prefix(){return 'sc119_history:'+scope()+':';}
 function entries(){const p=prefix(),a=[];for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i);if(!k||!k.startsWith(p))continue;try{let v=JSON.parse(localStorage.getItem(k));if(v&&['tarefas','notas'].includes(v.table)&&v.item&&v.item.id)a.push({key:k,...v});}catch(_){}}return a.sort((a,b)=>b.at-a.at);}
 function uid(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(_){}return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);}
@@ -12189,7 +12323,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-17d-sc113712"></script>
+<script src="./pwa-install.js?v=2026-11-17e-sc113713"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12509,7 +12643,7 @@ function prepare(result,ctx,snapshots){
   if(a.acao==='criar'){
    const dupe=duplicate(a.tabela,fields,virtual);if(dupe){refs[a.ref]=String(dupe.id);lastTouched.push(key(a.tabela,dupe.id));skipped.push(dupe.titulo||dupe.nome);continue;}
   }
-  const id=old?String(old.id):uid(a.tabela[0]+'ia');
+  const id=old?String(old.id):uid(a.tabela==='tarefas'&&fields.recorrencia?'sc166r-':a.tabela[0]+'ia');
   if(a.acao==='criar')refs[a.ref]=id;
   const after=a.acao==='excluir'?null:Object.assign({},old||defaultFields(a.tabela),fields,{id});
   if(after&&(!old||['data','hora','inicio','fim','duracao'].some(k=>Object.prototype.hasOwnProperty.call(fields,k))))conflict(a.tabela,after,id,virtual);
@@ -12534,7 +12668,8 @@ function prepare(result,ctx,snapshots){
 // Um diário durável contém o lote inteiro. A fila retoma por CID sem repetir a gravação.
 function enqueue(commands){
  if(!commands.length)return;
- const group=uid('sc120_lote_');commands.forEach(c=>c.sc120_group=group);
+ if(!sc166Escopo)throw Error('Conecte a conta Google antes de gravar alterações.');
+ const group=sc166PrefixoLote()+uid('ia');commands.forEach(c=>{c.sc120_group=group;c.sc166_owner=sc166Escopo;});
  try{localStorage.setItem(group,JSON.stringify(commands));}catch(_){throw Error('Não consegui guardar as ações neste aparelho. Sua mensagem foi mantida.');}
  const celebrations=[];
  commands.forEach(c=>{try{if(c.tipo==='SALVAR'&&typeof Celebracao!=='undefined')celebrations.push(Celebracao.captura(c.tabela,c.itens));}catch(_){}if(window.SC151FX)SC151FX.track(c,'capture');const hb=c.tipo==='MARCAR_HABITO'&&c.feito?obter('habitos',c.habito_id):null,seqBefore=hb&&hb.id?sequencia(hb):0;fila.push(c);efeitoLocal(c);if(hb&&hb.id)Celebracao.habito(hb,seqBefore,sequencia(hb));});
@@ -12842,8 +12977,8 @@ function init(){const $=id=>document.getElementById(id),top=$('topo');if(!top||!
  const head=document.createElement('div');head.id='sc129-header';head.innerHTML='<strong>2º Cérebro</strong><div><button type="button" id="sc129-settings" aria-label="Ajustes"><i class="fa-solid fa-gear" aria-hidden="true"></i></button></div>';const search=top.querySelector('button[onclick="abrirBusca()"]');if(search)head.lastElementChild.prepend(search);top.prepend(head);$('sc129-settings').onclick=()=>irPara('config');
  const input=$('captura'),form=input?.closest('form');if(form){const history=document.createElement('button');history.type='button';history.className='sc129-history';history.setAttribute('aria-label','Histórico da conversa');history.innerHTML='<svg class="sc130-history-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 10a9 9 0 1 1 1.8 7.4M3 4v6h6"/><path d="M12 7v5l3 2"/></svg>';history.onclick=()=>SC126.conversation();form.appendChild(history)}
  const status=document.createElement('div');status.id='sc129-sync';status.setAttribute('role','status');status.setAttribute('aria-live','polite');$('v-hoje').parentNode.after(status);
- function update(){let dead=[];try{dead=JSON.parse(localStorage.getItem('sc_fila_mortos_v1')||'[]')}catch(_){}const pending=typeof fila!=='undefined'&&fila.length>0,quarantined=Array.isArray(dead)&&dead.length>0,online=navigator.onLine!==false;status.dataset.pending=String(pending||quarantined);status.textContent=pending?(online?'Sincronizando…':'Pendente · sem conexão'):!online?'Sem conexão':typeof atualizando!=='undefined'&&atualizando?'Atualizando…':typeof ultimaSync!=='undefined'&&ultimaSync?'✓ Salvo':'Aguardando conexão';if(quarantined)status.textContent='Há pendências para conferir nos ajustes';if(pending&&typeof falhasSeguidas!=='undefined'&&falhasSeguidas>=2&&!enviando)status.textContent='Pendente · toque para tentar novamente'}
- status.onclick=()=>{try{const dead=JSON.parse(localStorage.getItem('sc_fila_mortos_v1')||'[]');if(Array.isArray(dead)&&dead.length){irPara('config');return}}catch(_){}if(typeof fila!=='undefined'&&fila.length&&typeof retentarFila==='function')retentarFila()};const old=window.statusNuvem;if(typeof old==='function')window.statusNuvem=function(){const r=old.apply(this,arguments);update();return r};window.addEventListener('online',update);window.addEventListener('offline',update);window.SC129={update};update();
+ function update(){let dead=[];try{dead=JSON.parse(localStorage.getItem(sc166QuarentenaKey())||'[]')}catch(_){}const pending=typeof fila!=='undefined'&&fila.length>0,quarantined=Array.isArray(dead)&&dead.length>0,online=navigator.onLine!==false;status.dataset.pending=String(pending||quarantined);status.textContent=pending?(online?'Sincronizando…':'Pendente · sem conexão'):!online?'Sem conexão':typeof atualizando!=='undefined'&&atualizando?'Atualizando…':typeof ultimaSync!=='undefined'&&ultimaSync?'✓ Salvo':'Aguardando conexão';if(quarantined)status.textContent='Há pendências para conferir nos ajustes';if(pending&&typeof falhasSeguidas!=='undefined'&&falhasSeguidas>=2&&!enviando)status.textContent='Pendente · toque para tentar novamente'}
+ status.onclick=()=>{try{const dead=JSON.parse(localStorage.getItem(sc166QuarentenaKey())||'[]');if(Array.isArray(dead)&&dead.length){irPara('config');return}}catch(_){}if(typeof fila!=='undefined'&&fila.length&&typeof retentarFila==='function')retentarFila()};const old=window.statusNuvem;if(typeof old==='function')window.statusNuvem=function(){const r=old.apply(this,arguments);update();return r};window.addEventListener('online',update);window.addEventListener('offline',update);window.SC129={update};update();
  // O menu tem um único responsável. A rotina SC11 antiga deixa de substituí-lo.
  if(window.SC100&&SC100.chooseContext)SC100.chooseContext('tudo');SC126.refresh();
 }
@@ -13011,7 +13146,17 @@ function stamp(n){const v=String(n.last_modified||'');const m=/^(\d{1,2})\/(\d{1
 function snippet(n,q){let text=resumoNota(n.conteudo||'').replace(/\s+/g,' ').trim();const term=String(q||'').trim().split(/\s+/)[0]||'';let at=term?text.toLocaleLowerCase().indexOf(term.toLocaleLowerCase()):-1;if(at>30)text='…'+text.slice(at-25);text=text.slice(0,110);if(!text)return '';if(!term)return esc(text);const ix=text.toLocaleLowerCase().indexOf(term.toLocaleLowerCase());return ix<0?esc(text):esc(text.slice(0,ix))+'<mark>'+esc(text.slice(ix,ix+term.length))+'</mark>'+esc(text.slice(ix+term.length))}
 function open(id){if(!finish())return;irPara('notas');sc62Pages.switchView('paginas');sc74Notes.open(id)}
 function status(text){const x=$('sc138-save');if(x)x.textContent=text}
-function draftKey(id){return 'sc138-draft:'+String(id)}
+function draftKey(id){return 'sc138-draft-v2:'+sc166Escopo+':'+String(id)}
+window.addEventListener('sc166:conta-saindo',()=>{
+ if(editing){
+  try{edSync();const field=$('sc138-content'),text=field?.value,cols=edColunas();
+   if(field&&(text!==editing.base||cols!==editing.baseCols))
+    localStorage.setItem(draftKey(editing.id),JSON.stringify({text,cols,base:editing.base,baseCols:editing.baseCols,at:Date.now()}));
+  }catch(_){}
+ }
+ clearTimeout(timer);editing=null;selection='';selectionNote='';selectionRange=null;
+ $('np-document')?.replaceChildren();edAlvo='f-cont';
+});
 function flush(){
  if(!editing)return true;
  clearTimeout(timer);
@@ -13055,6 +13200,8 @@ function flush(){
 function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader'),n=note(id);if(reader){reader.dataset.notaColunas=notaColunas(n?.colunas_nota);reader.innerHTML=sc74Notes.renderMarkdown(n?.conteudo||'');}edAlvo='f-cont';return true}
 function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;return !finish()}
 function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||''),defaultCols=notaColunas(n.colunas_nota),cols=defaultCols;try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&typeof draft.text==='string'&&draft.base===content&&(!draft.baseCols||draft.baseCols===defaultCols)&&confirm('Recuperar o rascunho de edição desta nota?')){content=draft.text;if(draft.cols)cols=notaColunas(draft.cols);}}catch(_){}
+ const modal=$('modal');
+ if(modal?.classList.contains('hidden')&&modal.querySelector('#ed'))$('modal-corpo')?.replaceChildren();
  editing={id:String(id),base:String(n.conteudo||''),baseCols:defaultCols};reader.dataset.notaColunas='1';reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><div class="sc138-format">'+edBarraHtml(true)+'</div><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
  edAlvo='sc138-content';edIniciar(content);edColunas(cols);if(typeof scInitNoteSize==='function')scInitNoteSize();
  const schedule=()=>{status('Guardando…');clearTimeout(timer);timer=setTimeout(flush,650)};reader.addEventListener('input',schedule);reader.addEventListener('change',schedule);reader.addEventListener('click',e=>{if(e.target.closest('#ed,#ed-ins,#ed-num'))schedule()});const first=edRaiz().querySelector('[contenteditable]');first?.focus();if(content!==editing.base||cols!==editing.baseCols)schedule();}
@@ -13343,10 +13490,18 @@ function short(d){return deISO(d).toLocaleDateString('pt-BR',{weekday:'short',da
 function monday(d){const n=deISO(d).getDay();return somaDias(d,-((n+6)%7));}
 function habits(){return rows('habitos').filter(x=>x.ativo!=='Não'&&String(x.dias).split(',').includes(String(deISO(day).getDay())));}
 
-const ideaDrafts=new Map(),ideaTimers=new Map();
+const ideaDrafts=new Map(),ideaTimers=new Map(),ideaBases=new Map();
+window.addEventListener('sc166:conta-limpa',()=>{
+ ideaTimers.forEach(t=>clearTimeout(t));ideaTimers.clear();ideaDrafts.clear();ideaBases.clear();
+ document.querySelectorAll('[data-sc148-note]').forEach(el=>{el.value='';el.blur();});
+});
+function ideaId(d){return 'sc148-idea-'+String(d).replace(/-/g,'');}
 function ideaSaved(){
- const value=parse(D.config.sc148_notes,{});
- return value&&typeof value==='object'&&!Array.isArray(value)?value:{};
+  const value=parse(D.config.sc148_notes,{});
+  const old=value&&typeof value==='object'&&!Array.isArray(value)?Object.assign({},value):{};
+  rows('notas').forEach(n=>{const m=/^sc148-idea-(\d{4})(\d{2})(\d{2})$/.exec(String(n.id||''));
+    if(m)old[m[1]+'-'+m[2]+'-'+m[3]]=String(n.conteudo||'');});
+  return old;
 }
 function ideaBox(){
  const pending=ideaDrafts.has(day),text=pending?ideaDrafts.get(day):String(ideaSaved()[day]??'');
@@ -13362,14 +13517,17 @@ function ideaStatus(d,msg){
 function ideaSave(d,drain=true){
  clearTimeout(ideaTimers.get(d));ideaTimers.delete(d);
  if(!ideaDrafts.has(d))return true;
- const text=ideaDrafts.get(d),notes=Object.assign({},ideaSaved());
- if(text===String(notes[d]??'')){ideaDrafts.delete(d);ideaStatus(d,'Sem alterações.');return true;}
- if(text.trim())notes[d]=text;else delete notes[d];
- const json=JSON.stringify(notes);
- if(json.length>48000){ideaStatus(d,'Não foi possível guardar. O rascunho continua aqui.');return false;}
- const cmd={tipo:'SALVAR_CONFIG',dados:{sc148_notes:json}};
- if(!enfileirarComando(cmd,true)){ideaStatus(d,'Não foi possível guardar. Tente salvar novamente.');return false;}
- efeitoLocal(cmd);ideaDrafts.delete(d);
+ const text=ideaDrafts.get(d),atual=String(ideaSaved()[d]??'');
+ if(text===atual){ideaDrafts.delete(d);ideaBases.delete(d);ideaStatus(d,'Sem alterações.');return true;}
+ if(atual!==ideaBases.get(d)){
+  ideaStatus(d,'A ideia mudou em outro lugar. Revise o texto antes de salvar novamente.');return false;
+ }
+ const current=rows('notas').find(n=>String(n.id)===ideaId(d));
+ const entry=Object.assign(current?{}:{titulo:'Ideia · '+d,tipo:'nota',etiquetas:'ideia-rapida',area:'Pessoal'},
+  {id:ideaId(d),conteudo:text});
+ const cmd={tipo:'SALVAR',tabela:'notas',itens:[entry]};
+ if(!enfileirarComando(cmd,true)){ideaStatus(d,'Não foi possível guardar. O rascunho continua aqui.');return false;}
+ efeitoLocal(cmd);ideaDrafts.delete(d);ideaBases.delete(d);
  document.querySelectorAll('[data-sc148-note]').forEach(el=>{
   if(el.dataset.sc148Note===d&&el!==document.activeElement&&el.value!==text)el.value=text.trim()?text:'';
  });
@@ -13378,7 +13536,8 @@ function ideaSave(d,drain=true){
  return true;
 }
 function ideaInput(field){
- const d=field.dataset.sc148Note;if(!sc120Date_(d))return;
+ const d=field.dataset.sc148Note;if(!sc120Date_(d)||!sc166Escopo)return;
+ if(!ideaDrafts.has(d))ideaBases.set(d,String(ideaSaved()[d]??''));
  ideaDrafts.set(d,field.value.slice(0,1500));
  ideaStatus(d,'Guardando…');
  clearTimeout(ideaTimers.get(d));
@@ -13387,7 +13546,14 @@ function ideaInput(field){
 function ideaClick(d,source){
  const field=source.closest('.sc148-idea')?.querySelector('[data-sc148-note]');
  if(!field||field.dataset.sc148Note!==d)return;
- if(ideaDrafts.has(d))ideaSave(d);
+ if(ideaDrafts.has(d)){
+  const atual=String(ideaSaved()[d]??'');
+  if(atual!==ideaBases.get(d)){
+   if(!confirm('A ideia foi alterada em outro lugar. Substituir a versão atual pelo texto deste rascunho?'))return;
+   ideaBases.set(d,atual);
+  }
+  ideaSave(d);
+ }
  else if(!source.closest('.sc148-idea')?.querySelector('[data-sc148-idea-status]')?.textContent)ideaStatus(d,'Sem alterações.');
 }
 

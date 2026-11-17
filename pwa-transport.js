@@ -35,6 +35,7 @@ function carregarSessao(){
 function limparCredenciais(){
   sessao='';tok='';tokExp=0;
   clearTimeout(timerRef);ls('r',K_SESSAO);ls('r',K_TOK);
+  if(typeof window.sc166PrepareLogout==='function')window.sc166PrepareLogout();
 }
 function encerrarConexao(aoEncerrar){
   if(encerrando||loginEmCurso) return;
@@ -51,6 +52,14 @@ function encerrarConexao(aoEncerrar){
   });
 }
 window.scPwaDesconectar=function(){encerrarConexao(function(){mostrarLoginSeNecessario();});};
+function sc166SessionHash(s){
+  return [2166136261,1442695041,3141592653].map(function(seed){
+    var h=seed;for(var i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),16777619);h^=h>>>13;}
+    return (h>>>0).toString(36);
+  }).join('-');
+}
+window.scPwaStorageScope=function(){return cfg?cfg.url+'|'+cfg.cid:'';};
+window.scPwaSessionMarker=function(){var v=sessao?'sessao:'+sessao:(tok?'token:'+tok:'');return v?sc166SessionHash(v):'';};
 window.scPwaTrocarConta=function(){encerrarConexao(function(){trocarConta=true;gisPronto=false;telaLogin('Escolha a conta Google autorizada.');});};
 function carregarTok(){ var t=ls('g',K_TOK); if(t){ var e=jwtExp(t); if(e-Date.now()>90000){ tok=t; tokExp=e; } } }
 
@@ -120,6 +129,7 @@ function configGis(){
 function aoEntrar(resp){
   var t=resp&&resp.credential;
   if(!t || loginEmCurso || encerrando || !ovl || !ovl.querySelector('#pw-manter')) return;
+  if(typeof window.sc166PrepareLogout==='function'&&!sessao)window.sc166PrepareLogout();
   tok=t;tokExp=jwtExp(t);
   if(!googleValido()){tok='';tokExp=0;return;}
   ls('s',K_TOK,t);
@@ -128,6 +138,7 @@ function aoEntrar(resp){
     loginEmCurso=false;esconderAviso();fechaOvl();
     if(!sessao) agendarRenovacao();
     var l=esperando;esperando=[];l.forEach(function(f){f.ok();});
+    if(typeof window.recarregar==='function')window.recarregar(true);
   }
   if(!ovl.querySelector('#pw-manter').checked){concluir();return;}
   var segredo;
@@ -175,7 +186,7 @@ function limparApp(){
   var pend=[];
   try{for(var i=0;i<localStorage.length;i++){
     var k=localStorage.key(i);
-    if(k && k.indexOf('sc_fila_cmd_v2:')===0) pend.push(k);
+    if(k&&(/^(sc_fila_cmd_v[23]:|sc166_lote:|sc120_lote_)/.test(k)||k==='sc_fila_v1'))pend.push(k);
   }}catch(e){}
   if(pend.length){
     alert('Existem '+pend.length+' alteração(ões) aguardando sincronização. Antes de reiniciar os arquivos offline, exporte as pendências em Ajustes. Nenhum dado foi apagado.');
@@ -220,10 +231,11 @@ function garantirToken(){
 
 /* ── ponte google.script.run → POST no Apps Script ── */
 function enviarApi(corpo){
+  var url=cfg&&cfg.url;
   return Promise.resolve().then(function(){
     etapa='servidor';
     var ac=window.AbortController?new AbortController():null, tm=ac?setTimeout(function(){ ac.abort(); },40000):0;
-    return fetch(cfg.url,{method:'POST',redirect:'follow',signal:ac?ac.signal:undefined,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo)}).then(function(r){ clearTimeout(tm); return r; },function(e){ clearTimeout(tm); throw new Error(e&&e.name==='AbortError'?'O servidor não respondeu em 40 s.':'Sem conexão com o servidor (possível bloqueio CORS ou redirecionamento do Apps Script).'); });
+    return fetch(url,{method:'POST',redirect:'follow',signal:ac?ac.signal:undefined,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo)}).then(function(r){ clearTimeout(tm); return r; },function(e){ clearTimeout(tm); throw new Error(e&&e.name==='AbortError'?'O servidor não respondeu em 40 s.':'Sem conexão com o servidor (possível bloqueio CORS ou redirecionamento do Apps Script).'); });
   }).then(function(r){ etapa='resposta'; return r.text(); }).then(function(t){
     var j; try{ j=JSON.parse(t); }catch(e){ throw new Error('Resposta inesperada do servidor (confira se a implantação pública está na versão nova).'); }
     if(j&&j.ok) return j.r;
@@ -232,22 +244,34 @@ function enviarApi(corpo){
     var err=new Error(m);err.codigo=e;throw err;
   });
 }
-function chamar(fn,args,tentou){
+function chamar(fn,args){
+  // Gravações da conta anterior nunca esperam um novo login para serem reenviadas.
+  if(fn==='enviarComando'&&!tokenValido())return Promise.reject(new Error('Reconecte a conta para sincronizar as alterações pendentes.'));
   return garantirToken().then(function(){
-    if(encerrando) throw new Error('Sessão em encerramento.');
-    var usada=sessao, googleUsado=tok;
-    return enviarApi({fn:fn,args:args,idToken:googleUsado,sessao:usada}).catch(function(e){
-      var invalida=usada ? e.codigo==='sessao_encerrada' : ['nao_autenticado','expirado'].includes(e.codigo);
-      if(!invalida) throw e;
-      if((usada && sessao===usada) || (!usada && !sessao && tok===googleUsado)) limparCredenciais();
-      avisoDispensado=false;
-      if(tentou){ mostrarLoginSeNecessario(); throw e; }
-      return chamar(fn,args,true);
+    if(encerrando)throw new Error('Sessão em encerramento.');
+    var usada=sessao,googleUsado=tok,origem=window.scPwaStorageScope();
+    var aindaAtual=function(){return origem===window.scPwaStorageScope()&&(usada?usada===sessao:!sessao&&googleUsado===tok);};
+    return enviarApi({fn:fn,args:args,idToken:googleUsado,sessao:usada}).then(function(r){
+      if(!aindaAtual())throw new Error('Resposta ignorada porque a sessão mudou.');
+      return r;
+    },function(e){
+      var invalida=usada?e.codigo==='sessao_encerrada':['nao_autenticado','expirado'].includes(e.codigo);
+      if(invalida&&aindaAtual()){
+        limparCredenciais();avisoDispensado=false;mostrarLoginSeNecessario();
+      }
+      throw e;
     });
   });
 }
 window.addEventListener('storage',function(e){
-  if(e.key===K_SESSAO && sessao && !e.newValue){sessao='';tok='';tokExp=0;ls('r',K_TOK);avisoDispensado=false;mostrarLoginSeNecessario();}
+  if((e.key!==K_SESSAO&&e.key!==K_CFG&&e.key!==null)||e.newValue===e.oldValue)return;
+  sessao='';tok='';tokExp=0;clearTimeout(timerRef);ls('r',K_TOK);
+  if(typeof window.sc166PrepareLogout==='function')window.sc166PrepareLogout();
+  // Preserve the proof written by the other tab when it already confirmed its new account.
+  lerCfg();carregarSessao();avisoDispensado=false;
+  falharEspera('A conexão mudou em outra aba.');
+  if(tokenValido()&&typeof window.recarregar==='function')window.recarregar(true);
+  else mostrarLoginSeNecessario();
 });
 function construtor(ok,fail,userObject){
   var base={ withSuccessHandler:function(f){ return construtor(f,fail,userObject); }, withFailureHandler:function(f){ return construtor(ok,f,userObject); }, withUserObject:function(obj){ return construtor(ok,fail,obj); } };
