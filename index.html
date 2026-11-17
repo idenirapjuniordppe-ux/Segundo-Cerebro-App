@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-17f-sc113714"></script>
+<script src="./pwa-transport.js?v=2026-11-17g-sc113715"></script>
 <script>
-var VERSAO_TELA = '2026-11-17f';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.14'; // melhorias nas ferramentas existentes
+var VERSAO_TELA = '2026-11-17g';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.15'; // validação atômica das notas com servidor compatível
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -2195,13 +2195,14 @@ var SC167=(function(){
   'use strict';
   var started=performance.now(),ready=null,counts={renders:0,planner:0,agenda:0};
   var requests=new Map(),calendarAt=new Map(),attemptAt=new Map(),scheduled=false;
-  var fields=['titulo','conteudo','colunas_nota','pagina_pai'];
+  var fields=['titulo','conteudo','area','etiquetas','fixada','tipo','pagina_pai','fixada_hoje','ordem_hoje','colunas_nota','flutuante','pos_x','pos_y','postit_cor'];
   function read(key,fallback){try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch(_){return fallback;}}
   function write(key,data){try{localStorage.setItem(key,JSON.stringify(data));return true;}catch(_){return false;}}
   function draftKey(id){return 'sc138-draft-v2:'+sc166Escopo+':'+String(id);}
   function historyKey(id){return 'sc167_note:'+sc166Escopo+':'+encodeURIComponent(id);}
   function history(id){return sc166Escopo?read(historyKey(id),[]):[];}
-  function noteRecord(n){return Object.fromEntries(fields.map(k=>[k,String(n[k]||(k==='colunas_nota'?'1':''))]));}
+  function noteValue(k,v){return v==null||v===''?(k==='colunas_nota'?'1':''):String(v);}
+  function noteRecord(n){return Object.fromEntries(fields.map(k=>[k,noteValue(k,n[k])]));}
   function point(id,type,data){
     if(!sc166Escopo||!id)return false;
     var old=history(id),key=JSON.stringify(data);
@@ -2209,21 +2210,27 @@ var SC167=(function(){
     return write(historyKey(id),[{type,data,at:new Date().toISOString()},...old].slice(0,12));
   }
   function noteBases(items){
-    var result=[];
-    for(var item of items){
+    return items.map(item=>{
       var current=obter('notas',item.id);
-      if(!current.id)continue;
-      var base=noteRecord(current),changed=fields.filter(k=>Object.hasOwn(item,k)&&String(item[k]||(k==='colunas_nota'?'1':''))!==base[k]);
-      if(changed.length)result.push({id:String(item.id),fields:changed.map(k=>[k,base[k]])});
-    }
-    return result;
+      if(!current.id)return {id:String(item.id),missing:true,fields:[]};
+      var base=noteRecord(current);
+      var changed=fields.filter(k=>Object.hasOwn(item,k)&&noteValue(k,item[k])!==base[k]);
+      return {id:String(item.id),fields:changed.map(k=>[k,base[k]])};
+    });
   }
   function notePrepare(cmd){
     if(cmd.tabela!=='notas'||cmd.tipo!=='SALVAR')return true;
     var bases=noteBases(cmd.itens||[]);
     if(!bases.length)return true;
-    if(!bases.every(b=>point(b.id,'Versão anterior',noteRecord(obter('notas',b.id)))))return false;
-    cmd.sc167_note_base=bases;return true;
+    if(!bases.every(b=>!b.fields.length||point(b.id,'Versão anterior',noteRecord(obter('notas',b.id)))))return false;
+    cmd.sc167_note_base=bases;
+    cmd.itens=cmd.itens.map((item,i)=>{
+      var base=bases[i];if(base.missing)return item;
+      var changed=new Set(base.fields.map(x=>x[0]));
+      // Não reenvia campos não tocados pelo editor, inclusive se vieram preenchidos no formulário.
+      return Object.fromEntries(Object.entries(item).filter(([k])=>!fields.includes(k)||changed.has(k)));
+    });
+    return true;
   }
   function noteToken(id,title){
     return 'nota:'+encodeURIComponent(String(id))+'|'+String(title||'Nota').replace(/[\[\]\r\n]/g,' ');
@@ -2237,9 +2244,13 @@ var SC167=(function(){
     for(var b of cmd.sc167_note_base||[]){
       var current=notes.find(n=>String(n.id)===b.id);
       var change=(cmd.itens||[]).find(n=>String(n.id)===b.id);
+      if(b.missing){
+        if(current&&fields.some(k=>Object.hasOwn(change,k)&&noteValue(k,current[k])!==noteValue(k,change[k])))return {base:b,current,changed:true};
+        continue;
+      }
       if(!current)return {base:b,current:null,changed:true};
       var data=noteRecord(current);
-      if(b.fields.some(([k,before])=>data[k]!==before&&data[k]!==String(change[k]||(k==='colunas_nota'?'1':''))))return {base:b,current,changed:true};
+      if(b.fields.some(([k,before])=>data[k]!==before&&data[k]!==noteValue(k,change[k])))return {base:b,current,changed:true};
     }
     return null;
   }
@@ -2868,6 +2879,7 @@ function aplicarDados(r, deCache){
   ['tarefas','projetos','eventos','notas','metas','habitos','registros','estudos','financas'].forEach(function(k){ if(r[k]) D[k] = r[k]; });
   if(r.config) D.config = r.config;
   D.versaoServidor = r.versaoServidor; D.usuario = sc166Conta; D.protegido = r.protegido;
+  if(!deCache)D.sc167NotasCAS=r.sc167NotasCAS===1;
   // Cache guarda a base confirmada; a fila é reaplicada sobre ela ao reabrir o app.
   if(!deCache) salvarCache();
   fila.forEach(efeitoLocal);
@@ -3096,11 +3108,23 @@ function drenarFila(){
       if(cmd.tentativas === 1) toast('Falha ao gravar; tentarei novamente: '+msg,true);
       timerFila = setTimeout(drenarFila,espera);
   }
+  function preservarConflito(r){
+      if(!Array.isArray(r.notas)||!SC167.noteKeepConflict(cmd,r.notas)||!salvarFila(cmd,true)){
+        falhaGravacao(new Error('Conflito na nota; a edição original continua na fila.'));return;
+      }
+      fila=fila.filter(function(c){return c.cid!==cmd.cid;});
+      enviando=false;falhasSeguidas=0;ultimoErroFila='';
+      aplicarDados(r);SC167.renderAfterAck();
+      toast('A nota mudou em outro aparelho. Sua edição foi preservada no histórico local.',true,
+        {rotulo:'Ver versões',fn:function(){if(geracao===sc166Geracao)SC167.openNoteHistory((r.sc167Conflito||[])[0]||cmd.sc167_note_base[0].id);}});
+      drenarFila();
+  }
   function enviarAoServidor(){google.script.run
     .withSuccessHandler(function(r){
       if(geracao!==sc166Geracao)return;
       if(r&&r.usuario&&sc166Nome(r.usuario)!==sc166Conta){sc166LimparTela();recarregar(true);return;}
       if(!r || typeof r!=='object' || r.erro||!sc166Nome(r.usuario)){falhaGravacao(new Error(r&&r.erro ? r.erro : 'Resposta inválida do servidor; operação mantida.'));return;}
+      if(cmd.sc167_note_base?.length&&r.sc167Conflito?.length){preservarConflito(r);return;}
       enviando = false; falhasSeguidas = 0; ultimoErroFila = '';
       // Conversão em duas etapas: o backend confirmou o evento; só então enfileirar a retirada da tarefa.
       if(cmd.sc166_conversao_tarefa){
@@ -3122,28 +3146,20 @@ function drenarFila(){
     })
     .withFailureHandler(falhaGravacao)
     .enviarComando(sc166ComandoServidor(cmd));}
-  // Leitura imediatamente antes da escrita conserva rascunhos quando outro aparelho editou a nota.
-  // Sem suporte de comparação atômica no servidor, esse teste não substitui um bloqueio do backend.
-  if(cmd.sc167_note_base?.length){
+  // O servidor novo compara e grava sob o mesmo lock. Se a integração for antiga, preserva a checagem anterior.
+  if(!D.sc167NotasCAS&&cmd.sc167_note_base?.some(b=>!b.missing||b.id.startsWith('sc148-idea-'))){
     google.script.run.withSuccessHandler(function(r){
       if(geracao!==sc166Geracao)return;
       if(!r||r.erro||sc166Nome(r.usuario)!==sc166Conta||!Array.isArray(r.notas)){falhaGravacao(new Error('Não consegui verificar a versão da nota.'));return;}
       if(!SC167.noteCompare(cmd,r.notas)){enviarAoServidor();return;}
-      if(!SC167.noteKeepConflict(cmd,r.notas)||!salvarFila(cmd,true)){
-        falhaGravacao(new Error('Conflito na nota; a edição original continua na fila.'));return;
-      }
-      fila=fila.filter(function(c){return c.cid!==cmd.cid;});
-      enviando=false;falhasSeguidas=0;ultimoErroFila='';
-      aplicarDados(r);SC167.renderAfterAck();
-      toast('A nota mudou em outro aparelho. Sua edição foi preservada no histórico local.',true,
-        {rotulo:'Ver versões',fn:function(){if(geracao===sc166Geracao)SC167.openNoteHistory(cmd.sc167_note_base[0].id);}});
-      drenarFila();
+      preservarConflito(r);
     }).withFailureHandler(falhaGravacao).getDados(true);
   }else enviarAoServidor();
 }
+
 function sc166ComandoServidor(cmd){
   var payload=Object.assign({},cmd);
-  delete payload.sc166_owner;delete payload.sc166_conversao_tarefa;delete payload.sc166_conversao_evento;delete payload.sc120_group;delete payload.sc167_note_base;
+  delete payload.sc166_owner;delete payload.sc166_conversao_tarefa;delete payload.sc166_conversao_evento;delete payload.sc120_group;if(!D.sc167NotasCAS)delete payload.sc167_note_base;
   return payload;
 }
 window.addEventListener('online', function(){falhasSeguidas=0;if(!sc166Confirmado)recarregar(true);else drenarFila();statusNuvem();});
@@ -12529,7 +12545,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-17f-sc113714"></script>
+<script src="./pwa-install.js?v=2026-11-17g-sc113715"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';

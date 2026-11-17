@@ -221,3 +221,27 @@ test('planner does not replace identical DOM on repeated renders',async t=>{
   assert.equal(w.document.querySelector('#v-agenda .sc148-root'),root);
   assert.equal(w.SC167.metrics().planner,n);
 });
+
+test('compatible server receives guarded delta without preflight, and rejected text stays recoverable',t=>{
+  const {w,sent,reads}=app(t);
+  w.aplicarDados(snapshot(A,{sc167NotasCAS:1,notas:[{id:'n1',titulo:'Original',conteudo:'Antes',colunas_nota:'1'}]}));
+  const beforeReads=reads.length;
+  assert(w.salvar('notas',{id:'n1',titulo:'Original',conteudo:'Minha edição',colunas_nota:'1'}));
+  assert.equal(reads.length,beforeReads);
+  assert.equal(sent.length,1);
+  const cmd=sent[0].cmd;
+  assert.equal(cmd.itens[0].titulo,undefined);
+  assert.equal(cmd.itens[0].colunas_nota,undefined);
+  assert.deepEqual(JSON.parse(JSON.stringify(cmd.sc167_note_base)),[{id:'n1',fields:[['conteudo','Antes']]}]);
+  sent[0].ok(snapshot(A,{sc167NotasCAS:1,seq:2,sc167Conflito:['n1'],notas:[{id:'n1',titulo:'Mais recente',conteudo:'Alteração de outro cliente'}]}));
+  assert.equal(w.lerFila().length,0);
+  assert.equal(w.D.notas[0].conteudo,'Alteração de outro cliente');
+  assert(w.SC167.history('n1').some(x=>x.data.conteudo==='Minha edição'));
+});
+
+test('new note ID is guarded on the compatible server',t=>{
+  const {w,sent}=app(t);
+  w.aplicarDados(snapshot(A,{sc167NotasCAS:1}));
+  assert(w.salvar('notas',{id:'sc148-idea-20261117',titulo:'Ideia',conteudo:'Texto'}));
+  assert.equal(sent[0].cmd.sc167_note_base[0].missing,true);
+});
