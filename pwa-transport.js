@@ -76,9 +76,10 @@ function acessoInicial(){
 }
 window.scPwaAbrirLogin=function(){telaLogin();};
 window.scPwaAutenticado=function(){return !!tokenValido();};
+window.scPwaConfigurado=function(){return !!cfg;};
 function novoOvl(html){ fechaOvl(); ovl=document.createElement('div'); ovl.style.cssText=CSS; ovl.innerHTML='<div style="max-width:420px;width:100%;background:#1e293b;border-radius:16px;padding:22px;box-shadow:0 10px 40px #0008">'+html+'</div>'; document.body.appendChild(ovl); return ovl; }
 function telaConfig(msg,anterior){
-  var o=novoOvl('<h2 style="margin:0 0 6px;font-size:20px">2° Cérebro</h2><p style="margin:0 0 14px;font-size:14px;opacity:.8">Conecte este aplicativo à implantação oficial do seu Google Apps Script.</p>'+(msg?'<p style="color:#fca5a5;font-size:13px">'+msg+'</p>':'')+
+  var o=novoOvl('<h2 style="margin:0 0 6px;font-size:20px">Conectar 2º Cérebro</h2><p style="margin:0 0 14px;font-size:14px;opacity:.8">Conecte este aplicativo à implantação oficial do seu Google Apps Script.</p>'+(msg?'<p style="color:#fca5a5;font-size:13px">'+msg+'</p>':'')+
    '<label style="font-size:12px;opacity:.8">Endereço do Apps Script (termina em /exec)</label><input id="pw-u" style="width:100%;box-sizing:border-box;margin:4px 0 12px;padding:10px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:14px">'+
    '<label style="font-size:12px;opacity:.8">ID do cliente OAuth do tipo Aplicativo da Web (termina em .apps.googleusercontent.com)</label><input id="pw-c" style="width:100%;box-sizing:border-box;margin:4px 0 14px;padding:10px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:14px">'+
    '<p style="font-size:12px;opacity:.86;margin:0 0 12px"><b>Origem deste aparelho:</b> <code>'+escH(location.origin)+'</code><br>Configure exatamente essa origem no Google Cloud (sem o caminho do repositório).</p>'+ 
@@ -88,7 +89,11 @@ function telaConfig(msg,anterior){
   o.querySelector('#pw-ok').onclick=function(){
     var u=o.querySelector('#pw-u').value.trim(), c=o.querySelector('#pw-c').value.trim();
     if(!urlValida(u)||!clienteValido(c)){ telaConfig('Confira os campos: URL /exec e ID OAuth real do tipo Aplicativo da Web (formato 123456-abc.apps.googleusercontent.com).',{url:u,cid:c}); return; }
-    if(!cfg||cfg.cid!==c||cfg.url!==u)ls('r',K_TOK);ls('s',K_CFG,JSON.stringify({url:u,cid:c})); location.reload();
+    var next=JSON.stringify({url:u,cid:c});
+    ls('s',K_CFG,next);
+    if(ls('g',K_CFG)!==next){telaConfig('Este navegador não permitiu guardar a conexão. A configuração antiga e seus dados não foram apagados.',{url:u,cid:c});return;}
+    if(!cfg||cfg.cid!==c||cfg.url!==u)ls('r',K_TOK);
+    location.reload();
   };
 }
 function telaLogin(msg){

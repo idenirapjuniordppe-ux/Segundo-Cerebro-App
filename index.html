@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-17d-sc113712"></script>
+<script src="./pwa-transport.js?v=2026-11-17h-sc1137121"></script>
 <script>
-var VERSAO_TELA = '2026-11-17d';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.12'; // Remove a ajuda de instalação redundante
+var VERSAO_TELA = '2026-11-17h';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.12.1'; // Remove a ajuda de instalação redundante
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -7083,7 +7083,12 @@ function rodarDiagnostico(profundo){
     .withSuccessHandler(function(r){
       var ic = { ok:'<i class="fa-solid fa-circle-check text-emerald-500"></i>', aviso:'<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>', erro:'<i class="fa-solid fa-circle-xmark text-red-500"></i>' };
       box.innerHTML = r.itens.map(function(i){
-        return '<div class="flex gap-2 items-start">'+(ic[i.status]||'')+'<div><b>'+h(i.grupo)+' · '+h(i.nome)+'</b>'+(i.detalhe?'<div class="subt">'+h(i.detalhe)+'</div>':'')+'</div></div>';
+        var st=i.status,detail=i.detalhe;
+        if(i.grupo==='Sistema'&&i.nome==='Versão tela × servidor'&&st==='erro'){
+          var server=/^servidor (\S+) \/ tela /.exec(String(detail||''));
+          if(server&&sc123VersoesCompativeis(VERSAO_TELA,server[1])){st='ok';detail+=' · versões compatíveis';}
+        }
+        return '<div class="flex gap-2 items-start">'+(ic[st]||'')+'<div><b>'+h(i.grupo)+' · '+h(i.nome)+'</b>'+(detail?'<div class="subt">'+h(detail)+'</div>':'')+'</div></div>';
       }).join('') + '<div class="subt pt-1">'+h(r.quando)+' · '+h(r.segundos)+' s'+(r.profundo?' · teste completo':'')+'</div>';
     })
     .withFailureHandler(function(e){ box.innerHTML = '<span class="text-red-600">Falhou: '+h(e && e.message ? e.message : e)+'</span>'; })
@@ -8194,6 +8199,10 @@ window.addEventListener('error', function(e){
 });
 function iniciar(){
   aplicarTemaInicial(); montarNav(); agDia = hojeISO(); irPara('hoje');
+  if(window.__PWA&&window.scPwaConfigurado&& !window.scPwaConfigurado()){
+    var abertura=el('carregando');if(abertura)abertura.classList.add('hidden');
+    return; // a tela de conexão cuida da configuração inicial
+  }
   fila = lerFila(); pendentes = fila.length;
   var c = lerCache(), comCache = !!(c && c.config && c.tarefas);
   if(comCache){ try { aplicarDados(c, true); el('carregando').classList.add('hidden'); atualizando = true; renderTudo(); setTimeout(tratarAtalho, 200); } catch(eC){ seguro('Dados salvos no aparelho', function(){ throw eC; }); } }
@@ -8207,7 +8216,7 @@ function iniciar(){
       if(r) processarVoz();
       if(r) setTimeout(verificarPWA, 4000);
       // Importações do Google Tasks são manuais e exigem escolha explícita da lista.
-      if(r) setTimeout(function(){ seguro('Aviso do dia', avisoDiaInicial); seguro('Acertos', acertosIniciais); }, 6000);
+      // A abertura não faz manutenção automática em títulos, áreas ou lembretes existentes.
       if(r && r.versaoServidor && !sc123VersoesCompativeis(VERSAO_TELA,r.versaoServidor)) toast('Versões incompatíveis: tela ' + VERSAO_TELA + ' / servidor ' + r.versaoServidor + '. Atualize os dois arquivos e publique uma nova versão.', true);
     })
     .withFailureHandler(function(e){
@@ -8785,7 +8794,7 @@ window.sc58={check,tasks,calendar,backups};
     var info=document.createElement('div');info.id='sc59-version';
     info.setAttribute('role','status');
     info.style.cssText='padding:10px 12px;margin:8px 0 12px;border:1px solid var(--tc-line,#d5deed);border-radius:12px;color:var(--tc-muted,#64748b);font:600 12px system-ui';
-    info.textContent='2° Cérebro · Studio '+(window.VERSAO_STUDIO||'')+' · versão '+(window.VERSAO_TELA||'')+' · GitHub Pages';
+    info.textContent='2° Cérebro · Studio '+(window.VERSAO_STUDIO||'')+' · versão '+(window.VERSAO_TELA||'')+' · '+(window.__PWA?'GitHub Pages':'Google Apps Script');
     root.insertBefore(info,root.firstChild);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mark);else mark();
@@ -12189,7 +12198,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-17d-sc113712"></script>
+<script src="./pwa-install.js?v=2026-11-17h-sc1137121"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13055,6 +13064,8 @@ function flush(){
 function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader'),n=note(id);if(reader){reader.dataset.notaColunas=notaColunas(n?.colunas_nota);reader.innerHTML=sc74Notes.renderMarkdown(n?.conteudo||'');}edAlvo='f-cont';return true}
 function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;return !finish()}
 function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||''),defaultCols=notaColunas(n.colunas_nota),cols=defaultCols;try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&typeof draft.text==='string'&&draft.base===content&&(!draft.baseCols||draft.baseCols===defaultCols)&&confirm('Recuperar o rascunho de edição desta nota?')){content=draft.text;if(draft.cols)cols=notaColunas(draft.cols);}}catch(_){}
+ const modal=$('modal');
+ if(modal?.classList.contains('hidden')&&modal.querySelector('#ed'))$('modal-corpo')?.replaceChildren();
  editing={id:String(id),base:String(n.conteudo||''),baseCols:defaultCols};reader.dataset.notaColunas='1';reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><div class="sc138-format">'+edBarraHtml(true)+'</div><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
  edAlvo='sc138-content';edIniciar(content);edColunas(cols);if(typeof scInitNoteSize==='function')scInitNoteSize();
  const schedule=()=>{status('Guardando…');clearTimeout(timer);timer=setTimeout(flush,650)};reader.addEventListener('input',schedule);reader.addEventListener('change',schedule);reader.addEventListener('click',e=>{if(e.target.closest('#ed,#ed-ins,#ed-num'))schedule()});const first=edRaiz().querySelector('[contenteditable]');first?.focus();if(content!==editing.base||cols!==editing.baseCols)schedule();}
