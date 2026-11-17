@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'teste-11.37.13'
   workflow_dispatch:
 
 permissions:
@@ -16,7 +17,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  testar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar ambiente de testes
+        run: npm install --no-save --no-audit --no-fund jsdom@26.1.0
+      - name: Executar testes existentes e de integridade
+        run: node --test --test-concurrency=1 *.test.cjs
   deploy:
+    needs: testar
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
