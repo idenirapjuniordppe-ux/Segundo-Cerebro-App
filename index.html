@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-16f-sc11378"></script>
+<script src="./pwa-transport.js?v=2026-11-17a-sc11379"></script>
 <script>
-var VERSAO_TELA = '2026-11-16f';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.8'; // Post-it, Biblioteca e mural de projeto
+var VERSAO_TELA = '2026-11-17a';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.9'; // Formatação completa em Notas
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -4773,12 +4773,22 @@ function edNoteFormatHtml(){
   return '<button type="button" data-ed-note-'+kind+'="'+action+'"'+(mark?' data-ed-note-state="'+mark+'"':'')+flag+' title="'+h(label)+'" aria-label="'+h(label)+'">'+icon+'</button>';
  };
  var as=function(icon,label,action,kind,mark){return btn(edNoteIcon(icon)+'<span>'+h(label)+'</span>',label,action,kind,mark);};
+ var blockGroup=function(keys){return ED_NOTE_BLOCKS.filter(function(x){return keys.indexOf(x[0])>=0;}).map(function(b){return as(b[1],b[2],b[0],'block','block:'+b[0]);}).join('');};
+ var lists=blockGroup(['todo','ul','ol','q']), headings=blockGroup(['p','h1','h2','h3','h4']), otherBlocks=blockGroup(['dest','cod','hr']);
  var blocks=ED_NOTE_BLOCKS.map(function(b){return as(b[1],b[2],b[0],'block','block:'+b[0]);}).join('');
+ var fast=[
+  ['check','Checklist','block:todo','block:todo'],['list','Lista com marcadores','block:ul','block:ul'],
+  ['number','Lista numerada','block:ol','block:ol'],['link','Inserir ou editar link','fmt:link','link']
+ ].map(function(x){return '<span class="ed-note-shortcut">'+btn(edNoteIcon(x[0]),x[1],x[2],'command',x[3])+'</span>';}).join('');
+ var sizeOptions=[['12','Pequeno'],['14','Compacto'],['16','Normal'],['18','Grande'],['20','Muito grande'],['24','Extra grande']];
+ var sizeMenu='<label class="ed-note-layout-size" for="sc-note-size"><span>Tamanho do texto</span><select class="input" id="sc-note-size" aria-label="Tamanho do texto da nota">'+sizeOptions.map(function(opt){return '<option value="'+opt[0]+'">'+h(opt[1])+' · '+opt[0]+' px</option>';}).join('')+'</select></label>';
+ var columns='<button type="button" id="ed-note-columns" data-ed-note-command="columns" aria-controls="ed" aria-pressed="false">'+edNoteIcon('▥')+'<span>Duas colunas</span></button>';
+ var group=function(title,html){return '<div class="ed-note-category"><div class="ed-note-category-title">'+title+'</div><div class="ed-note-options">'+html+'</div></div>';};
  var extras=[
  ['link','Inserir ou editar link','fmt:link','link'],['[[ ]]','Link para outra nota','fmt:nota'],
  ['S','Riscado','fmt:strike','strike'],['code','Código','fmt:code','code'],
  ['Tₓ','Limpar formatação','fmt:limpar'],['number','Opções de numeração','num'],['⇤','Diminuir recuo','block:rec'],
- ['⇥','Aumentar recuo','block:avanca'],['＋','Inserir data ou hora','insert'],['×','Fechar teclado e menus','close']
+ ['⇥','Aumentar recuo','block:avanca'],['＋','Inserir bloco, data ou hora','insert'],['×','Fechar teclado e menus','close']
  ].map(function(b){return as(b[0],b[1],b[2],'command',b[3]);}).join('');
  var palette=function(kind,colors,custom){
   return '<div class="ed-note-palette">'+colors.map(function(c){
@@ -4791,11 +4801,11 @@ function edNoteFormatHtml(){
   btn(edNoteIcon('bold'),'Negrito (Ctrl+B)','fmt:bold','command','bold')+
   btn(edNoteIcon('italic'),'Itálico (Ctrl+I)','fmt:italic','command','italic')+
   btn('<span class="ed-note-color-icon" aria-hidden="true">A</span><span class="ed-note-touch-label" aria-hidden="true">Cor</span>','Cor do texto','ink','menu')+
-  btn(edNoteIcon('mark')+'<span class="ed-note-touch-label" aria-hidden="true">Marcar</span>','Marca-texto','mark','menu')+
+  btn(edNoteIcon('mark')+'<span class="ed-note-touch-label" aria-hidden="true">Marcar</span>','Marca-texto','mark','menu')+fast+
   btn('<span class="ed-note-more-label">Mais</span>'+edNoteIcon('more'),'Mais opções','more','menu')+'</div>'+
   panel('blocks','Tipo de bloco','<div class="ed-note-options">'+blocks+'</div>')+
-  panel('more','Mais opções','<div class="ed-note-options">'+
-    as('Aa','Tipo de bloco','blocks','goto')+extras+'</div>')+
+  panel('more','Mais opções',group('Listas e citações',lists)+group('Texto e títulos',headings+otherBlocks)+
+    group('Formatação e inserção',extras)+group('Layout da nota',sizeMenu+columns))+
   panel('ink','Cor do texto',palette('ink',[['Azul','#2563eb'],['Roxo','#7c3aed'],['Verde','#16835d'],['Vermelho','#c43c4e']],'#2563eb'))+
   panel('mark','Marca-texto',palette('mark',[['Amarelo','#fff3a3'],['Rosa','#ffc4e0'],['Verde','#c4f0d6'],['Laranja','#ffd2ab']],'#fff3a3'))+'</div>';
 }
@@ -4852,6 +4862,7 @@ function edNoteBind(){
   if(key==='num')edNumMenu(true);
   else if(key==='insert')edPainel(true);
   else if(key==='close')edFechar();
+  else if(key==='columns')edAlternarColunas();
   else if(key==='block:hr')edDivisorAqui();
   else if(key.indexOf('block:')===0)edBloco(key.slice(6));
   else if(key.indexOf('fmt:')===0)edFmt(key.slice(4));
@@ -4859,6 +4870,7 @@ function edNoteBind(){
   if(!noFocus&&trigger&&n.contains(document.activeElement))trigger.focus();
  });
  n.addEventListener('change',function(e){
+  if(e.target.id==='sc-note-size'){if(typeof scSetNoteSize==='function')scSetNoteSize(e.target.value);return;}
   if(e.target.id==='ed-text-color')edCorAplicar(e.target.value);
   else if(e.target.id==='ed-mark-color')edMarcaAplicar(e.target.value);
   else return;
@@ -6098,13 +6110,17 @@ function salvarProjetoModal(id){
 
 function notaColunas(valor){ return String(valor) === '2' ? '2' : '1'; }
 function edColunas(valor){
-  var editor = edRaiz(), botao = el('nota-colunas');
-  if(!editor || !botao) return '1';
+  var editor = edRaiz();
+  if(!editor) return '1';
   if(valor == null) return notaColunas(editor.dataset.notaColunas);
   var colunas = notaColunas(valor);
   editor.dataset.notaColunas = colunas;
-  botao.setAttribute('aria-pressed', String(colunas === '2'));
-  botao.title = colunas === '2' ? 'Voltar a uma coluna' : 'Dividir em duas colunas';
+  ['nota-colunas','ed-note-columns'].forEach(function(id){
+    var botao=el(id);if(!botao)return;
+    botao.setAttribute('aria-pressed', String(colunas === '2'));
+    botao.title = colunas === '2' ? 'Voltar a uma coluna' : 'Dividir em duas colunas';
+    if(id==='ed-note-columns')botao.querySelector('span:last-child').textContent=colunas==='2'?'Uma coluna':'Duas colunas';
+  });
   ['ne75-preview','sc5-note-preview-area'].forEach(function(id){
     var previa = el(id); if(previa) previa.dataset.notaColunas = colunas;
   });
@@ -6120,7 +6136,7 @@ function abrirNota(x){
   abrirModal(id?'Nota':'Nova nota',
     '<div class="flex gap-1.5 flex-wrap">' + (id ? '' : '<button type="button" class="chip chip-f" onclick="abrirModelos(\'nota\')">📋 Modelos</button>') + '<button type="button" class="chip chip-f" onclick="salvarComoModelo(\'nota\')">+ Salvar como modelo</button></div>' +
     campo('Título', inp('f-tit', n.titulo)) +
-    campo('Conteúdo', '<div class="sc-nota-tamanho"><label for="sc-note-size">Tamanho do texto</label><select id="sc-note-size" aria-label="Tamanho do texto da nota" onchange="scSetNoteSize(this.value)"><option value="12">Pequeno · 12 px</option><option value="14">Compacto · 14 px</option><option value="16">Normal · 16 px</option><option value="18">Grande · 18 px</option><option value="20">Muito grande · 20 px</option><option value="24">Extra grande · 24 px</option></select></div>'+edBarraHtml(true)+'<div id="ed"></div><div id="ed-ln"></div><textarea id="f-cont" class="hidden">'+h(n.conteudo||'')+'</textarea>') +
+    campo('Conteúdo', edBarraHtml(true)+'<div id="ed"></div><div id="ed-ln"></div><textarea id="f-cont" class="hidden">'+h(n.conteudo||'')+'</textarea>') +
     linha2(campo('Área', selHtml('f-area', areaPares(), n.area)), campo('Tipo', selHtml('f-tipo', [['nota','Nota'],['link','Link / ler depois'],['estudo','Estudo (cria Google Doc)'],['revisao','Revisão']], n.tipo||'nota'))) +
     campo('Dentro de', sc62ParentOptions(id, n.pagina_pai||'')) +
     campo('Etiquetas (vírgula)', inp('f-etq', n.etiquetas)) +
@@ -12246,7 +12262,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-16f-sc11378"></script>
+<script src="./pwa-install.js?v=2026-11-17a-sc11379"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13076,15 +13092,15 @@ function flush(){
  const field=$('sc138-content');
  if(!editor||!field)return false;
  edSync();
- const text=field.value, key=draftKey(id);
- if(text===editing.base){
+ const text=field.value, cols=edColunas(), key=draftKey(id);
+ if(text===editing.base&&cols===editing.baseCols){
   if(editing.draftOwned){
    try{localStorage.removeItem(key);editing.draftOwned=false;}catch(_){}
   }
   return true;
  }
  try{
-  localStorage.setItem(key,JSON.stringify({text,base:editing.base,at:Date.now()}));
+  localStorage.setItem(key,JSON.stringify({text,cols,base:editing.base,baseCols:editing.baseCols,at:Date.now()}));
   editing.draftOwned=true;
  }catch(_){
   status('Não foi possível guardar o rascunho. A edição continua aberta.');
@@ -13092,28 +13108,29 @@ function flush(){
  }
  if(text.length>48000){status('Limite de 48 mil caracteres; divida em subpáginas.');return false}
  const n=note(id);
- if(!n||String(n.conteudo||'')!==editing.base){
+ if(!n||String(n.conteudo||'')!==editing.base||notaColunas(n.colunas_nota)!==editing.baseCols){
   status('A nota mudou em outro lugar. Seu rascunho está preservado.');
   return false;
  }
+ const delta={id};if(text!==editing.base)delta.conteudo=text;if(cols!==editing.baseCols)delta.colunas_nota=cols;
  let accepted=false;
- try{accepted=salvar('notas',{id,conteudo:text},null,true)===true;}catch(_){}
- if(!accepted||String(note(id)?.conteudo||'')!==text){
+ try{accepted=salvar('notas',delta,null,true)===true;}catch(_){}
+ if(!accepted||String(note(id)?.conteudo||'')!==text||notaColunas(note(id)?.colunas_nota)!==cols){
   status('Não foi possível salvar. Rascunho preservado. Tente novamente.');
   return false;
  }
  // A base só avança quando o texto está no estado local e a fila foi guardada.
- editing.base=text;
+ editing.base=text;editing.baseCols=cols;
  try{localStorage.removeItem(key);editing.draftOwned=false;}catch(_){}
  status('Guardado no aparelho · sincronização na fila');
  return true;
 }
-function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader');if(reader)reader.innerHTML=sc74Notes.renderMarkdown(note(id)?.conteudo||'');edAlvo='f-cont';return true}
+function finish(){if(!editing)return true;if(!flush())return false;const id=editing.id;editing=null;clearTimeout(timer);const reader=$('sc138-inline')?.closest('.np-reader'),n=note(id);if(reader){reader.dataset.notaColunas=notaColunas(n?.colunas_nota);reader.innerHTML=sc74Notes.renderMarkdown(n?.conteudo||'');}edAlvo='f-cont';return true}
 function keepEditor(id){if(!editing)return false;if(String(id)===editing.id)return true;return !finish()}
-function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||'');try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&draft.base===content&&confirm('Recuperar o rascunho de edição desta nota?'))content=draft.text;}catch(_){}
- editing={id:String(id),base:String(n.conteudo||'')};reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><div class="sc138-format">'+edBarraHtml(true)+'</div><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
- edAlvo='sc138-content';edIniciar(content);edRaiz().dataset.notaColunas=notaColunas(n.colunas_nota);if(typeof scInitNoteSize==='function')scInitNoteSize();
- const schedule=()=>{status('Guardando…');clearTimeout(timer);timer=setTimeout(flush,650)};reader.addEventListener('input',schedule);reader.addEventListener('change',schedule);reader.addEventListener('click',e=>{if(e.target.closest('#ed,#ed-ins,#ed-num'))schedule()});const first=edRaiz().querySelector('[contenteditable]');first?.focus();}
+function start(id){if(editing)return;const n=note(id),reader=$('np-document')?.querySelector('.np-reader');if(!n||!reader)return;let content=String(n.conteudo||''),defaultCols=notaColunas(n.colunas_nota),cols=defaultCols;try{const draft=JSON.parse(localStorage.getItem(draftKey(id))||'null');if(draft&&typeof draft.text==='string'&&draft.base===content&&(!draft.baseCols||draft.baseCols===defaultCols)&&confirm('Recuperar o rascunho de edição desta nota?')){content=draft.text;if(draft.cols)cols=notaColunas(draft.cols);}}catch(_){}
+ editing={id:String(id),base:String(n.conteudo||''),baseCols:defaultCols};reader.dataset.notaColunas='1';reader.innerHTML='<section id="sc138-inline"><div class="sc138-edit-head"><span id="sc138-save" role="status">Edição direta</span><button type="button" data-sc138-finish>Concluir edição</button></div><div class="sc138-format">'+edBarraHtml(true)+'</div><div id="ed" aria-label="Conteúdo da nota"></div><div id="ed-ln"></div><textarea id="sc138-content" hidden>'+esc(content)+'</textarea></section>';
+ edAlvo='sc138-content';edIniciar(content);edColunas(cols);if(typeof scInitNoteSize==='function')scInitNoteSize();
+ const schedule=()=>{status('Guardando…');clearTimeout(timer);timer=setTimeout(flush,650)};reader.addEventListener('input',schedule);reader.addEventListener('change',schedule);reader.addEventListener('click',e=>{if(e.target.closest('#ed,#ed-ins,#ed-num'))schedule()});const first=edRaiz().querySelector('[contenteditable]');first?.focus();if(content!==editing.base||cols!==editing.baseCols)schedule();}
 function selected(){const sel=window.getSelection();if(!sel||sel.isCollapsed||!sel.rangeCount)return;const el=sel.anchorNode?.nodeType===1?sel.anchorNode:sel.anchorNode?.parentElement;const end=sel.focusNode?.nodeType===1?sel.focusNode:sel.focusNode?.parentElement;if(!el?.closest('#np-document .np-reader')||!end?.closest('#np-document .np-reader'))return;selection=sel.toString().trim();if(selection.length>1000)return;if(!selection)return;selectionNote=editing?.id||$('np-document')?.querySelector('.np-crumbs button:last-child')?.dataset.id||'';selectionRange=sel.getRangeAt(0).cloneRange();let bar=$('sc138-selection');if(!bar){bar=document.createElement('div');bar.id='sc138-selection';bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','Ações do trecho selecionado');bar.innerHTML='<button type="button" data-sc138-format="bold" aria-label="Negrito"><b>B</b></button><button type="button" data-sc138-format="mark" aria-label="Destacar texto">▰</button><button type="button" data-sc138-format="link" aria-label="Inserir link">↗</button><button type="button" data-sc138-task>Criar tarefa</button><button type="button" data-sc138-dismiss aria-label="Fechar ações do trecho">×</button>';$('np-document').appendChild(bar)}bar.hidden=false;}
 function formatSelection(kind){if(!selection||!note(selectionNote))return;if(editing){try{const s=window.getSelection();s.removeAllRanges();s.addRange(selectionRange);edGuardarSelecao();edFmt(kind);if(kind!=='link')flush();}catch(_){toast('Selecione o trecho novamente.',true)}return}
  const n=note(selectionNote),raw=String(n.conteudo||''),at=raw.indexOf(selection);if(at<0||raw.indexOf(selection,at+1)>=0){toast('Toque no texto para editar este trecho com precisão.');return}let replacement=kind==='bold'?'**'+selection+'**':'[marca=#fff3a3]'+selection+'[/marca]';if(kind==='link'){const input=prompt('Endereço do link (https://…)');if(!input)return;let url;try{url=new URL(input);if(!['https:','http:'].includes(url.protocol)||/[\s()]/.test(input))throw new Error()}catch(_){toast('Informe um endereço http ou https válido.',true);return}replacement='['+selection+']('+url.href+')'}salvar('notas',{id:n.id,conteudo:raw.slice(0,at)+replacement+raw.slice(at+selection.length)});$('sc138-selection')?.remove();sc74Notes.render();}
@@ -13600,6 +13617,12 @@ window.SC154={open,save};if(document.readyState==='loading')document.addEventLis
 html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible!important;touch-action:auto!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;min-height:0}
 .ed-note-main,.ed-note-panel{box-sizing:border-box;background:var(--en-paper);border:1px solid var(--en-edge);border-radius:11px;padding:5px}
 .ed-note-main{display:flex;align-items:center;gap:3px;flex-wrap:wrap;min-width:0}
+.ed-note-shortcut{display:none}
+@container(min-width:540px){.ed-note-shortcut{display:inline-flex}}
+.ed-note-category+.ed-note-category{margin-top:6px;padding-top:5px;border-top:1px solid var(--en-edge)}
+.ed-note-category-title{font-size:12px;color:var(--sc128-muted,var(--en-ink));font-weight:650;padding:3px 7px}
+.ed-note-layout-size{padding:4px 7px;display:flex;align-items:center;gap:6px;font-size:13px;min-width:0;flex-wrap:wrap}
+.ed-note-layout-size select{max-width:100%;font-size:16px;min-height:40px}
 .ed-note-tools button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:35px;min-height:35px;padding:4px 7px;font:inherit;font-size:13px;color:var(--en-ink)!important;background:transparent!important;border:1px solid transparent!important;border-radius:7px}
 .ed-note-tools button:hover,.ed-note-tools button[aria-pressed=true],.ed-note-tools button[aria-expanded=true]{color:var(--en-accent)!important;background:var(--en-soft)!important}
 .ed-note-tools button:focus-visible,.ed-note-custom:focus-within{outline:2px solid var(--en-accent);outline-offset:1px}
@@ -13627,9 +13650,12 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
   max-width:480px!important;width:auto;margin-inline:auto;z-index:45;
   padding:0;background:transparent!important;box-shadow:0 4px 18px #0002;border-radius:11px
  }
- #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:3px;gap:1px}
+ #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:3px;gap:1px}
  #sc138-inline .ed-note-main>button{padding:4px 1px;min-width:0;min-height:46px;flex-direction:column;gap:1px}
- #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks]{display:none}
+ #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks]{min-width:0;margin:0;justify-content:center;font-size:11px}
+ #sc138-inline .ed-note-main .ed-note-shortcut{display:none}
+ #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks] svg{width:12px;height:12px}
+ #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks] #ed-note-block-label{max-width:100%}
  #sc138-inline .ed-note-tools .ed-note-touch-label,#sc138-inline .ed-note-more-label{display:block;font-size:11px;line-height:1.1}
  #sc138-inline .ed-note-more-label{order:1}
  #sc138-inline .ed-note-tools{position:relative;container-type:normal}
