@@ -2162,11 +2162,11 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-16c-sc11375"></script>
+<script src="./pwa-transport.js?v=2026-11-16d-sc11376"></script>
 <script>
-var VERSAO_TELA = '2026-11-16c';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
-var VERSAO_STUDIO = '11.37.5'; // Planner: estado, rotina e feedback
+var VERSAO_TELA = '2026-11-16d';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f'].indexOf(servidor)>=0;}
+var VERSAO_STUDIO = '11.37.6'; // Planner: estado, rotina e feedback
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
@@ -12338,7 +12338,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-16c-sc11375"></script>
+<script src="./pwa-install.js?v=2026-11-16d-sc11376"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -12804,7 +12804,7 @@ html.sc126 main>div.max-w-6xl{padding:12px 10px 24px!important;width:100%;max-wi
 const $=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const data=()=>typeof D==='object'&&D?D:{},rows=k=>Array.isArray(data()[k])?data()[k]:[],today=()=>hojeISO();
 const done=x=>window.SC111?SC111.finished(x):['feita','concluido','pago'].includes(x.status),name=x=>x.titulo||x.nome||x.descricao||'Sem título';
-let organize='tarefas',library='notas',libraryQuery='',busy=false;
+let organize='tarefas',library='notas',libraryQuery='',busy=false,allNotesOpen=true;
 const mainTabs=[['hoje','fa-sun','Hoje'],['organizar','fa-layer-group','Organizar'],['biblioteca','fa-book-open','Biblioteca']];
 function tabFor(v){return ['tarefas','metas','organizar'].includes(v)?'organizar':['notas','biblioteca'].includes(v)?'biblioteca':v==='config'?'': 'hoje'}
 function navIcon(v){const paths={hoje:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 10h18"/>',organizar:'<path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5"/>',biblioteca:'<path d="M12 5v16M12 5C9 3 6 3 3 4v16c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Z"/>'};return '<svg class="sc129-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[v]+'</svg>'}
@@ -12850,6 +12850,7 @@ function renderOrganize(){const host=$('v-organizar');if(!host)return;const coun
 }
 function links(){const result=[],seen=new Set();rows('notas').forEach(n=>{const text=String(n.conteudo||'');for(const m of text.matchAll(/https:\/\/[^\s<>"\]\)]+/g)){let u;try{u=new URL(m[0])}catch(_){continue}if(seen.has(u.href))continue;seen.add(u.href);result.push({url:u.href,note:n,host:u.hostname})}});return result;}
 function renderLibrary(){const host=$('v-biblioteca');if(!host)return;
+ const previousAll=host.querySelector('#sc138-all-notes');if(previousAll)allNotesOpen=previousAll.open;
  const q=String(libraryQuery||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(),match=x=>!q||q.split(/\s+/).every(t=>[name(x),x.conteudo,x.notas,x.disciplina,x.area].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(t));
  let html='<h1>'+(library==='notas'?'Notas':'Biblioteca')+'</h1>'+tools([['notas','Notas'],['estudos','Estudos'],['arquivos','Arquivos'],['postits','Post-its']],library,'library')+'<input id="sc129-library-query" class="input" type="search" placeholder="Buscar na biblioteca" aria-label="Buscar na biblioteca" value="'+esc(libraryQuery)+'">';
  if(library==='notas'){
@@ -12861,7 +12862,13 @@ function renderLibrary(){const host=$('v-biblioteca');if(!host)return;
  const noteRow=n=>{const children=rows('notas').filter(y=>String(y.pagina_pai||'')===String(n.id)).length;const projects=rows('projetos').filter(p=>related(p).notas.some(x=>String(x.id)===String(n.id)));const snippet=api?api.snippet(n,libraryQuery):esc(resumoNota(n.conteudo).slice(0,110));return '<div class="sc129-note"><button type="button" class="sc126-row-main" data-sc138-open="'+esc(n.id)+'" style="padding:12px"><strong>'+esc(name(n))+'</strong>'+(snippet?'<small class="sc138-snippet">'+snippet+'</small>':'')+'<small>'+esc([children?children+' subpágina(s)':'',projects.map(name).join(' · '),n.last_modified?'Editada: '+n.last_modified:''].filter(Boolean).join(' · '))+'</small></button>'+button(n.fixada==='Sim'?'★':'☆','data-sc138-star="'+esc(n.id)+'" aria-label="'+(n.fixada==='Sim'?'Remover dos favoritos: ':'Favoritar: ')+esc(name(n))+'" aria-pressed="'+(n.fixada==='Sim')+'"')+button('⋯','data-sc129-note-menu="'+esc(n.id)+'" aria-label="Opções da nota '+esc(name(n))+'"')+'</div>'};
  const pinned=filter==='todas'&&!q?current.filter(n=>n.fixada==='Sim'):[],rest=pinned.length?current.filter(n=>n.fixada!=='Sim'):current;
  if(pinned.length)html+='<h2 class="sc138-section">Fixadas</h2>'+list(pinned.map(noteRow).join(''),'');
- html+='<h2 class="sc138-section">'+(filter==='favoritas'?'Favoritas':filter==='recentes'?'Abertas recentemente':'Todas as notas')+'</h2>'+list(rest.map(noteRow).join(''),'Nenhuma nota encontrada.');html+='<details class="sc126-details"><summary>Arquivadas · '+old.length+'</summary>'+list(old.map(noteRow).join(''),'Nenhuma nota arquivada.')+'</details>';
+ const noteList=list(rest.map(noteRow).join(''),'Nenhuma nota encontrada.');
+ if(filter==='todas'){
+   html+='<details id="sc138-all-notes" class="sc126-details"'+(allNotesOpen?' open':'')+'><summary class="sc138-section">Todas as notas</summary>'+noteList+'</details>';
+ }else{
+   html+='<h2 class="sc138-section">'+(filter==='favoritas'?'Favoritas':'Abertas recentemente')+'</h2>'+noteList;
+ }
+ html+='<details class="sc126-details"><summary>Arquivadas · '+old.length+'</summary>'+list(old.map(noteRow).join(''),'Nenhuma nota arquivada.')+'</details>';
  }else if(library==='arquivos'){
  html+='<div class="sc126-tools">'+button('Adicionar link em uma nota','data-sc126-new="notas"')+'</div>';const files=links().filter(x=>match(x.note)||!q||x.url.toLowerCase().includes(q));html+=list(files.map(x=>'<div class="sc126-row"><a class="sc126-row-main" href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer"><strong>'+esc(x.host)+'</strong><small>'+esc(name(x.note))+'</small></a>'+button('Nota',openAttr('notas',x.note.id))+'</div>').join(''),'Nenhum link encontrado nas notas.');
  }else {html+='<div class="sc126-tools">'+button(library==='estudos'?'Novo estudo e agenda':'Novo post-it','data-sc126-tool="'+library+'"')+'</div>';const records=(library==='estudos'?rows('estudos'):rows('notas').filter(x=>x.tipo==='postit')).filter(match);html+=list(records.map(x=>row(library==='estudos'?'estudos':'notas',x,meta(x))).join(''),'Nenhum registro encontrado.')}
