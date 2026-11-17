@@ -8,13 +8,14 @@ const A='a@example.test', B='b@example.test';
 const snapshot=(usuario, data={})=>Object.assign({usuario,seq:1,config:{},tarefas:[],eventos:[],notas:[]},data);
 
 function app(t){
-  const sent=[], reads=[], errors=[];
+  const sent=[], reads=[], calendars=[], errors=[];
   const vc=new VirtualConsole();
   vc.on('jsdomError',e=>{if(e.type==='unhandled exception'||e.type==='unhandled-exception')errors.push(e.detail||e);});
   const adapter=(ok,fail)=>new Proxy({}, {get:(_,name)=>{
     if(name==='withSuccessHandler')return fn=>adapter(fn,fail);
     if(name==='withFailureHandler')return fn=>adapter(ok,fn);
-    if(name==='getDados')return ()=>reads.push({ok,fail});
+    if(name==='getDados')return force=>reads.push({ok,fail,force});
+    if(name==='eventosGoogle')return (from,to)=>calendars.push({from,to,ok,fail});
     if(name==='enviarComando')return cmd=>sent.push({cmd,ok,fail});
     return ()=>{};
   }});
@@ -29,7 +30,7 @@ function app(t){
   t.after(()=>{w.close();assert.deepEqual(errors,[]);});
   let online=true;
   Object.defineProperty(w.navigator,'onLine',{get:()=>online});
-  return {w,sent,reads,online:v=>{online=v;}};
+  return {w,sent,reads,calendars,online:v=>{online=v;}};
 }
 
 test('cache and queues require the matching PWA session; legacy data stays intact',t=>{
@@ -129,4 +130,94 @@ test('planner stores ideas as independent notes and preserves the legacy text in
   assert.equal(w.D.notas.find(n=>n.id===dateKey(day)).conteudo,'Uma ideia\nMais texto <b>');
   assert.equal(w.D.notas.find(n=>n.id===dateKey(next)).conteudo,'Outra ideia');
   assert.equal(JSON.parse(w.D.config.sc148_notes)[day],'Legado');
+});
+
+test('planner does not claim success or replace undo when persistence fails',t=>{
+  const {w,online}=app(t);online(false);
+  w.aplicarDados(snapshot(A,{tarefas:[{id:'t1',titulo:'Estudar',data:'2026-11-20'}]}));
+  const prev={at:234,changes:[]};w.SC145.write('planner-undo',prev);
+  const original=w.Storage.prototype.setItem;
+  w.Storage.prototype.setItem=function(k,v){if(k.startsWith('sc_fila_cmd_v3:'))throw Error('quota');return original.call(this,k,v);};
+  assert.equal(w.SC148.apply([{id:'t1',after:{id:'t1',data:'2026-11-21'}}],'Teste'),false);
+  assert.equal(w.D.tarefas[0].data,'2026-11-20');
+  assert.equal(w.SC145.read('planner-undo').at,234);
+  assert.equal(w.SC145.read('planner-log',null),null);
+});
+
+test('calendar failures are not empty verified calendars, and identical requests are shared',async t=>{
+  const {w,calendars}=app(t);
+  w.aplicarDados(snapshot(A,{config:{google_agenda:'Sim'}}));
+  const a='2026-11-20',b='2026-11-22',p=w.SC167.calendar(a,b),q=w.SC167.calendar(a,b);
+  assert.equal(p,q);assert.equal(calendars.length,1);
+  calendars[0].ok({erro:'Sem acesso',eventos:[]});
+  assert.equal(await p,false);assert.equal(w.SC144.loaded(a),false);
+  assert.equal(await w.SC167.calendar(a,b),false);assert.equal(calendars.length,1);
+  const retry=w.SC167.calendar(a,b,true);calendars[1].ok({eventos:[]});
+  assert.equal(await retry,true);assert.equal(w.SC144.loaded(a),true);
+  const late=w.SC167.calendar(a,b,true);w.sc166PrepareLogout();calendars[2].ok({eventos:[{id:'old'}]});
+  assert.equal(await late,false);
+  assert.equal(Object.keys(w.gcalCache).length,0);
+});
+
+test('note edit preflight preserves both versions and never posts a detected conflict',t=>{
+  const {w,sent,reads}=app(t);
+  w.aplicarDados(snapshot(A,{notas:[{id:'n1',titulo:'Trabalho',conteudo:'Antes'}]}));
+  assert(w.salvar('notas',{id:'n1',conteudo:'Minha edição'}));
+  assert.equal(sent.length,0);
+  assert.equal(reads.at(-1).force,true);
+  reads.at(-1).ok(snapshot(A,{seq:2,notas:[{id:'n1',titulo:'Trabalho',conteudo:'Edição em outro aparelho'}]}));
+  assert.equal(sent.length,0);
+  assert.equal(w.D.notas[0].conteudo,'Edição em outro aparelho');
+  assert.equal(w.fila.length,0);
+  assert(w.SC167.history('n1').some(x=>x.data.conteudo==='Minha edição'));
+  assert(w.SC167.history('n1').some(x=>x.data.conteudo==='Antes'));
+  w.sc166PrepareLogout();w.aplicarDados(snapshot(B));
+  assert.equal(w.SC167.history('n1').length,0);
+});
+
+test('note links survive renames and do not silently select a duplicate title',t=>{
+  const {w}=app(t);
+  w.aplicarDados(snapshot(A,{notas:[{id:'n1',titulo:'Mesmo nome'},{id:'n2',titulo:'Mesmo nome'}]}));
+  const token=w.SC167.noteToken('n2','Mesmo nome');
+  w.D.notas[1].titulo='Renomeada';
+  const markup=w.sc74Notes.renderMarkdown('[['+token+']]');
+  assert.match(markup,/data-id="n2"/);
+  assert.match(markup,/Renomeada/);
+  w.D.notas[1].titulo='Mesmo nome';
+  assert.match(w.sc74Notes.renderMarkdown('[[Mesmo nome]]'),/data-np="unresolved"/);
+});
+
+test('labels describe the actual alert state, and progress excludes cancelled tasks',t=>{
+  const {w}=app(t);
+  const {alert,project,habit}=w.SC167;
+  assert.equal(alert('eventos',{},false).state,'saved');
+  assert.equal(alert('eventos',{google_id:'id'},false).state,'sent');
+  assert.equal(alert('eventos',{google_id:'id',alerta_status:'confirmado'},false).state,'confirmed');
+  assert.equal(alert('tarefas',{evento_google:'id',alerta_status:'falha'},false).state,'failed');
+  assert.equal(alert('eventos',{google_id:'id'},true).state,'pending');
+  const p=project('p1',[{projeto:'p1',status:'feita'},{projeto:'p1',status:'aberta'},{projeto:'p1',status:'cancelada'}]);
+  assert.equal(p.percent,50);assert.equal(p.count,2);
+  const x=habit({id:'h1',dias:'1,2,3,4,5',criado_em:'16/11/2026' },'2026-11-17',[{habito_id:'h1',data:'2026-11-16'}]);
+  assert.equal(x.total,1);assert.equal(x.done,1);
+  assert.equal(w.SC153.state({data:'2026-11-01'},'habitos',new Date('2026-11-17T12:00:00')),'');
+});
+
+test('capture accepts Brazilian date and explicit time but blocks accidental idea conversion',t=>{
+  const {w}=app(t);
+  const u=w.SC120.understanding;
+  assert.equal(u.date('Consulta em 9/12','2026-11-17'),'2026-12-09');
+  assert.equal(u.date('Consulta em 31/11','2026-11-17'),'');
+  assert.equal(u.hour('Treino amanhã às 11h na academia',''), '11:00');
+  assert.throws(()=>w.SC167.captureCheck({acoes:[{tabela:'tarefas'}]}, {root:'Anote esta ideia: estudar francês'}),/nota/i);
+  assert.doesNotThrow(()=>w.SC167.captureCheck({acoes:[{tabela:'tarefas'}]}, {root:'Transforme esta ideia em uma tarefa'}));
+});
+
+test('planner does not replace identical DOM on repeated renders',async t=>{
+  const {w}=app(t);
+  if(w.document.readyState==='loading')await new Promise(r=>w.document.addEventListener('DOMContentLoaded',r,{once:true}));
+  w.irPara('agenda');w.SC148.refresh();
+  const root=w.document.querySelector('#v-agenda .sc148-root'),n=w.SC167.metrics().planner;
+  assert(root);w.SC148.refresh();w.SC148.refresh();
+  assert.equal(w.document.querySelector('#v-agenda .sc148-root'),root);
+  assert.equal(w.SC167.metrics().planner,n);
 });
