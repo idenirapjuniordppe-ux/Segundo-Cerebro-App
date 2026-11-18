@@ -2162,10 +2162,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-17k-sc1137151"></script>
+<script src="./pwa-transport.js?v=2026-11-18a-sc1137151"></script>
 <script>
-var VERSAO_TELA = '2026-11-17k';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
+var VERSAO_TELA = '2026-11-18a';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
 var VERSAO_STUDIO = '11.37.15.1'; // validação atômica das notas com servidor compatível
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
@@ -11262,7 +11262,7 @@ html[data-sc-theme="executive"] .sc5-tabs button:not([aria-pressed="true"]){
 .sc10-ui .sc10-status{display:inline-block;font-size:11px;border-radius:6px;padding:2px 5px;background:rgba(125,147,176,.2);margin-left:6px}
 .sc10-ui .sc10-form{display:grid;gap:12px}
 .sc10-ui .sc10-form label{display:grid;gap:5px;font-size:13px;font-weight:600}
-.sc10-ui .sc10-form input,.sc10-ui .sc10-form select,.sc10-ui .sc10-form textarea{border:1px solid rgba(99,130,157,.6);background:var(--sc901-panel,var(--card,#fff));color:var(--sc901-ink,var(--txt,#203447));border-radius:10px;padding:11px;min-height:42px;width:100%;font:inherit}
+.sc10-ui .sc10-form input:not([type="checkbox"]),.sc10-ui .sc10-form select,.sc10-ui .sc10-form textarea{border:1px solid rgba(99,130,157,.6);background:var(--sc901-panel,var(--card,#fff));color:var(--sc901-ink,var(--txt,#203447));border-radius:10px;padding:11px;min-height:42px;width:100%;font:inherit}
 .sc10-ui .sc10-form textarea{min-height:110px;resize:vertical}
 .sc10-ui .sc10-form .sc10-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sc10-ui .sc10-save{background:#25639a!important;color:white!important}
@@ -11654,10 +11654,10 @@ var SC10=(function(){
  function input(id,value,type){return '<input id="'+id+'" type="'+(type||'text')+'" value="'+esc(value||'')+'">';}
  function label(txt,html){return '<label>'+txt+html+'</label>';}
  function edit(id){var k=tool==='postits'?'notas':tool,o=id?obter(k,id):{},title= id?'Editar':'Novo';var fields='';
-   if(tool==='postits')fields=label('Texto','<textarea id="sc10-text" maxlength="5000" placeholder="Escreva aqui...">'+esc(o.conteudo||'')+'</textarea>')+label('Título (opcional)',input('sc10-title',o.titulo))+label('Área',formArea(o.area))+label('Cor','<select id="sc116-color"><option value="amarelo"'+(!o.postit_cor||o.postit_cor==='amarelo'?' selected':'')+'>Amarelo</option><option value="rosa"'+(o.postit_cor==='rosa'?' selected':'')+'>Rosa</option><option value="azul"'+(o.postit_cor==='azul'?' selected':'')+'>Azul</option><option value="verde"'+(o.postit_cor==='verde'?' selected':'')+'>Verde</option></select>')+'<label class="sc116-check"><input type="checkbox" id="sc116-pin" '+(window.SC116.scope(o)?'checked':'')+'> Pendurar na tela</label>';
+   if(tool==='postits')fields=label('Texto','<textarea id="sc10-text" maxlength="5000" placeholder="Escreva aqui...">'+esc(o.conteudo||'')+'</textarea>')+label('Título (opcional)',input('sc10-title',o.titulo))+label('Área',formArea(o.area))+label('Cor','<select id="sc116-color"><option value="amarelo"'+(!o.postit_cor||o.postit_cor==='amarelo'?' selected':'')+'>Amarelo</option><option value="rosa"'+(o.postit_cor==='rosa'?' selected':'')+'>Rosa</option><option value="azul"'+(o.postit_cor==='azul'?' selected':'')+'>Azul</option><option value="verde"'+(o.postit_cor==='verde'?' selected':'')+'>Verde</option></select>')+'<label class="sc116-check" for="sc116-pin"><input type="checkbox" id="sc116-pin" '+(window.SC116.scope(o)?'checked':'')+'><span>Pendurar na tela</span></label>';
    if(tool==='estudos')fields=label('Atividade',input('sc10-title',o.titulo))+label('Disciplina',input('sc10-sub',o.disciplina))+ '<div class="sc10-two">'+label('Data',input('sc10-date',o.data||hojeISO(),'date'))+label('Horário (opcional)',input('sc10-time',o.hora,'time'))+'</div>'+label('Área',formArea(o.area))+'<div class="sc10-two">'+label('Tipo','<select id="sc10-type"><option value="sessao">Estudo</option><option value="revisao"'+(o.tipo==='revisao'?' selected':'')+'>Revisão</option><option value="prova"'+(o.tipo==='prova'?' selected':'')+'>Prova</option></select>')+label('Situação','<select id="sc10-status"><option value="planejado">Pendente</option><option value="concluido"'+(o.status==='concluido'?' selected':'')+'>Concluído</option></select>')+'</div>'+label('Anotação (opcional)','<textarea id="sc10-text" rows="3">'+esc(o.notas||'')+'</textarea>');
    if(tool==='financas')fields=label('Descrição',input('sc10-title',o.descricao))+'<div class="sc10-two">'+label('Valor (R$)',input('sc10-amount',o.valor_centavos!=null?(Number(o.valor_centavos)/100).toFixed(2).replace('.',','):''))+label('Data',input('sc10-date',o.data||hojeISO(),'date'))+'</div>'+'<div class="sc10-two">'+label('Movimento','<select id="sc10-type"><option value="despesa"'+(o.tipo!=='receita'?' selected':'')+'>Despesa</option><option value="receita"'+(o.tipo==='receita'?' selected':'')+'>Receita</option></select>')+label('Situação','<select id="sc10-status"><option value="pendente">Pendente</option><option value="pago"'+(o.status==='pago'?' selected':'')+'>Pago/recebido</option></select>')+'</div>'+label('Área',formArea(o.area))+label('Categoria (opcional)',input('sc10-sub',o.categoria));
-   abrirModal(title+' '+({postits:'post-it',estudos:'estudo',financas:'lançamento'}[tool]),'<div class="sc10-ui"><form class="sc10-form" id="sc10-form" onsubmit="SC10.save('+arg(id||'')+');return false">'+fields+'<div class="sc10-actions"><button type="submit" class="sc10-save">Salvar</button><button type="button" onclick="SC10.open('+arg(tool)+')">Voltar</button>'+(id?'<button type="button" onclick="SC10.remove('+arg(id)+')">Excluir</button>':'')+(tool==='estudos'&&id&&o.data?'<button type="button" onclick="SC10.calendar('+arg(id)+')">Adicionar à agenda</button>':'')+'</div></form></div>','');
+   abrirModal(title+' '+({postits:'post-it',estudos:'estudo',financas:'lançamento'}[tool]),'<div class="sc10-ui"><form class="sc10-form'+(tool==='postits'?' sc10-postit-form':'')+'" id="sc10-form" onsubmit="SC10.save('+arg(id||'')+');return false">'+fields+'<div class="sc10-actions"><button type="submit" class="sc10-save">Salvar</button><button type="button" onclick="SC10.open('+arg(tool)+')">Voltar</button>'+(id?'<button type="button" onclick="SC10.remove('+arg(id)+')">Excluir</button>':'')+(tool==='estudos'&&id&&o.data?'<button type="button" onclick="SC10.calendar('+arg(id)+')">Adicionar à agenda</button>':'')+'</div></form></div>','');
  }
  function save(id){var text=clean(val('sc10-text')),title=clean(val('sc10-title')),area=val('sc10-area');var data={};if(id)data.id=id;
    if(tool==='postits'){if(!text){toast('Escreva o post-it.',true);return;}var keepPin=marcado('sc116-pin'),wasPin=id?SC116.scope(obter('notas',id)):'';if(keepPin&&!wasPin&&!SC116.mayPin(id,'*'))return;data={...data,titulo:title||text.slice(0,36),conteudo:text,tipo:'postit',area:area,postit_cor:val('sc116-color')||'amarelo'};if(!id)data.flutuante=keepPin?'Sim':'';if(salvar('notas',data,null,true)!==true){toast('Não foi possível guardar o post-it.',true);return;}if(id&&!!wasPin!==keepPin&&!SC116.setScope(id,keepPin?'*':'',true))return;open(tool);return;}
@@ -11930,7 +11930,7 @@ html.sc11-active .vista .btn-p,html.sc11-active .sc10-ui .sc10-save{background:#
 html.sc11-active .vista .input,
 html.sc11-active .vista select,
 html.sc11-active .vista textarea,
-html.sc11-active .sc10-ui .sc10-form :where(input):not(sc-nunca),
+html.sc11-active .sc10-ui .sc10-form :where(input:not([type="checkbox"])):not(sc-nunca),
 html.sc11-active .sc10-ui .sc10-form :where(select):not(sc-nunca),
 html.sc11-active .sc10-ui .sc10-form :where(textarea):not(sc-nunca){background:var(--sc11-paper)!important;color:var(--sc11-ink)!important;border:1px solid var(--sc11-border)!important;border-radius:13px!important}
 html.sc11-active .vista .input::placeholder,html.sc11-active .sc10-ui .sc10-form input::placeholder{color:var(--sc11-muted)!important}
@@ -12088,8 +12088,11 @@ html.sc11-active #nav-movel .sc11-nav-create .sc11-icon{width:52px!important;hei
 .sc116-paper[data-drag="1"]{box-shadow:0 20px 36px rgba(15,24,40,.32);transition:none!important}
 .sc116-paper *{text-shadow:none!important}.sc116-paper button{-webkit-tap-highlight-color:transparent}
 .sc116-floating-button{margin-inline-start:6px;min-width:76px;white-space:nowrap}
-.sc116-check{display:flex!important;align-items:center!important;gap:9px!important;font-size:13px!important;padding:7px 4px!important}
-.sc116-check input{width:18px;height:18px;flex:0 0 auto}
+.sc10-ui .sc10-postit-form{box-sizing:border-box;min-inline-size:0;grid-template-columns:minmax(0,1fr)}
+.sc10-ui .sc10-postit-form > label{min-inline-size:0}
+.sc10-ui .sc10-form .sc116-check{display:flex;align-items:center;gap:9px;min-block-size:44px;padding:4px;font-size:13px;cursor:pointer}
+.sc10-ui .sc116-check > input[type="checkbox"]{width:18px;height:18px;flex:none;margin:0;padding:0}
+.sc10-ui .sc116-check > span{min-inline-size:0;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:520px){.sc116-paper{width:min(220px,calc(100vw - 22px));max-height:min(220px,calc(100dvh - 180px))}.sc116-content{font-size:12.5px}.sc116-head{padding:5px 6px}}
 @media(prefers-reduced-motion:reduce){.sc116-paper{transition:none!important}}
 
@@ -12578,7 +12581,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-17k-sc1137151"></script>
+<script src="./pwa-install.js?v=2026-11-18a-sc1137151"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
