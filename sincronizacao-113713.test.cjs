@@ -245,3 +245,60 @@ test('new note ID is guarded on the compatible server',t=>{
   assert(w.salvar('notas',{id:'sc148-idea-20261117',titulo:'Ideia',conteudo:'Texto'}));
   assert.equal(sent[0].cmd.sc167_note_base[0].missing,true);
 });
+
+test('legacy recovery data stays exportable without triggering a sync alarm',async t=>{
+  const {w,sent}=app(t);
+  const old={
+    sc_fila_v1:'[]',
+    sc_fila_mortos_v1:'[]',
+    sc120_lote_Vazio:'[]',
+    sc_cache_v1:'{"tarefas":[]}',
+    sc_rasc:'{"nota:n1":{"draft":true}}',
+    'sc119_history:escopo-antigo:1':'{"table":"notas","reason":"edit","item":{"id":"n1"}}'
+  };
+  for(const [key,value] of Object.entries(old))w.localStorage.setItem(key,value);
+  if(w.document.readyState==='loading')await new Promise(r=>w.document.addEventListener('DOMContentLoaded',r,{once:true}));
+  const notices=[];
+  w.toast=(...args)=>notices.push(args);
+  w.aplicarDados(snapshot(A));
+  assert.equal(w.sc166HaPendenciasLegadas(w.sc166ChavesLegadas()),false);
+  assert.deepEqual(notices,[]);
+  const exportButton=w.document.getElementById('sc166-export-legacy');
+  assert(exportButton);
+  assert.equal(exportButton.hidden,true);
+  await new Promise(r=>w.setTimeout(r,100));
+  assert.equal(exportButton.hidden,false);
+  let downloaded;
+  w.downloadFile=(filename,type,data)=>downloaded={filename,type,dados:JSON.parse(data).dados};
+  exportButton.click();
+  assert.deepEqual(downloaded.dados,old);
+  assert.equal(sent.length,0);
+  for(const [key,value] of Object.entries(old))assert.equal(w.localStorage.getItem(key),value);
+});
+
+test('legacy commands at rest get only one neutral notice and are never replayed',t=>{
+  const {w,sent}=app(t);
+  const cmd={cid:'legacy-a',tipo:'SALVAR',tabela:'tarefas',itens:[{id:'item-a'}]};
+  const sources={'sc_fila_v1':[cmd],'sc_fila_mortos_v1':[cmd],'sc120_lote_A':[cmd],'sc_fila_cmd_v2:legacy-a':cmd};
+  for(const [key,value] of Object.entries(sources)){
+    w.localStorage.setItem(key,JSON.stringify(value));
+    assert.equal(w.sc166HaPendenciasLegadas(w.sc166ChavesLegadas()),true,key);
+    w.localStorage.removeItem(key);
+  }
+  w.localStorage.setItem('sc_fila_v1','[]');
+  w.localStorage.setItem('sc_fila_cmd_v2:invalid','{"cid":"invalid"}');
+  assert.equal(w.sc166HaPendenciasLegadas(w.sc166ChavesLegadas()),false);
+  const original=JSON.stringify(cmd);
+  w.localStorage.setItem('sc_fila_cmd_v2:legacy-a',original);
+  const notices=[];
+  w.toast=(...args)=>notices.push(args);
+  w.aplicarDados(snapshot(A));
+  w.aplicarDados(snapshot(A));
+  w.drenarFila();
+  assert.equal(notices.length,1);
+  assert.match(notices[0][0],/Pendências antigas/);
+  assert.equal(notices[0][1],false);
+  assert.equal(notices[0][2],undefined);
+  assert.equal(sent.length,0);
+  assert.equal(w.localStorage.getItem('sc_fila_cmd_v2:legacy-a'),original);
+});

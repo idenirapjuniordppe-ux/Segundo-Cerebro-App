@@ -2162,10 +2162,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-17i-sc1137151"></script>
+<script src="./pwa-transport.js?v=2026-11-17j-sc1137151"></script>
 <script>
-var VERSAO_TELA = '2026-11-17i';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
+var VERSAO_TELA = '2026-11-17j';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
 var VERSAO_STUDIO = '11.37.15.1'; // validação atômica das notas com servidor compatível
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc155Lifecycle(x){
@@ -2425,15 +2425,37 @@ function sc166ChavesLegadas(){
 function sc166ExportarLegado(){
   try{
     var dados={};sc166ChavesLegadas().forEach(function(k){dados[k]=localStorage.getItem(k);});
-    if(!Object.keys(dados).length){toast('Nenhum dado antigo sem conta encontrada neste aparelho.');return;}
+    if(!Object.keys(dados).length){toast('Nenhum dado antigo encontrado neste aparelho.');return;}
     if(!confirm('Esta cópia pode conter dados de uma conta anterior. Deseja salvar para conferir localmente?'))return;
     downloadFile('segundo-cerebro-dados-locais-antigos.json','application/json;charset=utf-8',JSON.stringify({schema:'sc166-legado',dados:dados},null,2));
   }catch(e){toast('Não foi possível exportar os dados locais antigos.',true);}
 }
+function sc166ChaveFilaLegada(k){
+  return k==='sc_fila_v1'||k==='sc_fila_mortos_v1'||k.startsWith('sc_fila_cmd_v2:')||/^sc120_lote_[a-zA-Z0-9]+$/.test(k);
+}
+function sc166HaPendenciasLegadas(chaves){
+  return chaves.some(function(k){
+    if(!sc166ChaveFilaLegada(k))return false;
+    try{
+      var dado=JSON.parse(localStorage.getItem(k));
+      var comandos=k.startsWith('sc_fila_cmd_v2:')?[dado]:dado;
+      return Array.isArray(comandos)&&comandos.some(function(cmd){
+        return cmd&&typeof cmd.cid==='string'&&cmd.cid.trim()&&typeof cmd.tipo==='string'&&cmd.tipo.trim();
+      });
+    }catch(e){return false;}
+  });
+}
+function sc166HaDadosLegados(){
+  if(!sc166Conta)return false;
+  try{
+    var chaves=sc166ChavesLegadas();
+    return chaves.some(function(k){return !sc166ChaveFilaLegada(k);})||sc166HaPendenciasLegadas(chaves);
+  }catch(e){return false;}
+}
 function sc166AvisarLegado(){
   if(sc166AvisoLegado||!sc166Conta)return;
-  try{if(sc166ChavesLegadas().some(function(k){return k!=='sc_cache_v1'&&k!=='sc_rasc';})){
-    sc166AvisoLegado=true;toast('Alterações antigas sem conta identificada foram preservadas neste aparelho. Não foram reenviadas.',true,{rotulo:'Exportar para conferir',fn:sc166ExportarLegado});
+  try{if(sc166HaPendenciasLegadas(sc166ChavesLegadas())){
+    sc166AvisoLegado=true;toast('Pendências antigas guardadas neste aparelho. Veja em Ajustes.',false);
   }}catch(e){}
 }
 
@@ -8973,10 +8995,11 @@ function recoveryUI(){
  panel.innerHTML='<h3>Segurança, sincronização e recuperação</h3>'+ 
  '<p>Exporte seus dados e operações pendentes. Registros com ID repetido são ignorados por padrão. Uma importação só termina quando os lotes forem confirmados no servidor.</p>'+ 
  '<div id="sc5-sync-status" role="status" aria-live="polite"></div>'+ 
- '<div class="sc56-tools"><button type="button" id="sc5-export">Baixar cópia de segurança</button><button type="button" id="sc56-retry">Reenviar quarentena</button><button type="button" id="sc56-export-queue">Exportar pendências</button></div>'+ 
+ '<div class="sc56-tools"><button type="button" id="sc5-export">Baixar cópia de segurança</button><button type="button" id="sc56-retry">Reenviar quarentena</button><button type="button" id="sc56-export-queue">Exportar pendências</button><button type="button" id="sc166-export-legacy" hidden>Exportar dados antigos</button></div>'+
  '<label class="sc56-label" for="sc5-restore-file">Selecionar backup JSON para verificar</label><input type="file" id="sc5-restore-file" accept=".json,application/json">'+ 
  '<div id="sc5-restore-preview" role="status" aria-live="polite"></div><div id="sc56-progress" role="status"></div>';
  cfg.insertBefore(panel,cfg.firstElementChild.nextSibling);
+ $('sc166-export-legacy').onclick=sc166ExportarLegado;
  $('sc5-export').onclick=safeExport;$('sc5-restore-file').onchange=readRecovery;
  $('sc56-retry').onclick=()=>{if(typeof reintegrarQuarentena==='function'){reintegrarQuarentena();}refreshRecovery();};
  $('sc56-export-queue').onclick=()=>{const obj={app:'Segundo Cerebro',exportado_em:new Date().toISOString(),fila_pendente:lerFila(),fila_quarentena:localJson(sc166QuarentenaKey())};downloadFile('segundo-cerebro-pendencias-'+hojeISO()+'.json','application/json;charset=utf-8',JSON.stringify(obj,null,2));};
@@ -8984,6 +9007,7 @@ function recoveryUI(){
 }
 function refreshRecovery(){
  const x=$('sc5-sync-status');if(!x)return;
+ const legado=$('sc166-export-legacy');if(legado)legado.hidden=!sc166HaDadosLegados();
  const queue=lerFila(),dead=localJson(sc166QuarentenaKey());
  x.textContent=queue.length+' operação(ões) pendente(s) · '+dead.length+' em quarentena · '+(navigator.onLine?'rede disponível':'offline')+'.';
  // 12h: lista o que está em quarentena (antes só aparecia a contagem)
@@ -12554,7 +12578,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-17i-sc1137151"></script>
+<script src="./pwa-install.js?v=2026-11-17j-sc1137151"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';

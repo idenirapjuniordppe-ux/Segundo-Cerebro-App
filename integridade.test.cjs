@@ -22,5 +22,5 @@ assert(src.includes('sc166Serie(t)'), 'Recorrência sem origem única');
 assert(src.includes("'sc148-idea-'"), 'Ideias não persistidas separadamente');
 assert(!src.includes('Sem hora, ele vem no horário padrão do dia'), 'Mensagem de lembrete contraditória');
 assert(transport.includes('scPwaSessionMarker'), 'Sessão sem vínculo do cache');
-assert(worker.includes("VERSION='2026-11-17i'"), 'Versões do cache não correspondem');
+assert(worker.includes("VERSION='2026-11-17j'"), 'Versões do cache não correspondem');
 console.log('PASS: sintaxe de scripts e controles de integridade 11.37.15.1');
