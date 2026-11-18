@@ -302,3 +302,147 @@ test('legacy commands at rest get only one neutral notice and are never replayed
   assert.equal(sent.length,0);
   assert.equal(w.localStorage.getItem('sc_fila_cmd_v2:legacy-a'),original);
 });
+
+function ready(w){
+  return w.document.readyState==='loading'?new Promise(resolve=>w.document.addEventListener('DOMContentLoaded',resolve,{once:true})):Promise.resolve();
+}
+function touch(w,target,type,x=0,y=0,count=1){
+  const e=new w.Event(type,{bubbles:true,cancelable:true});
+  const points=Array.from({length:count},(_,identifier)=>({identifier,clientX:x,clientY:y}));
+  Object.defineProperties(e,{touches:{value:/end|cancel/.test(type)?[]:points},changedTouches:{value:points}});
+  target.dispatchEvent(e);
+}
+test('cancelled mobile gestures clear pull-to-refresh and modal transforms without actions',async t=>{
+  const {w}=app(t);
+  await ready(w);
+  const d=w.document;
+  w.navMovelVisivel=()=>true;
+  let refreshes=0;
+  w.recarregar=()=>{refreshes++;};
+  w.fecharModal();
+  const ptr=d.getElementById('ptr');
+  touch(w,d.body,'touchstart',20,60);
+  touch(w,d.body,'touchmove',20,180);
+  assert.equal(ptr.classList.contains('on'),true);
+  touch(w,d.body,'touchcancel',20,180);
+  assert.equal(ptr.classList.contains('on'),false);
+  touch(w,d.body,'touchend',20,180);
+  assert.equal(refreshes,0);
+  touch(w,d.body,'touchstart',20,60);
+  touch(w,d.body,'touchmove',20,180);
+  touch(w,d.body,'touchstart',20,180,2);
+  assert.equal(ptr.classList.contains('on'),false);
+  touch(w,d.body,'touchend');
+  assert.equal(refreshes,0);
+  touch(w,d.body,'touchstart',20,60);
+  touch(w,d.body,'touchmove',20,180);
+  touch(w,d.body,'touchend',20,180);
+  assert.equal(refreshes,1);
+  w.abrirModal('Teste','<p>Exemplo</p>','');
+  const modal=d.getElementById('modal-caixa'), header=modal.firstElementChild;
+  touch(w,header,'touchstart',10,40);
+  touch(w,header,'touchmove',10,180);
+  assert.match(modal.style.transform,/translateY/);
+  touch(w,header,'touchcancel',10,180);
+  touch(w,header,'touchend',10,180);
+  assert.equal(modal.style.transform,'');
+  assert.equal(modal.style.transition,'');
+  assert.equal(d.getElementById('modal').classList.contains('hidden'),false);
+});
+
+test('manual refresh explains offline and invalid replies without overwriting local data',async t=>{
+  const {w,reads,online}=app(t);
+  await ready(w);
+  w.aplicarDados(snapshot(A,{tarefas:[{id:'original'}]}));
+  const notices=[];
+  w.toast=(text,bad)=>notices.push([text,!!bad]);
+  const initial=reads.length;
+  online(false);
+  w.recarregar(true,true);
+  assert.equal(reads.length,initial);
+  assert.match(notices.at(-1)[0],/sem conexão/i);
+  online(true);
+  w.recarregar(true,true);
+  assert.equal(reads.length,initial+1);
+  reads.at(-1).ok({erro:'não disponível'});
+  assert.match(notices.at(-1)[0],/não foi possível atualizar/i);
+  assert.equal(w.D.tarefas[0].id,'original');
+  w.recarregar(true,true);
+  reads.at(-1).ok(snapshot(A,{seq:2,tarefas:[{id:'updated'}]}));
+  assert.equal(w.D.tarefas[0].id,'updated');
+  assert.deepEqual(notices.at(-1),['Atualizado.',false]);
+});
+
+test('planner shortcut Todas as tarefas opens Organizar in the tasks section',async t=>{
+  const {w}=app(t);
+  await ready(w);
+  w.aplicarDados(snapshot(A,{tarefas:[{id:'example',titulo:'Tarefa de teste',status:'aberta'}]}));
+  const d=w.document;
+  w.irPara('organizar');
+  d.querySelector('[data-sc126-organize="projetos"]').click();
+  w.irPara('hoje');
+  w.SC148.refresh();
+  const shortcut=d.querySelector('#v-hoje [data-sc148="tasks"]');
+  assert(shortcut);
+  shortcut.click();
+  assert.equal(w.vistaAtual,'organizar');
+  assert.equal(d.querySelector('#v-organizar [data-sc126-organize="tarefas"]').getAttribute('aria-pressed'),'true');
+  assert.match(d.getElementById('v-organizar').textContent,/Tarefa de teste/);
+  assert(d.getElementById('modal').classList.contains('hidden'));
+});
+
+test('day planner shows continuation blocks but hides cached Google events when integration is off',async t=>{
+  const {w}=app(t);
+  await ready(w);
+  const d=w.hojeISO(), next=w.somaDias(d,1), later=w.somaDias(d,2);
+  w.aplicarDados(snapshot(A,{config:{google_agenda:'Sim'},eventos:[
+    {id:'overnight',titulo:'Virada local',data:d,inicio:'23:00',fim:'01:30'},
+    {id:'exact-midnight',titulo:'Até meia-noite',data:d,inicio:'23:30',fim:'00:00'}
+  ]}));
+  w.gcalCache={'test|range':[
+    {id:'google',titulo:'Viagem',data:d,fim_data:later,inicio:'22:00',fim:'10:00'},
+    {id:'single-all-day',titulo:'Dia inteiro',data:d,fim_data:next,diaTodo:true,inicio:'',fim:''}
+  ]};
+  const find=(day,id)=>w.SC148.timelineEntries(day).find(e=>e.id===id);
+  assert.deepEqual([find(d,'google').start,find(d,'google').end],[1320,1440]);
+  assert.deepEqual([find(next,'google').start,find(next,'google').end],[0,1440]);
+  assert.deepEqual([find(later,'google').start,find(later,'google').end],[0,600]);
+  assert.deepEqual([find(next,'overnight').start,find(next,'overnight').end],[0,90]);
+  assert.equal(find(next,'exact-midnight'),undefined);
+  assert.equal(find(next,'single-all-day'),undefined);
+  w.D.config.google_agenda='Não';
+  assert.equal(find(d,'google'),undefined);
+  assert(find(next,'overnight'));
+});
+
+test('failed manual Google Calendar refresh keeps the last fetched events',async t=>{
+  const {w,calendars}=app(t);
+  await ready(w);
+  const d=w.hojeISO(), next=w.somaDias(d,1);
+  w.aplicarDados(snapshot(A,{config:{google_agenda:'Sim'}}));
+  const cached={id:'google',titulo:'Compromisso em cache',data:d,inicio:'10:00',fim:'11:00'};
+  w.gcalCache={[d+'|'+next]:[cached]};
+  w.irPara('hoje');
+  w.SC148.refresh();
+  const n=calendars.length;
+  const notices=[];w.toast=(text,bad)=>notices.push([text,!!bad]);
+  w.document.querySelector('#v-hoje [data-sc148="reload"]').click();
+  assert(calendars.length>n);
+  calendars.slice(n).forEach(req=>req.fail(new Error('Falha simulada')));
+  await new Promise(r=>w.setTimeout(r,0));
+  assert(w.SC148.timelineEntries(d).some(e=>e.id==='google'));
+  assert.match(notices.at(-1)[0],/não foi possível atualizar/i);
+});
+
+test('availability treats an all-day Calendar end date as exclusive',async t=>{
+  const {w}=app(t);
+  await ready(w);
+  const d=w.somaDias(w.hojeISO(),1), next=w.somaDias(d,1), after=w.somaDias(d,2);
+  const event={id:'day',data:d,fim_data:next,diaTodo:true,inicio:'',fim:''};
+  const cfg={tarefas:[],eventos:[],config:{dia_inicio:'08:00',dia_fim:'10:00'}};
+  assert.deepEqual(Array.from(w.SC144.available(d,30,0,cfg,[event],new w.Date(),2)),[]);
+  assert.deepEqual(Array.from(w.SC144.available(next,30,0,cfg,[event],new w.Date(),2)),['08:00','08:15']);
+  const lasting={...event,fim_data:after};
+  assert.deepEqual(Array.from(w.SC144.available(next,30,0,cfg,[lasting],new w.Date(),2)),[]);
+  assert.deepEqual(Array.from(w.SC144.available(after,30,0,cfg,[lasting],new w.Date(),2)),['08:00','08:15']);
+});

@@ -2162,12 +2162,27 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-18a-sc1137151"></script>
+<script src="./pwa-transport.js?v=2026-11-18b-sc1137151"></script>
 <script>
-var VERSAO_TELA = '2026-11-18a';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
+var VERSAO_TELA = '2026-11-18b';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a','2026-11-18b'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
 var VERSAO_STUDIO = '11.37.15.1'; // validação atômica das notas com servidor compatível
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
+function sc168EventWindow(e,day,fallback=30){
+  if(!e||!sc120Date_(e.data)||!sc120Date_(day)||day<e.data)return null;
+  const clock=s=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(s||''))?Number(s.slice(0,2))*60+Number(s.slice(3)):null;
+  const start=clock(e.inicio),end=clock(e.fim);
+  let last=sc120Date_(e.fim_data)&&e.fim_data>=e.data?e.fim_data:e.data;
+  if(e.diaTodo===true||start===null){
+    if(last>e.data?day>=last:day!==e.data)return null;
+    return {start:0,end:1440,allDay:true};
+  }
+  if(last===e.data&&end!==null&&end<start)last=somaDias(e.data,1);
+  if(day>last)return null;
+  const a=day===e.data?start:0;
+  const b=day<last?1440:end===null||last===e.data&&end===start?Math.min(1440,a+fallback):end;
+  return b>a?{start:a,end:b,allDay:false}:null;
+}
 function sc155Lifecycle(x){
   if(!x)return 'inactive';
   const s=String(x.status||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
@@ -3248,13 +3263,19 @@ function salvarConfig(dados){
   efeitoLocal(cmd);renderTudo();drenarFila();return true;
 }
 function recarregar(forcar, aviso){
+  if(aviso&&navigator.onLine===false){toast('Sem conexão. Mantive os dados deste aparelho.',true);return;}
   var geracao=sc166Geracao;
   google.script.run.withSuccessHandler(function(r){
-    if(geracao!==sc166Geracao||!(forcar||el('modal').classList.contains('hidden'))||!aplicarDados(r))return;
+    if(geracao!==sc166Geracao||!(forcar||el('modal').classList.contains('hidden')))return;
+    if(!r||r.erro||!sc166Nome(r.usuario)){
+      if(aviso)toast('Não foi possível atualizar. Mantive os dados deste aparelho.',true);
+      return;
+    }
+    if(!aplicarDados(r)){if(aviso)toast('Os dados exibidos já estão atualizados.');return;}
     el('carregando').classList.add('hidden');SC167.readyMark();renderTudo();processarVoz();
     if(aviso)toast('Atualizado.');
     if(fila.length)drenarFila();
-  }).withFailureHandler(function(){if(geracao===sc166Geracao&&aviso)toast('Sem resposta do servidor.',true);}).getDados(!!aviso);
+  }).withFailureHandler(function(){if(geracao===sc166Geracao&&aviso)toast('Sem resposta do servidor. Mantive os dados deste aparelho.',true);}).getDados(!!aviso);
 }
 
 /* ───────── navegação / tema ───────── */
@@ -3419,6 +3440,7 @@ function carregarGcal(de,ate){
   });
 }
 function gcalDoDia(dia){
+  if(D.config.google_agenda!=='Sim')return [];
   var out = [], vistos = {};
   Object.keys(gcalCache).forEach(function(k){
     var l = gcalCache[k]; if(!Array.isArray(l)) return;
@@ -7769,41 +7791,48 @@ function renderSemana(){
     '<p class="subt mt-1">Toque em uma barra para ver o que foi feito. Cores = áreas. Linha tracejada = média.</p>' + tempoHtml;
 }
 
-/* puxar para atualizar (celular) */
-var ptr = null;
-function ptrMostrar(d){ var p = el('ptr'); p.textContent = d>=90 ? 'Solte para atualizar' : 'Puxe para atualizar'; p.style.transform = 'translate(-50%,'+(Math.min(d,110)-40)+'px)'; p.classList.add('on'); }
-function ptrOcultar(){ var p = el('ptr'); p.classList.remove('on'); p.style.transform = ''; }
-document.addEventListener('touchstart', function(e){
-  ptr = null;
-  if(e.touches.length !== 1 || !navMovelVisivel() || !el('modal').classList.contains('hidden') || foco.rodando || (window.scrollY||0) > 0) return;
-  if(e.target.closest('.linha-swipe, .ag-sw, .sc68-home-item, .sc100-task, #sc117-fab, input, textarea, select, [contenteditable="true"], .bloco, [data-ini], #nav-movel, #lote')) return;
-  ptr = { y:e.touches[0].clientY, x:e.touches[0].clientX, d:0 };
-}, { passive:true });
-document.addEventListener('touchmove', function(e){
-  if(!ptr) return; var dy = e.touches[0].clientY - ptr.y, dx = e.touches[0].clientX - ptr.x;
-  if(dy <= 0 || Math.abs(dx) > dy || (window.scrollY||0) > 0){ ptr = null; ptrOcultar(); return; }
-  ptr.d = Math.min(dy, 140); if(ptr.d > 24) ptrMostrar(ptr.d);
-}, { passive:true });
-document.addEventListener('touchend', function(){
-  if(!ptr) return; var d = ptr.d; ptr = null; ptrOcultar();
-  if(d >= 90){ vibra(15); recarregar(true, true); }
-});
-
-/* janela de baixo no celular: arrastar o cabeçalho para baixo fecha */
-var mdr = null;
-document.addEventListener('touchstart', function(e){
-  mdr = null; if(!navMovelVisivel()) return;
-  var cab = e.target.closest('#modal-caixa > div:first-child'); if(!cab || e.target.closest('button')) return;
-  mdr = { y:e.touches[0].clientY, d:0 };
-}, { passive:true });
-document.addEventListener('touchmove', function(e){
-  if(!mdr) return; var dy = e.touches[0].clientY - mdr.y; if(dy < 0) dy = 0; mdr.d = dy;
-  var c = el('modal-caixa'); c.style.transition = 'none'; c.style.transform = 'translateY('+dy+'px)';
-}, { passive:true });
-document.addEventListener('touchend', function(){
-  if(!mdr) return; var d = mdr.d; mdr = null; var c = el('modal-caixa'); c.style.transition = 'transform .18s ease-out';
-  if(d > 110){ c.style.transform = ''; c.style.transition = ''; fecharModal(); } else { c.style.transform = ''; setTimeout(function(){ c.style.transition = ''; }, 200); }
-});
+/* Puxar para atualizar e arrastar o cabeçalho no celular. */
+var ptr=null,mdr=null;
+function ptrMostrar(d){var p=el('ptr');p.textContent=d>=90?'Solte para atualizar':'Puxe para atualizar';p.style.transform='translate(-50%,'+(Math.min(d,110)-40)+'px)';p.classList.add('on');}
+function ptrOcultar(){var p=el('ptr');p.classList.remove('on');p.style.transform='';}
+function cancelarToques(){
+  if(ptr){ptr=null;ptrOcultar();}
+  if(mdr){mdr=null;var c=el('modal-caixa');c.style.transform='';c.style.transition='';}
+}
+document.addEventListener('touchstart',function(e){
+  cancelarToques();
+  if(e.touches.length!==1||!navMovelVisivel())return;
+  var t=e.touches[0], alvo=e.target;
+  if(!el('modal').classList.contains('hidden')){
+    if(alvo.closest('#modal-caixa > div:first-child')&&!alvo.closest('button,a,input,label,[contenteditable]'))
+      mdr={id:t.identifier,y:t.clientY,x:t.clientX,d:0};
+    return;
+  }
+  if(foco.rodando||(window.scrollY||0)>0||alvo.closest('.linha-swipe,.ag-sw,.sc68-home-item,.sc100-task,.sc150-block,#sc117-fab,input,textarea,select,button,a,label,summary,[contenteditable],.bloco,[data-ini],#nav-movel,#lote'))return;
+  ptr={id:t.identifier,y:t.clientY,x:t.clientX,d:0};
+},{passive:true});
+document.addEventListener('touchmove',function(e){
+  var g=ptr||mdr;
+  if(!g)return;
+  var t=e.touches[0];
+  if(e.touches.length!==1||!t||t.identifier!==g.id){cancelarToques();return;}
+  var dy=t.clientY-g.y,dx=t.clientX-g.x;
+  if(dy<=0||Math.abs(dx)>dy||(ptr&&(window.scrollY||0)>0)){cancelarToques();return;}
+  g.d=Math.min(dy,140);
+  if(ptr){if(g.d>24)ptrMostrar(g.d);else ptrOcultar();return;}
+  var c=el('modal-caixa');c.style.transition='none';c.style.transform='translateY('+dy+'px)';
+},{passive:true});
+document.addEventListener('touchend',function(e){
+  var g=ptr||mdr;if(!g)return;
+  if(e.touches.length||!Array.from(e.changedTouches).some(function(t){return t.identifier===g.id;})){cancelarToques();return;}
+  var atualizar=!!ptr&&g.d>=90, fechar=!!mdr&&g.d>110;
+  cancelarToques();
+  if(atualizar){vibra(15);recarregar(true,true);}
+  if(fechar)fecharModal();
+},{passive:true});
+document.addEventListener('touchcancel',cancelarToques,{passive:true});
+document.addEventListener('visibilitychange',function(){if(document.hidden)cancelarToques();});
+window.addEventListener('blur',cancelarToques);
 
 /* atalhos do ícone e "compartilhar para o app" (?a=tarefa|nota|captura|agenda|hoje · ?text=&title=&url=) */
 var atalhoFeito = false;
@@ -12581,7 +12610,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-18a-sc1137151"></script>
+<script src="./pwa-install.js?v=2026-11-18b-sc1137151"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13187,7 +13216,7 @@ function init(){document.documentElement.classList.add('sc126');const parent=$('
  });
  document.addEventListener('click',e=>{const b=e.target.closest('[data-sc100-task]');if(b){e.stopImmediatePropagation();detail('tarefas',b.dataset.sc100Task)}},true);
  document.addEventListener('input',e=>{if(e.target.id!=='sc129-library-query')return;const position=e.target.selectionStart;libraryQuery=e.target.value;renderLibrary();const f=$('sc129-library-query');f.focus();try{f.setSelectionRange(position,position)}catch(_){}});
- window.addEventListener('sc:conversation',transcript);window.addEventListener('pageshow',refresh);window.SC126={refresh,detail,conversation,links,tabFor,related,projectDetail,archiveNote};refresh();
+ window.addEventListener('sc:conversation',transcript);window.addEventListener('pageshow',refresh);window.SC126={refresh,detail,conversation,links,tabFor,related,projectDetail,archiveNote,openTasks(){organize='tarefas';irPara('organizar');}};refresh();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
@@ -13591,9 +13620,14 @@ function source(id){if(!note(id))return;abrirModal('Fonte ou arquivo','<label>No
 function sourceURL(value){try{const u=new URL(value);if(u.protocol!=='https:'||u.username||u.password||/^(localhost|127\.|\[|0\.)/.test(u.hostname))return null;return u.href;}catch(_){return null;}}
 function saveSource(id){const n=note(id),url=sourceURL($('sc144-source-url')?.value.trim()),title=$('sc144-source-title')?.value.trim();if(!n||!url||!title){toast('Informe um nome e um endereço https válido.',true);return;}if(!safeFinish())return;if(String(n.conteudo||'').includes(url)){toast('Esta fonte já está na nota.');return;}salvar('notas',{id,conteudo:String(n.conteudo||'')+'\n\nFonte: '+title.replace(/[\r\n]/g,' ')+'\n'+url+'\nConsultada em: '+hojeISO()});fecharModal();SC138Notes.open(id);}
 const minute=x=>{const m=String(x||'').match(/^(\d{1,2}):(\d{2})$/);return m&&+m[1]<24&&+m[2]<60?+m[1]*60+(+m[2]):null;},hh=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
-function localPrevious(day){const d=deISO(day);d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function available(day,duration,buffer,data,imports,now=new Date(),limit=6){duration=Number(duration);buffer=Number(buffer);if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||duration<15||duration>240||buffer<0||buffer>60||!Number.isInteger(duration)||!Number.isInteger(buffer))return [];const today=hojeISO();if(day<today||!deISO(day)||[deISO(day).getFullYear(),String(deISO(day).getMonth()+1).padStart(2,'0'),String(deISO(day).getDate()).padStart(2,'0')].join('-')!==day)return [];const start=minute(data.config?.dia_inicio)??480,end=minute(data.config?.dia_fim)??1200;let at=Math.max(start,day===today?now.getHours()*60+now.getMinutes()+1:start);at=Math.ceil(at/15)*15;const busy=[];
- const add=(x,task=false)=>{if(sc155Lifecycle(x)!=='open')return;if(x.data<day&&((x.fim_data&&x.fim_data>=day)||(!task&&x.data===localPrevious(day)&&minute(x.fim)!==null&&minute(x.fim)<=minute(x.inicio)))){busy.push([0,x.fim_data>day?1440:(minute(x.fim)??1440)+buffer]);return;}if(x.data!==day)return;const a=minute(task?x.hora:x.inicio);if(a===null){if(!task)busy.push([0,1440]);return;}let b=task?a+(Number(x.duracao)>0?Number(x.duracao):30):minute(x.fim);if(b==null)b=a+60;if(b<=a||x.fim_data&&x.fim_data>day)b=1440;busy.push([Math.max(0,a-buffer),Math.min(1440,b+buffer)]);};
+ const add=(x,task=false)=>{
+  if(sc155Lifecycle(x)!=='open')return;
+  let a,b;
+  if(task){if(x.data!==day)return;a=minute(x.hora);if(a===null)return;b=a+(Number(x.duracao)>0?Number(x.duracao):30);}
+  else{const span=sc168EventWindow(x,day,60);if(!span)return;a=span.start;b=span.end;}
+  busy.push([Math.max(0,a-buffer),Math.min(1440,b+buffer)]);
+ };
  (data.tarefas||[]).forEach(x=>add(x,true));(data.eventos||[]).forEach(x=>add(x));(imports||[]).forEach(x=>add(x));const result=[];for(;at+duration<=end;at+=15){if(!busy.some(([a,b])=>at<b&&at+duration>a)){result.push(hh(at));if(result.length===limit)break;}}return result;}
 function imports(day){if(D.config.google_agenda!=='Sim')return [];const all=[];if(typeof gcalCache==='object')Object.values(gcalCache).forEach(x=>{if(Array.isArray(x))all.push(...x);});return all;}
 function loaded(day){return SC167.calendarFresh(day);}
@@ -13757,16 +13791,25 @@ const $=id=>document.getElementById(id),esc=x=>h(String(x??'')),rows=k=>Array.is
 let view='dia',day=hojeISO(),busy=false,timer,cloudBusy=false,cloudState='Servidor ainda não verificado',pauseUntil=0;
 const button=(title,action,extra='')=>'<button type="button" class="btn" data-sc148="'+action+'" '+extra+'>'+title+'</button>';
 const parse=(x,f)=>{try{return JSON.parse(x)||f;}catch(_){return f;}},prefs=()=>parse(D.config.sc148_prefs,{}),auto=()=>D.config.sc148_auto!=='Não',task=id=>rows('tarefas').find(t=>String(t.id)===String(id)),managed=t=>String(t.notas||'').includes('[planner:auto]'),active=t=>sc155Lifecycle(t)==='open';
-function imported(){const all=[];if(typeof gcalCache==='object')Object.values(gcalCache).forEach(v=>{if(Array.isArray(v))all.push(...v);});return [...new Map(all.map(e=>[e.id+'|'+e.data+'|'+e.inicio,e])).values()];}
+function imported(){if(D.config.google_agenda!=='Sim')return [];const all=[];if(typeof gcalCache==='object')Object.values(gcalCache).forEach(v=>{if(Array.isArray(v))all.push(...v);});return [...new Map(all.map(e=>[e.id+'|'+e.data+'|'+e.inicio,e])).values()];}
 function options(){const covered=[];for(let i=0;i<7;i++){const d=somaDias(hojeISO(),i);if(SC144.loaded(d))covered.push(d);}const n=new Date();return {today:hojeISO(),now:hh(n.getHours()*60+n.getMinutes()),covered,imports:imported()};}
 function proposed(){return sc148Plan(D,options());}
-function loadCalendars(extra=false){
+function loadCalendars(extra=false,force=false){
  if(D.config.google_agenda!=='Sim'||!sc166Confirmado)return Promise.resolve(false);
- if(!extra)return Promise.all([loadCalendars('coverage'),loadCalendars(true)]);
+ if(!extra)return Promise.all([loadCalendars('coverage',force),loadCalendars(true,force)]);
  const first=day.slice(0,7)+'-01',last=new Date(deISO(first).getFullYear(),deISO(first).getMonth()+1,0).getDate(),
   a=extra==='coverage'?hojeISO():view==='mes'?first:view==='semana'?monday(day):day,
   b=extra==='coverage'?somaDias(a,7):view==='mes'?first.slice(0,8)+String(last):somaDias(a,view==='semana'?7:1);
- return SC167.calendar(a,b);
+ return SC167.calendar(a,b,force);
+}
+async function reloadCalendars(){
+ if(D.config.google_agenda!=='Sim'){toast('A exibição do Google Agenda está desativada em Ajustes.');return;}
+ if(navigator.onLine===false||!sc166Confirmado){toast('Não foi possível atualizar o Google Agenda. Confira a conexão.',true);return;}
+ const epoch=sc166Geracao,result=await loadCalendars(false,true);
+ if(epoch!==sc166Geracao||D.config.google_agenda!=='Sim')return;
+ refresh();
+ if(Array.isArray(result)&&result.every(Boolean)){schedule();toast('Google Agenda atualizada.');}
+ else toast('Não foi possível atualizar todo o Google Agenda. Mantive os compromissos já carregados.',true);
 }
 function fingerprint(t){return JSON.stringify([t.data||'',t.hora||'',t.duracao||'',t.notas||'',t.status||'']);}
 function apply(changes,reason){if(!changes.length)return false;const undo={at:Date.now(),changes:changes.map(c=>({id:c.id,before:clone(task(c.id)),after:Object.assign({},task(c.id),c.after),reason:c.reason||reason}))};const prevUndo=SC145.read('planner-undo',null);if(!SC145.write('planner-undo',undo))throw Error('Não consegui guardar o desfazer. Nada alterado.');busy=true;try{if(!salvar('tarefas',changes.map(c=>c.after),{sc148_base:undo.changes.map(c=>({id:c.id,fields:{data:c.before.data||'',hora:c.before.hora||'',duracao:c.before.duracao||'',notas:c.before.notas||'',status:c.before.status||''}}))})){SC145.write('planner-undo',prevUndo);return false;}SC145.write('planner-log',{at:Date.now(),reason,items:changes.map(c=>({id:c.id,reason:c.reason||reason}))});}finally{busy=false;}refresh();return true;}
@@ -13774,10 +13817,18 @@ async function plan(mark=false){if(busy)return;busy=true;try{await loadCalendars
 function undo(){const u=SC145.read('planner-undo',null);if(!u||Date.now()-u.at>7*86400000)throw Error('Nenhum planejamento recente para desfazer.');for(const c of u.changes)if(!task(c.id)||fingerprint(task(c.id))!==fingerprint(c.after))throw Error('Uma tarefa mudou depois. Não desfiz para preservar sua edição.');pauseUntil=Date.now()+30*60000;busy=true;try{if(!salvar('tarefas',u.changes.map(c=>({id:c.id,data:c.before.data||'',hora:c.before.hora||'',duracao:c.before.duracao||'',notas:c.before.notas||''}))))return false;SC145.write('planner-undo',null);SC145.write('planner-pause',pauseUntil);}finally{busy=false;}toast('Desfeito. Automação pausada por 30 minutos.');refresh();}
 function setView(v){view=v;if(typeof agDia==='string')agDia=day;refresh();loadCalendars().then(refresh);}
 function events(d){
- const internal=rows('eventos').filter(e=>e.data===d&&sc155Lifecycle(e)!=='inactive'),ids=new Set(internal.map(e=>e.google_id).filter(Boolean));
- return internal.map(e=>({...e,plannerKind:'event'}))
-  .concat(imported().filter(e=>e.data===d&&!ids.has(e.id)&&sc155Lifecycle(e)!=='inactive').map(e=>({...e,plannerKind:'external'})))
-  .concat(itensDoDia(d,false).filter(e=>e.tipo==='rotina').map(e=>({...e,data:d,rotina:true,plannerKind:'routine'})));
+ const slice=(e,kind)=>{const span=sc168EventWindow(e,d);return span?[{...e,plannerKind:kind,plannerSpan:span}]:[];};
+ const internal=rows('eventos').filter(e=>sc155Lifecycle(e)!=='inactive').flatMap(e=>slice(e,'event')),
+  linked=new Set(internal.map(e=>e.google_id).filter(Boolean));
+ return internal
+  .concat(imported().filter(e=>!linked.has(e.id)&&sc155Lifecycle(e)!=='inactive').flatMap(e=>slice(e,'external')))
+  .concat(itensDoDia(d,false).filter(e=>e.tipo==='rotina').flatMap(e=>slice({...e,data:d,rotina:true},'routine')));
+}
+function eventHours(e){
+ const s=e.plannerSpan;
+ if(s.allDay)return 'Dia inteiro';
+ const start=hh(s.start);
+ return !e.fim&&s.end<1440?start:start+'–'+hh(s.end);
 }
 function check(t){return '<label class="sc148-check" data-sc167-kind="task"><input type="checkbox" data-sc148-task="'+esc(t.id)+'" '+(sc155Lifecycle(t)==='done'?'checked':'')+'><span>'+esc(t.titulo)+'</span></label>';}
 function editButton(t){return button('Abrir','edit','data-id="'+esc(t.id)+'" aria-label="Abrir '+esc(t.titulo)+'"');}
@@ -13853,10 +13904,10 @@ function ideaClick(d,source){
  else if(!source.closest('.sc148-idea')?.querySelector('[data-sc148-idea-status]')?.textContent)ideaStatus(d,'Sem alterações.');
 }
 
-function summary(){const pending=rows('tarefas').filter(active),today=rows('tarefas').filter(t=>t.data===day&&['open','done'].includes(sc155Lifecycle(t))),done=today.filter(t=>sc155Lifecycle(t)==='done').length,pct=today.length?Math.round(done/today.length*100):0;const priority=pending.filter(t=>t.data===day||t.top3===day).sort((a,b)=>(b.top3===day)-(a.top3===day)).slice(0,3),todayISO=hojeISO(),now=new Date(),minuteNow=now.getHours()*60+now.getMinutes(),next=day<todayISO?[]:events(day).filter(e=>sc155Lifecycle(e)==='open'&&(day>todayISO||((min(e.fim)??min(e.inicio)??1440)>minuteNow))).sort((a,b)=>(min(a.inicio)??1440)-(min(b.inicio)??1440)).slice(0,1);return '<div class="sc148-grid"><section class="sc148-card"><h3>Foco do dia</h3>'+priority.map(check).join('')+(priority.length?'':'<p>Escolha uma tarefa para começar.</p>')+'</section><section class="sc148-card"><h3>Próximo compromisso</h3>'+next.map(e=>'<strong>'+esc(e.titulo)+'</strong><p>'+esc(e.inicio||'Dia inteiro')+'</p>').join('')+(next.length?'':'<p>Nenhum próximo compromisso neste dia.</p>')+button('Ver dia','view','data-view="dia"')+'</section><section class="sc148-card"><h3>Uma ideia</h3>'+ideaBox()+'</section><section class="sc148-card"><h3>Hábitos</h3>'+habits().map(x=>'<label class="sc148-check" data-sc167-kind="habit"><input type="checkbox" data-sc148-habit="'+esc(x.id)+'" '+(habitoFeito(x.id,day)?'checked':'')+'><span>'+esc(x.nome)+'</span></label>').join('')+'</section><section class="sc148-card"><h3>Feito no dia</h3><div class="sc148-percent">'+pct+'%</div><progress max="100" value="'+pct+'" aria-label="Progresso do dia"></progress><p>'+done+' de '+today.length+' tarefas</p></section><section class="sc148-card"><h3>Caixa de entrada</h3><p>'+pending.filter(t=>!t.data).length+' tarefa(s) sem data</p>'+button('Organizar','inbox')+'</section></div>';}
+function summary(){const pending=rows('tarefas').filter(active),today=rows('tarefas').filter(t=>t.data===day&&['open','done'].includes(sc155Lifecycle(t))),done=today.filter(t=>sc155Lifecycle(t)==='done').length,pct=today.length?Math.round(done/today.length*100):0;const priority=pending.filter(t=>t.data===day||t.top3===day).sort((a,b)=>(b.top3===day)-(a.top3===day)).slice(0,3),todayISO=hojeISO(),now=new Date(),minuteNow=now.getHours()*60+now.getMinutes(),next=day<todayISO?[]:events(day).filter(e=>sc155Lifecycle(e)==='open'&&(day>todayISO||e.plannerSpan.end>minuteNow)).sort((a,b)=>a.plannerSpan.start-b.plannerSpan.start).slice(0,1);return '<div class="sc148-grid"><section class="sc148-card"><h3>Foco do dia</h3>'+priority.map(check).join('')+(priority.length?'':'<p>Escolha uma tarefa para começar.</p>')+'</section><section class="sc148-card"><h3>Próximo compromisso</h3>'+next.map(e=>'<strong>'+esc(e.titulo)+'</strong><p>'+esc(eventHours(e))+'</p>').join('')+(next.length?'':'<p>Nenhum próximo compromisso neste dia.</p>')+button('Ver dia','view','data-view="dia"')+'</section><section class="sc148-card"><h3>Uma ideia</h3>'+ideaBox()+'</section><section class="sc148-card"><h3>Hábitos</h3>'+habits().map(x=>'<label class="sc148-check" data-sc167-kind="habit"><input type="checkbox" data-sc148-habit="'+esc(x.id)+'" '+(habitoFeito(x.id,day)?'checked':'')+'><span>'+esc(x.nome)+'</span></label>').join('')+'</section><section class="sc148-card"><h3>Feito no dia</h3><div class="sc148-percent">'+pct+'%</div><progress max="100" value="'+pct+'" aria-label="Progresso do dia"></progress><p>'+done+' de '+today.length+' tarefas</p></section><section class="sc148-card"><h3>Caixa de entrada</h3><p>'+pending.filter(t=>!t.data).length+' tarefa(s) sem data</p>'+button('Organizar','inbox')+'</section></div>';}
 function eventRow(e){
  const state=SC153.state(e,e.plannerKind==='event'?'eventos':e.plannerKind);
- return '<article class="sc148-item'+(state?' sc153-'+state:'')+'" data-sc167-kind="'+(e.rotina?'routine':'event')+'"><div><strong>'+esc(e.titulo)+'</strong><small>'+esc((e.inicio?e.inicio+(e.fim?'–'+e.fim:''):'Dia inteiro')+(e.rotina?' · Rotina':' · Compromisso')+(state?' · '+SC153.label(state):''))+'</small></div>'+(e.plannerKind==='event'?button('Abrir','event','data-id="'+esc(e.id)+'"'):'')+'</article>';
+ return '<article class="sc148-item'+(state?' sc153-'+state:'')+'" data-sc167-kind="'+(e.rotina?'routine':'event')+'"><div><strong>'+esc(e.titulo)+'</strong><small>'+esc(eventHours(e)+(e.rotina?' · Rotina':' · Compromisso')+(state?' · '+SC153.label(state):''))+'</small></div>'+(e.plannerKind==='event'?button('Abrir','event','data-id="'+esc(e.id)+'"'):'')+'</article>';
 }
 function timelineEntries(d){
  const out=rows('tarefas').filter(t=>t.data===d&&min(t.hora)!==null&&sc155Lifecycle(t)!=='inactive').map(t=>{
@@ -13864,20 +13915,20 @@ function timelineEntries(d){
   return {kind:'task',id:t.id,title:t.titulo,start:min(t.hora),end:Math.min(1440,min(t.hora)+(Number(t.duracao)>0?Number(t.duracao):30)),label:t.hora+(Number(t.duracao)>0?'–'+hh(Math.min(1439,min(t.hora)+Number(t.duracao))):' · duração não definida'),done:state==='done',state};
  });
  events(d).forEach(e=>{
-  const start=min(e.inicio);if(start===null)return;
-  const finish=min(e.fim),state=SC153.state(e,e.plannerKind==='event'?'eventos':e.plannerKind);
-  out.push({kind:e.plannerKind,id:e.id,title:e.titulo,start,end:finish===null?Math.min(1440,start+30):finish>start?finish:1440,label:e.inicio+(e.fim?'–'+e.fim:''),done:state==='done',state,routine:e.rotina});
+  const {start,end,allDay}=e.plannerSpan;if(allDay)return;
+  const state=SC153.state(e,e.plannerKind==='event'?'eventos':e.plannerKind);
+  out.push({kind:e.plannerKind,id:e.id,title:e.titulo,start,end,label:eventHours(e),done:state==='done',state,routine:e.rotina});
  });
  return out.sort((a,b)=>a.start-b.start||b.end-a.end);
 }
 function segment(start,end,entries,d){if(end<=start)return '';const visible=entries.filter(e=>e.start<end&&e.end>start).map(e=>({...e,a:Math.max(start,e.start),b:Math.min(end,e.end)}));let group=[],limit=0;const groups=[];for(const e of visible){if(group.length&&e.a>=limit){groups.push(group);group=[];}group.push(e);limit=Math.max(limit,e.b,e.a+45);}if(group.length)groups.push(group);let blocks='';for(const g of groups){const lanes=[];for(const e of g){let lane=lanes.findIndex(end=>end<=e.a);if(lane<0)lane=lanes.length;lanes[lane]=Math.max(e.b,e.a+45);e.lane=lane;}for(const e of g){const action=e.kind==='task'?'edit':e.kind;blocks+='<button type="button" class="sc150-block '+(e.done?'sc150-done':'')+' '+(e.state?'sc153-'+e.state:'')+'" data-sc148="'+action+'" data-id="'+esc(e.id)+'" data-day="'+d+'" style="top:'+((e.a-start)*1.05)+'px;height:'+Math.max(44,(e.b-e.a)*1.05-4)+'px;left:calc(50px + (100% - 50px) * '+e.lane+'/'+lanes.length+');width:calc((100% - 50px) / '+lanes.length+' - 4px)" aria-label="'+esc(e.title+' · '+e.label+(' · '+(e.kind==='task'?'Tarefa':e.routine?'Rotina':'Compromisso'))+(e.state?' · '+SC153.label(e.state):e.done?' · Concluído':''))+'"><strong>'+esc(e.title)+'</strong><small>'+esc(e.label+(' · '+(e.kind==='task'?'Tarefa':e.routine?'Rotina':'Compromisso'))+(e.state?' · '+SC153.label(e.state):''))+'</small></button>';}}
 let grid='';for(let m=start;m<end;m+=60)grid+='<button type="button" class="sc150-hour" style="top:'+((m-start)*1.05)+'px" data-sc148="slot" data-day="'+d+'" data-time="'+hh(m)+'" aria-label="Adicionar compromisso em '+esc(short(d))+' às '+hh(m)+'"><time>'+hh(m)+'</time><span aria-hidden="true">+</span></button>';
 const n=new Date(),now=n.getHours()*60+n.getMinutes();const marker=d===hojeISO()&&now>=start&&now<end?'<div class="sc150-now" style="top:'+((now-start)*1.05)+'px"><span>'+hh(now)+' · Agora</span></div>':'';return '<div class="sc150-timeline" style="height:'+((end-start)*1.05)+'px">'+grid+blocks+marker+'</div>';}
-function daily(){const entries=timelineEntries(day),ev=events(day),allDay=ev.filter(e=>!e.inicio),n=new Date(),isToday=day===hojeISO(),startHour=isToday?Math.min(23,Math.max(7,n.getHours())):7,endHour=Math.min(24,Math.max(20,startHour+2));let start=startHour*60,end=endHour*60;for(const e of entries){if(e.start<start&&e.end>start)start=Math.floor(e.start/60)*60;}for(let i=0;i<entries.length;i++)for(const e of entries)if(e.start<end&&e.end>end)end=Math.min(1440,Math.ceil(e.end/60)*60);const pending=rows('tarefas').filter(t=>t.data===day&&!t.hora&&active(t)),finished=rows('tarefas').filter(t=>t.data===day&&!t.hora&&sc155Lifecycle(t)==='done'),hs=habits();return (allDay.length?'<details class="sc148-card sc149-section"><summary>Dia inteiro · '+allDay.length+'</summary>'+allDay.map(eventRow).join('')+'</details>':'')+'<details class="sc148-card sc149-hours sc150-hours" open><summary>Horários do dia</summary><details class="sc150-fold"><summary>Ver horários anteriores</summary>'+segment(0,start,entries,day)+'</details>'+segment(start,end,entries,day)+(end<1440?'<details class="sc150-fold"><summary>Após as '+hh(end)+'</summary>'+segment(end,1440,entries,day)+'</details>':'')+'</details>'+(pending.length?'<section class="sc148-card sc149-section"><h3>Sem horário</h3>'+pending.map(t=>'<article class="sc148-item"><div>'+check(t)+'<small>'+esc(Number(t.duracao)>0?t.duracao+' min':'Duração não definida')+'</small></div>'+button('Encaixar','fit','data-id="'+esc(t.id)+'" aria-label="Encontrar horário para '+esc(t.titulo)+'"')+editButton(t)+'</article>').join('')+'</section>':'')+(SC145.read('planner-log',null)?.reason==='Encaixe escolhido manualmente'&&SC145.read('planner-undo',null)?'<div class="sc148-sub" role="status">Encaixe salvo. '+button('Desfazer encaixe','undo')+'</div>':'')+'<details class="sc148-card sc149-section"><summary>Hábitos e notas</summary>'+hs.map(x=>'<label class="sc148-check" data-sc167-kind="habit"><input type="checkbox" data-sc148-habit="'+esc(x.id)+'" '+(habitoFeito(x.id,day)?'checked':'')+'><span>'+esc(x.nome)+'</span></label>').join('')+''+ideaBox()+'</details>'+(finished.length?'<details class="sc148-card sc149-section"><summary>Concluídas · '+finished.length+'</summary>'+finished.map(t=>item(t,false)).join('')+'</details>':'');}
+function daily(){const entries=timelineEntries(day),ev=events(day),allDay=ev.filter(e=>e.plannerSpan.allDay),n=new Date(),isToday=day===hojeISO(),startHour=isToday?Math.min(23,Math.max(7,n.getHours())):7,endHour=Math.min(24,Math.max(20,startHour+2));let start=startHour*60,end=endHour*60;for(const e of entries){if(e.start<start&&e.end>start)start=Math.floor(e.start/60)*60;}for(let i=0;i<entries.length;i++)for(const e of entries)if(e.start<end&&e.end>end)end=Math.min(1440,Math.ceil(e.end/60)*60);const pending=rows('tarefas').filter(t=>t.data===day&&!t.hora&&active(t)),finished=rows('tarefas').filter(t=>t.data===day&&!t.hora&&sc155Lifecycle(t)==='done'),hs=habits();return (allDay.length?'<details class="sc148-card sc149-section"><summary>Dia inteiro · '+allDay.length+'</summary>'+allDay.map(eventRow).join('')+'</details>':'')+'<details class="sc148-card sc149-hours sc150-hours" open><summary>Horários do dia</summary><details class="sc150-fold"><summary>Ver horários anteriores</summary>'+segment(0,start,entries,day)+'</details>'+segment(start,end,entries,day)+(end<1440?'<details class="sc150-fold"><summary>Após as '+hh(end)+'</summary>'+segment(end,1440,entries,day)+'</details>':'')+'</details>'+(pending.length?'<section class="sc148-card sc149-section"><h3>Sem horário</h3>'+pending.map(t=>'<article class="sc148-item"><div>'+check(t)+'<small>'+esc(Number(t.duracao)>0?t.duracao+' min':'Duração não definida')+'</small></div>'+button('Encaixar','fit','data-id="'+esc(t.id)+'" aria-label="Encontrar horário para '+esc(t.titulo)+'"')+editButton(t)+'</article>').join('')+'</section>':'')+(SC145.read('planner-log',null)?.reason==='Encaixe escolhido manualmente'&&SC145.read('planner-undo',null)?'<div class="sc148-sub" role="status">Encaixe salvo. '+button('Desfazer encaixe','undo')+'</div>':'')+'<details class="sc148-card sc149-section"><summary>Hábitos e notas</summary>'+hs.map(x=>'<label class="sc148-check" data-sc167-kind="habit"><input type="checkbox" data-sc148-habit="'+esc(x.id)+'" '+(habitoFeito(x.id,day)?'checked':'')+'><span>'+esc(x.nome)+'</span></label>').join('')+''+ideaBox()+'</details>'+(finished.length?'<details class="sc148-card sc149-section"><summary>Concluídas · '+finished.length+'</summary>'+finished.map(t=>item(t,false)).join('')+'</details>':'');}
 function external(id,d,kind){
  const e=events(d).find(x=>x.plannerKind===kind&&String(x.id)===String(id));if(!e)return;
  if(kind==='routine')return e.origemRotina?Planner.ocorrencia(e.ri,d,e.inicio,e.fim,e.origemRotina):abrirRotina(e.ri,d);
- abrirModal(e.titulo,'<p>'+esc(short(d)+' · '+(e.inicio||'Dia inteiro')+(e.fim?'–'+e.fim:''))+'</p><p>Compromisso da agenda conectada. Altere na agenda de origem.</p>','');
+ abrirModal(e.titulo,'<p>'+esc(short(d)+' · '+eventHours(e))+'</p><p>Compromisso da agenda conectada. Altere na agenda de origem.</p>','');
 }
 function fitOptions(id,d){const t=task(id);if(!t||!active(t)||t.hora||!sc120Date_(d))return [];const duration=Number(t.duracao);if(!Number.isInteger(duration)||duration<15||duration>240)return [];if(!SC144.loaded(d))return [];if(SC145.blocked(t).length)return [];const data=clone(D),p=prefs();data.config.dia_inicio=p.start||D.config.dia_inicio||'08:00';data.config.dia_fim=p.end||D.config.dia_fim||'20:00';data.tarefas=data.tarefas.filter(x=>String(x.id)!==String(id));const routines=events(d).filter(e=>e.rotina);return SC144.available(d,duration,Number.isInteger(p.buffer)?p.buffer:15,data,imported().concat(routines),new Date(),3);}
 let fitDraft=null;
@@ -13919,7 +13970,7 @@ function cloudUndo(){google.script.run.withSuccessHandler(()=>{recarregar(true);
 function cloud(){cloudBusy=true;google.script.run.withSuccessHandler(r=>{cloudBusy=false;cloudState=r.enabled?'Servidor automático ativo':'Servidor automático pausado';toast(cloudState);refresh();}).withFailureHandler(()=>{cloudBusy=false;cloudState='Atualize Codigo.gs e publique o servidor para ativar';toast(cloudState,true);refresh();}).planner148Configure(true);}
 function review(){const recent=rows('tarefas').filter(t=>sc155Lifecycle(t)==='done'&&dataConcl(t)>=somaDias(hojeISO(),-6)&&dataConcl(t)<=hojeISO()),pending=rows('tarefas').filter(active);abrirModal('Revisão semanal','<p>'+recent.length+' tarefa(s) concluída(s) nos últimos 7 dias.</p><p>'+pending.filter(t=>t.data&&t.data<hojeISO()).length+' pendência(s) com data passada · '+pending.filter(t=>!t.data).length+' sem data.</p><h3>Próximos passos</h3>'+proposed().reasons.slice(0,12).map(r=>'<p>'+esc(task(r.id)?.titulo||'')+' · '+esc(r.reason)+'</p>').join('')+'<h3>Rotinas</h3>'+habits().map(hb=>{const count=rows('registros').filter(r=>r.habito_id===hb.id&&r.data>=somaDias(hojeISO(),-6)).length;return '<p>'+esc(hb.nome)+': '+count+' registro(s) em 7 dias. '+(count<2?'Experimente uma sessão menor, sem alterar a rotina automaticamente.':'Mantenha um ritmo sustentável.')+'</p>';}).join(''),button('Revisão completa','legacy-review'));}
 function schedule(){clearTimeout(timer);if(busy||!auto()||Date.now()<Math.max(pauseUntil,SC145.read('planner-pause',0),Number(D.config.sc148_pause_until||0)))return;timer=setTimeout(()=>{if(busy||!auto()||navigator.onLine===false||fila.length||enviando||document.visibilityState==='hidden')return;try{const p=proposed();if(p.changes.length)apply(p.changes,'Agenda mudou: blocos flexíveis reorganizados');}catch(e){console.warn('Planner:',e.message);}},1200);}
-function init(){Planner.menu=open;const oldEvent=window.abrirEvento;window.abrirEvento=function(x){const e=obter('eventos',x),result=oldEvent.apply(this,arguments);eventWarning(e.id||'');return result;};const oldSaveEvent=window.salvarEventoModal;window.salvarEventoModal=function(id){if($('sc150-conflict')){const hits=eventConflicts($('f-data').value,$('f-ini').value,$('f-fim').value,id);if(hits.length){$('sc150-conflict').textContent='Há sobreposição com '+hits.map(e=>e.title).join(' · ')+'. Escolha outro horário.';if(window.SC151FX)SC151FX.warning(hits);toast('Confira o conflito de horários antes de salvar.',true);return;}}return oldSaveEvent.apply(this,arguments);};const oldSave=window.salvar;window.salvar=function(tab,items,extra,exigirPersistencia){if(tab==='tarefas'&&!busy){items=(Array.isArray(items)?items:[items]).map(o=>{const t=task(o.id);if(t&&managed(t)&&(['data','hora'].some(k=>Object.hasOwn(o,k)&&String(o[k])!==String(t[k]||''))))return Object.assign({},o,{notas:String(o.notas??t.notas??'').replace(/\s*\[planner:auto\]/g,'')+'\n[planner:fixo]'});return o;});}return oldSave.call(this,tab,items,extra,exigirPersistencia);};const oldLocal=SC145.local;SC145.local=function(text){const n=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();if(/^(planeje|organize|replaneje) (meu dia|minha semana|o meu dia)[.!]?$/.test(n)){plan(true).catch(e=>toast(e.message,true));return 'Estou conferindo a agenda e distribuindo as tarefas flexíveis. O resultado aparece no Planner e pode ser desfeito.';}if(/^(desfaca|desfazer) (o )?(plano|planejamento)[.!]?$/.test(n)){undo();return 'Planejamento desfeito; a automação está pausada por 30 minutos.';}return oldLocal.apply(this,arguments);};const oldAgenda=window.renderAgenda;window.renderAgenda=function(){if(typeof agDia==='string'&&sc120Date_(agDia))day=agDia;const r=oldAgenda.apply(this,arguments);render();return r;};const old=window.renderTudo;window.renderTudo=function(){const r=old.apply(this,arguments);refresh();schedule();return r;};document.addEventListener('click',e=>{const b=e.target.closest('[data-sc148]');if(!b)return;e.preventDefault();const k=b.dataset.sc148;try{const map={view:()=>setView(b.dataset.view),'save-idea':()=>ideaClick(b.dataset.day,b),plan:()=>plan(true).catch(e=>toast(e.message,true)),undo,settings,'save-settings':saveSettings,cloud,'cloud-undo':cloudUndo,prev:()=>{day=view==='mes'?SC146.addMonths(day,-1):somaDias(day,view==='semana'?-7:-1);setView(view);},next:()=>{day=view==='mes'?SC146.addMonths(day,1):somaDias(day,view==='semana'?7:1);setView(view);},today:()=>{day=hojeISO();setView('dia');},date:()=>{day=b.dataset.day;setView('dia');},slot:()=>newSlot(b.dataset.day,b.dataset.time),external:()=>external(b.dataset.id,b.dataset.day,'external'),routine:()=>external(b.dataset.id,b.dataset.day,'routine'),fit:()=>fit(b.dataset.id).catch(e=>toast(e.message,true)),'accept-fit':()=>acceptFit(b.dataset.time),edit:()=>SC126.detail('tarefas',b.dataset.id),event:()=>abrirEvento(rows('eventos').find(x=>x.id===b.dataset.id)),'new-event':()=>abrirEvento({data:day}),new:()=>abrirTarefa({data:b.dataset.day||day}),tasks:()=>{fecharModal();SC10.open('tarefas');},inbox:()=>Planner.entrada(),goals:()=>Planner.metas(),routines:()=>Planner.rotinas(),projects:projectProgress,review,'legacy-review':()=>Planner.revisao(),reload:()=>{gcalCache={};loadCalendars().then(()=>{refresh();schedule();});}};map[k]?.();}catch(e){toast(e.message,true);}});document.addEventListener('change',e=>{if(e.target.matches('[data-sc148-task]')){alternarTarefa(e.target.dataset.sc148Task);refresh();}if(e.target.matches('[data-sc148-habit]')){marcarHabito(e.target.dataset.sc148Habit,day);refresh();}if(e.target.matches('[data-sc148-move]'))move(e.target.dataset.sc148Move,e.target.value);if(e.target.matches('[data-sc148-date]')&&sc120Date_(e.target.value)){day=e.target.value;setView('dia');}});document.addEventListener('input',e=>{if(e.target.matches('[data-sc148-note]'))ideaInput(e.target);});window.addEventListener('pagehide',()=>{for(const d of ideaDrafts.keys())ideaSave(d,false);});window.addEventListener('online',()=>loadCalendars().then(schedule));window.addEventListener('focus',()=>loadCalendars().then(schedule));setInterval(()=>{if(document.visibilityState!=='hidden')loadCalendars().then(()=>{if(['hoje','agenda'].includes(vistaAtual)&&!document.activeElement?.matches('input,textarea,select')&&$('modal')?.classList.contains('hidden'))refresh();schedule();});},60000);refresh();}
+function init(){Planner.menu=open;const oldEvent=window.abrirEvento;window.abrirEvento=function(x){const e=obter('eventos',x),result=oldEvent.apply(this,arguments);eventWarning(e.id||'');return result;};const oldSaveEvent=window.salvarEventoModal;window.salvarEventoModal=function(id){if($('sc150-conflict')){const hits=eventConflicts($('f-data').value,$('f-ini').value,$('f-fim').value,id);if(hits.length){$('sc150-conflict').textContent='Há sobreposição com '+hits.map(e=>e.title).join(' · ')+'. Escolha outro horário.';if(window.SC151FX)SC151FX.warning(hits);toast('Confira o conflito de horários antes de salvar.',true);return;}}return oldSaveEvent.apply(this,arguments);};const oldSave=window.salvar;window.salvar=function(tab,items,extra,exigirPersistencia){if(tab==='tarefas'&&!busy){items=(Array.isArray(items)?items:[items]).map(o=>{const t=task(o.id);if(t&&managed(t)&&(['data','hora'].some(k=>Object.hasOwn(o,k)&&String(o[k])!==String(t[k]||''))))return Object.assign({},o,{notas:String(o.notas??t.notas??'').replace(/\s*\[planner:auto\]/g,'')+'\n[planner:fixo]'});return o;});}return oldSave.call(this,tab,items,extra,exigirPersistencia);};const oldLocal=SC145.local;SC145.local=function(text){const n=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();if(/^(planeje|organize|replaneje) (meu dia|minha semana|o meu dia)[.!]?$/.test(n)){plan(true).catch(e=>toast(e.message,true));return 'Estou conferindo a agenda e distribuindo as tarefas flexíveis. O resultado aparece no Planner e pode ser desfeito.';}if(/^(desfaca|desfazer) (o )?(plano|planejamento)[.!]?$/.test(n)){undo();return 'Planejamento desfeito; a automação está pausada por 30 minutos.';}return oldLocal.apply(this,arguments);};const oldAgenda=window.renderAgenda;window.renderAgenda=function(){if(typeof agDia==='string'&&sc120Date_(agDia))day=agDia;const r=oldAgenda.apply(this,arguments);render();return r;};const old=window.renderTudo;window.renderTudo=function(){const r=old.apply(this,arguments);refresh();schedule();return r;};document.addEventListener('click',e=>{const b=e.target.closest('[data-sc148]');if(!b)return;e.preventDefault();const k=b.dataset.sc148;try{const map={view:()=>setView(b.dataset.view),'save-idea':()=>ideaClick(b.dataset.day,b),plan:()=>plan(true).catch(e=>toast(e.message,true)),undo,settings,'save-settings':saveSettings,cloud,'cloud-undo':cloudUndo,prev:()=>{day=view==='mes'?SC146.addMonths(day,-1):somaDias(day,view==='semana'?-7:-1);setView(view);},next:()=>{day=view==='mes'?SC146.addMonths(day,1):somaDias(day,view==='semana'?7:1);setView(view);},today:()=>{day=hojeISO();setView('dia');},date:()=>{day=b.dataset.day;setView('dia');},slot:()=>newSlot(b.dataset.day,b.dataset.time),external:()=>external(b.dataset.id,b.dataset.day,'external'),routine:()=>external(b.dataset.id,b.dataset.day,'routine'),fit:()=>fit(b.dataset.id).catch(e=>toast(e.message,true)),'accept-fit':()=>acceptFit(b.dataset.time),edit:()=>SC126.detail('tarefas',b.dataset.id),event:()=>abrirEvento(rows('eventos').find(x=>x.id===b.dataset.id)),'new-event':()=>abrirEvento({data:day}),new:()=>abrirTarefa({data:b.dataset.day||day}),tasks:()=>{fecharModal();SC126.openTasks();},inbox:()=>Planner.entrada(),goals:()=>Planner.metas(),routines:()=>Planner.rotinas(),projects:projectProgress,review,'legacy-review':()=>Planner.revisao(),reload:()=>reloadCalendars().catch(()=>toast('Não foi possível atualizar o Google Agenda.',true))};map[k]?.();}catch(e){toast(e.message,true);}});document.addEventListener('change',e=>{if(e.target.matches('[data-sc148-task]')){alternarTarefa(e.target.dataset.sc148Task);refresh();}if(e.target.matches('[data-sc148-habit]')){marcarHabito(e.target.dataset.sc148Habit,day);refresh();}if(e.target.matches('[data-sc148-move]'))move(e.target.dataset.sc148Move,e.target.value);if(e.target.matches('[data-sc148-date]')&&sc120Date_(e.target.value)){day=e.target.value;setView('dia');}});document.addEventListener('input',e=>{if(e.target.matches('[data-sc148-note]'))ideaInput(e.target);});window.addEventListener('pagehide',()=>{for(const d of ideaDrafts.keys())ideaSave(d,false);});window.addEventListener('online',()=>loadCalendars().then(schedule));window.addEventListener('focus',()=>loadCalendars().then(schedule));setInterval(()=>{if(document.visibilityState!=='hidden')loadCalendars().then(()=>{if(['hoje','agenda'].includes(vistaAtual)&&!document.activeElement?.matches('input,textarea,select')&&$('modal')?.classList.contains('hidden'))refresh();schedule();});},60000);refresh();}
 window.SC148={open,render,refresh,plan,proposed,apply,undo,settings,saveSettings,move,review,cloud,schedule,options,html,newSlot,fitOptions,timelineEntries,segment};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();</script>
 
