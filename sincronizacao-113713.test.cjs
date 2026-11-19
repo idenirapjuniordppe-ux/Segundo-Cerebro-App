@@ -7,7 +7,7 @@ const source = readFileSync('index.html','utf8');
 const A='a@example.test', B='b@example.test';
 const snapshot=(usuario, data={})=>Object.assign({usuario,seq:1,config:{},tarefas:[],eventos:[],notas:[]},data);
 
-function app(t){
+function app(t,clock){
   const sent=[], reads=[], calendars=[], errors=[];
   const vc=new VirtualConsole();
   vc.on('jsdomError',e=>{if(e.type==='unhandled exception'||e.type==='unhandled-exception')errors.push(e.detail||e);});
@@ -20,6 +20,7 @@ function app(t){
     return ()=>{};
   }});
   const dom=new JSDOM(source,{url:'https://example.test/app/',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
+    if(clock){const Real=w.Date;w.Date=class extends Real{constructor(...args){super(...(args.length?args:[clock]));}static now(){return new Real(clock).getTime();}};}
     w.scrollTo=()=>{};w.matchMedia=()=>({matches:false,addListener(){},addEventListener(){}});
     w.confirm=()=>true;w.navigator.vibrate=()=>{};w.HTMLCanvasElement.prototype.getContext=()=>null;
     w.requestAnimationFrame=fn=>w.setTimeout(()=>fn(w.performance.now()),16);
@@ -445,4 +446,165 @@ test('availability treats an all-day Calendar end date as exclusive',async t=>{
   const lasting={...event,fim_data:after};
   assert.deepEqual(Array.from(w.SC144.available(next,30,0,cfg,[lasting],new w.Date(),2)),[]);
   assert.deepEqual(Array.from(w.SC144.available(after,30,0,cfg,[lasting],new w.Date(),2)),['08:00','08:15']);
+});
+
+test('Hoje promotes the next eligible commitment and focuses its existing planner card',async t=>{
+  const {w,sent}=app(t,'2026-11-19T13:00:00');
+  await ready(w);
+  const d=w.hojeISO(),doc=w.document;
+  w.aplicarDados(snapshot(A,{config:{sc148_auto:'Não'},eventos:[
+    {id:'past',titulo:'Passado',data:d,inicio:'10:00',fim:'10:30'},
+    {id:'cancelled',titulo:'Cancelado',data:d,inicio:'13:30',fim:'13:50',status:'cancelado'},
+    {id:'first',titulo:'Reunião de teste',data:d,inicio:'14:00',fim:'14:40'},
+    {id:'second',titulo:'Encontro seguinte',data:d,inicio:'15:20',fim:'16:00'}
+  ]}));
+  w.irPara('hoje');w.SC148.refresh();
+  const next=()=>doc.querySelector('#v-hoje [data-sc148="jump-next"]');
+  assert.match(next().textContent,/Próximo compromisso.*Reunião de teste.*14:00/);
+  next().click();
+  assert.equal(doc.activeElement.dataset.id,'first');
+  assert.equal(doc.activeElement.dataset.sc148,'event');
+  assert.equal(sent.length,0,'navigating to the card cannot change data');
+  assert(w.SC152.complete('first',true));
+  assert.equal(w.D.eventos.find(e=>e.id==='first').concluido,'Sim');
+  assert.match(next().textContent,/Encontro seguinte/);
+  assert.equal(w.D.eventos.find(e=>e.id==='second').inicio,'15:20');
+});
+
+function freeFixture(t,extra={}){
+  const a=app(t,'2026-11-19T13:00:00'),w=a.w,d=w.hojeISO(),doc=w.document;
+  const fixture={
+    config:{sc148_auto:'Não',sc148_prefs:JSON.stringify({start:'14:00',end:'17:00',buffer:0})},
+    eventos:[{id:'meeting',titulo:'Reunião',data:d,inicio:'14:00',fim:'14:40'}, {id:'review',titulo:'Revisão',data:d,inicio:'15:20',fim:'17:00'}],
+    tarefas:[
+      {id:'a',titulo:'Revisar anotações',status:'aberta',duracao:'25',prioridade:'alta'},
+      {id:'b',titulo:'Responder e-mails',status:'aberta',duracao:'15'},
+      {id:'c',titulo:'Ler pendências',status:'aberta',duracao:'20'},
+      {id:'large',titulo:'Mais longa',status:'aberta',duracao:'65'},
+      {id:'unknown',titulo:'Sem duração',status:'aberta'},
+      {id:'future',titulo:'Não antecipar',status:'aberta',data:w.somaDias(d,1),duracao:'15'},
+      {id:'blocked',titulo:'Aguardando',status:'aberta',duracao:'20',etiquetas:'aguardando'}
+    ],
+    ...extra
+  };
+  const setup=()=>{w.aplicarDados(snapshot(A,fixture));w.irPara('hoje');w.SC148.refresh();};
+  return {...a,d,doc,setup};
+}
+test('free slot lists no more than two fitting tasks and only saves after explicit confirmation',async t=>{
+  const {w,d,doc,sent,setup}=freeFixture(t);
+  await ready(w);setup();
+  const gap=()=>doc.querySelector('#v-hoje [data-sc148="day-gap"]');
+  assert.match(gap().textContent,/40 min livres.*14:40–15:20/);
+  gap().click();
+  const options=doc.querySelectorAll('#sc169-gap-dialog [data-sc148="gap-select"]');
+  assert.equal(options.length,2);
+  assert(!Array.from(options).some(x=>['large','future','unknown','blocked'].includes(x.dataset.id)));
+  const save=()=>doc.querySelector('[data-sc148="gap-save"]');
+  assert.equal(save().disabled,true);
+  options[0].click();
+  assert.equal(save().disabled,false);
+  assert.equal(sent.length,0);
+  const picked=options[0].dataset.id;
+  save().click();
+  const item=w.D.tarefas.find(t=>t.id===picked);
+  assert.deepEqual([item.data,item.hora],[d,'14:40']);
+  assert.match(item.notas,/\[planner:fixo\]/);
+  assert.equal(sent.length,1);
+  assert.equal(w.D.tarefas.find(t=>t.id==='future').hora,undefined);
+  assert.equal(w.D.eventos[0].inicio,'14:00');
+});
+test('a changed or unverified calendar cannot commit a previously displayed slot',async t=>{
+  const {w,d,doc,sent,setup}=freeFixture(t);
+  await ready(w);setup();
+  doc.querySelector('#v-hoje [data-sc148="day-gap"]').click();
+  const option=doc.querySelector('#sc169-gap-dialog [data-sc148="gap-select"]');
+  option.click();
+  w.D.eventos.push({id:'new',titulo:'Horário ocupado',data:d,inicio:'14:45',fim:'15:05'});
+  doc.querySelector('[data-sc148="gap-save"]').click();
+  assert.equal(sent.length,0);
+  assert.equal(w.D.tarefas.find(t=>t.id===option.dataset.id).hora,undefined);
+  assert.match(doc.getElementById('toasts').textContent,/agenda mudou/);
+  w.fecharModal();w.D.config.google_agenda='Sim';w.SC148.refresh();
+  assert.equal(doc.querySelector('#v-hoje [data-sc148="day-gap"]'),null);
+});
+
+test('task arrow opens compact rescheduling, flags clashes, and saves only confirmed date and time',async t=>{
+  const {w,sent}=app(t,'2026-11-19T13:00:00');
+  await ready(w);
+  const d=w.hojeISO(),doc=w.document;
+  w.aplicarDados(snapshot(A,{config:{sc148_auto:'Não'},eventos:[{id:'meeting',titulo:'Reunião',data:d,inicio:'14:00',fim:'14:40'}],
+    tarefas:[{id:'late',titulo:'Atrasada',data:w.somaDias(d,-1),hora:'14:00',duracao:'25',status:'aberta'}]}));
+  w.SC126.openTasks();
+  doc.querySelector('#v-organizar [data-sc154-reschedule][data-id="late"]').click();
+  const warn=doc.getElementById('sc169-move-conflict'),date=doc.getElementById('sc154-date'),time=doc.getElementById('sc154-time'),save=doc.querySelector('[data-sc154-save]');
+  assert.equal(date.value,d);
+  assert.equal(date.parentElement.hidden,true);
+  assert.equal(save.disabled,true);
+  assert.match(warn.textContent,/Conflito com Reunião/);
+  save.click();assert.equal(sent.length,0);
+  doc.querySelector('[data-sc154-day="1"]').click();
+  assert.equal(date.value,w.somaDias(d,1));
+  assert.equal(warn.hidden,true);
+  time.value='16:20';time.dispatchEvent(new w.Event('input',{bubbles:true}));
+  assert.equal(sent.length,0);
+  save.click();assert.equal(sent.length,1);
+  assert.deepEqual([w.D.tarefas[0].data,w.D.tarefas[0].hora,w.D.tarefas[0].status],[w.somaDias(d,1),'16:20','aberta']);
+});
+
+test('projects advance the next-task highlight without changing the project lifecycle',async t=>{
+  const {w,sent}=app(t,'2026-11-19T13:00:00');
+  await ready(w);
+  const d=w.hojeISO(),doc=w.document;
+  w.aplicarDados(snapshot(A,{config:{sc148_auto:'Não'},projetos:[{id:'p1',nome:'Organizar estudos',status:'ativo'}],
+    tarefas:[
+      {id:'t1',titulo:'Revisar roteiro',projeto:'p1',data:d,hora:'13:50',status:'aberta',prioridade:'alta'},
+      {id:'t2',titulo:'Preparar a versão final',projeto:'p1',data:d,hora:'17:00',status:'aberta'},
+      {id:'t3',titulo:'Excluída do progresso',projeto:'p1',status:'cancelada'},
+      {id:'other',titulo:'Não pertence ao projeto',projeto:'p2',status:'aberta'}
+    ]}));
+  w.irPara('organizar');doc.querySelector('[data-sc126-organize="projetos"]').click();
+  const cardNext=()=>doc.querySelector('#v-organizar [data-sc169-project-next]');
+  const initial=cardNext().dataset.sc169ProjectNext;
+  doc.querySelector('#v-organizar [data-sc129-project="p1"][data-pane="tarefas"]').click();
+  const modal=doc.getElementById('modal-corpo'),next=()=>modal.querySelector('[data-sc169-project-next]');
+  assert.equal(next().dataset.sc169ProjectNext,initial);
+  modal.querySelector('[data-sc126-check="'+initial+'"]').click();
+  const remaining=initial==='t1'?'t2':'t1';
+  assert.equal(next().dataset.sc169ProjectNext,remaining);
+  assert.equal(cardNext().dataset.sc169ProjectNext,remaining);
+  modal.querySelector('[data-sc126-check="'+remaining+'"]').click();
+  assert.match(modal.textContent,/Sem tarefas pendentes/);
+  assert.equal(w.D.projetos[0].status,'ativo');
+  assert(!sent.some(r=>r.cmd.tabela==='projetos'));
+});
+
+test('reprogramming waits for a connected calendar and catches a late-arriving conflict',async t=>{
+  const {w,calendars,sent}=app(t,'2026-11-19T13:00:00');
+  await ready(w);
+  const d=w.somaDias(w.hojeISO(),1),doc=w.document;
+  w.aplicarDados(snapshot(A,{config:{google_agenda:'Sim',sc148_auto:'Não'},
+    tarefas:[{id:'change',titulo:'Reprogramar',data:d,hora:'14:00',duracao:'25',status:'aberta'}]}));
+  w.SC154.open('change');
+  const save=doc.querySelector('[data-sc154-save]'),warn=doc.getElementById('sc169-move-conflict');
+  assert.equal(save.disabled,true);
+  assert.match(warn.textContent,/Conferindo/);
+  const request=calendars.find(x=>x.from===d&&x.to===d);
+  assert(request);
+  request.ok({eventos:[{id:'google',titulo:'Reunião no Google',data:d,inicio:'14:05',fim:'14:35'}]});
+  await new Promise(resolve=>w.setTimeout(resolve,0));
+  assert.match(warn.textContent,/Conflito com Reunião no Google/);
+  assert.equal(save.disabled,true);
+  assert.equal(sent.length,0);
+});
+
+test('free time honors working hours, transition buffers and tasks carried over after midnight',async t=>{
+  const {w}=app(t,'2026-11-19T13:00:00');
+  await ready(w);
+  const d=w.somaDias(w.hojeISO(),1),previous=w.somaDias(d,-1);
+  w.aplicarDados(snapshot(A,{config:{sc148_auto:'Não',sc148_prefs:JSON.stringify({start:'00:00',end:'02:00',buffer:10})},
+    tarefas:[{id:'night',titulo:'Tarefa noturna',data:previous,hora:'23:45',duracao:'45',status:'aberta'}],
+    eventos:[{id:'event',titulo:'Reunião',data:d,inicio:'01:00',fim:'01:20'}]}));
+  const gaps=w.SC148.gapRanges(d);
+  assert.deepEqual(Array.from(gaps,g=>[g.a,g.b]),[[40,50],[90,120]]);
+  assert.deepEqual(Array.from(w.SC148.taskConflicts(d,'00:10',{id:'new',duracao:'10'})),['Tarefa noturna']);
 });
