@@ -608,3 +608,145 @@ test('free time honors working hours, transition buffers and tasks carried over 
   assert.deepEqual(Array.from(gaps,g=>[g.a,g.b]),[[40,50],[90,120]]);
   assert.deepEqual(Array.from(w.SC148.taskConflicts(d,'00:10',{id:'new',duracao:'10'})),['Tarefa noturna']);
 });
+
+test('abrir e fechar uma nota não regrava o texto nem cria sincronização',async t=>{
+  const {w,online}=app(t);await ready(w);online(false);
+  const conteudo='Título\n* marcador preservado\n\n';
+  w.aplicarDados(snapshot(A,{notas:[{id:'n1',titulo:'Nota',conteudo}]}));
+  w.SC138Notes.open('n1');w.SC138Notes.start('n1');
+  assert.ok(w.SC138Notes.finish());
+  assert.equal(w.D.notas[0].conteudo,conteudo);
+  assert.equal(w.lerFila().length,0);
+  w.SC138Notes.open('n1');w.SC138Notes.start('n1');w.edColunas('2');
+  assert.ok(w.SC138Notes.finish());
+  assert.equal(w.D.notas[0].conteudo,conteudo);
+  assert.equal(w.D.notas[0].colunas_nota,'2');
+  assert.equal(w.lerFila()[0].itens[0].conteudo,undefined);
+});
+
+test('seleção inválida não reutiliza a barra de uma seleção anterior',async t=>{
+  const {w,online}=app(t);await ready(w);online(false);
+  w.aplicarDados(snapshot(A,{notas:[{id:'n1',titulo:'Nota',conteudo:'Seleção curta\n'+'a'.repeat(1001)}]}));
+  w.SC138Notes.open('n1');
+  const d=w.document, paragraphs=d.querySelectorAll('.np-reader > p'), selection=w.getSelection();
+  for(const [i,p] of [...paragraphs].entries()){
+    const r=d.createRange();r.selectNodeContents(p);selection.removeAllRanges();selection.addRange(r);
+    d.dispatchEvent(new w.Event('keyup'));
+    if(i===0)assert.ok(d.querySelector('[data-sc138-task]'));
+  }
+  const bar=d.getElementById('sc138-selection');
+  assert.ok(!bar||bar.hidden);
+  w.SC138Notes.makeTask();
+  assert.equal(w.D.tarefas.length,0);
+});
+
+test('falha de gravação mantém a seleção da nota para tentar criar a tarefa novamente',async t=>{
+  const {w,online}=app(t);await ready(w);online(false);
+  w.aplicarDados(snapshot(A,{notas:[{id:'n1',titulo:'Nota',conteudo:'Ação na nota'}]}));
+  w.SC138Notes.open('n1');
+  const d=w.document,r=d.createRange(),s=w.getSelection();
+  r.selectNodeContents(d.querySelector('.np-reader > p'));s.removeAllRanges();s.addRange(r);
+  d.dispatchEvent(new w.Event('keyup'));
+  const messages=[];w.toast=(text,error)=>messages.push({text,error});
+  const set=w.Storage.prototype.setItem;
+  w.Storage.prototype.setItem=function(k,v){if(k.startsWith('sc_fila_cmd_v3:'))throw Error('storage quota');return set.call(this,k,v);};
+  d.querySelector('[data-sc138-task]').click();
+  assert.equal(w.D.tarefas.length,0);
+  assert.equal(messages.some(m=>m.text.includes('Tarefa criada')),false);
+  assert.ok(d.querySelector('[data-sc138-task]'));
+  w.Storage.prototype.setItem=set;
+  d.querySelector('[data-sc138-task]').click();
+  assert.equal(w.D.tarefas.length,1);
+  assert.equal(w.D.tarefas[0].titulo,'Ação na nota');
+});
+
+test('planejamento automático respeita o último dia exclusivo da Agenda e não prolonga evento de duração zero',t=>{
+  const {w}=app(t);
+  const today='2026-11-20',next='2026-11-21',tomorrow='2026-11-22';
+  const data={config:{sc148_prefs:JSON.stringify({start:'08:00',end:'09:00',buffer:0})},tarefas:[{id:'t1',duracao:'30',status:'aberta',notas:'[planner:auto]'}],eventos:[]};
+  const allDay={id:'g1',data:today,fim_data:next,diaTodo:true};
+  assert.equal(w.sc148Plan(data,{today,imports:[allDay]}).changes[0].after.data,next);
+  const sameTime={id:'g2',data:today,inicio:'11:00',fim:'11:00'};
+  assert.equal(w.sc148Plan(data,{today,imports:[allDay,sameTime]}).changes[0].after.data,next);
+  const twoDays={...allDay,fim_data:tomorrow};
+  assert.equal(w.sc148Plan(data,{today,imports:[twoDays]}).changes[0].after.data,tomorrow);
+});
+
+test('Agenda desligada no servidor não passa por agenda vazia confirmada e detalhes distinguem os lembretes',async t=>{
+  const {w,calendars}=app(t);await ready(w);
+  w.aplicarDados(snapshot(A,{config:{google_agenda:'Sim'}}));
+  const p=w.SC167.calendar('2026-11-20','2026-11-20',true);
+  calendars.at(-1).ok({eventos:[],desligado:true});
+  assert.equal(await p,false);
+  assert.equal(w.SC167.calendarFresh('2026-11-20'),false);
+  const q=w.SC167.calendar('2026-11-20','2026-11-20',true);
+  calendars.at(-1).ok({eventos:[]});
+  assert.equal(await q,true);
+  assert.equal(w.SC167.calendarFresh('2026-11-20'),true);
+  assert.match(w.sc143AlertHTML('eventos',{id:'e1',google_id:'g',alerta_status:'padrao_agenda'}),/Lembretes da agenda/);
+  assert.match(w.sc143AlertHTML('eventos',{id:'e2',google_id:'g',alerta_status:'sem_lembrete'}),/Sem lembrete/);
+  assert.doesNotMatch(w.sc143AlertHTML('eventos',{id:'e2',google_id:'g',lembrete:'-1',alerta_status:'confirmado'}),/Lembrete confirmado/);
+});
+
+test('não fecha os formulários de projeto e meta nem confirma pagamento sem armazenar',async t=>{
+  const {w,online}=app(t);await ready(w);online(false);
+  w.aplicarDados(snapshot(A,{financas:[{id:'f1',descricao:'Amostra',tipo:'despesa',status:'pendente',valor_centavos:'1000',data:'2026-11-20'}]}));
+  const d=w.document,m=d.getElementById('modal'),set=w.Storage.prototype.setItem,messages=[];
+  w.toast=(text,error)=>messages.push({text,error});
+  w.Storage.prototype.setItem=function(k,v){if(k.startsWith('sc_fila_cmd_v3:'))throw Error('storage quota');return set.call(this,k,v);};
+  w.abrirProjeto();d.getElementById('f-nome').value='Projeto de teste';w.salvarProjetoModal('');
+  assert.equal(m.classList.contains('hidden'),false);
+  assert.equal(d.getElementById('f-nome').value,'Projeto de teste');
+  w.fecharModal();w.abrirMeta();d.getElementById('f-tit').value='Meta de teste';w.salvarMetaModal('');
+  assert.equal(m.classList.contains('hidden'),false);
+  w.SC146.settle('f1');
+  assert.equal(w.D.financas[0].status,'pendente');
+  assert.equal(messages.some(x=>x.text.includes('Pagamento registrado')),false);
+  assert.equal(w.lerFila().length,0);
+});
+
+test('Planner não libera tarefas ao falhar a busca ou após trocar de conta',async t=>{
+  const {w,calendars}=app(t);await ready(w);
+  const openTask={id:'t1',titulo:'Tarefa da conta A',duracao:'30',status:'aberta'};
+  w.aplicarDados(snapshot(A,{config:{google_agenda:'Sim'},tarefas:[openTask]}));
+  const messages=[];w.toast=text=>messages.push(text);
+  const first=w.SC148.plan(true);
+  for(const c of calendars.splice(0))c.fail(Error('sem resposta'));
+  await first;
+  assert.equal(w.lerFila().length,0);
+  assert.match(messages.at(-1),/Nenhum horário foi alterado/);
+  // A força aqui vem do fixture, sem alterar o app, para não esperar a janela de retry.
+  const calendar=w.SC167.calendar;
+  w.SC167.calendar=(from,to)=>calendar(from,to,true);
+  const old=w.SC148.plan(true);
+  const pending=calendars.splice(0);assert.ok(pending.length);
+  w.aplicarDados(snapshot(B,{tarefas:[{...openTask,titulo:'Tarefa da conta B'}]}));
+  for(const c of pending)c.ok({eventos:[]});
+  await old;
+  assert.equal(w.D.tarefas[0].titulo,'Tarefa da conta B');
+  assert.equal(w.lerFila().length,0);
+});
+
+test('telas principais abrem com dados de amostra sem disparar gravações',async t=>{
+  const {w,online}=app(t);await ready(w);online(false);
+  const d=w.document;
+  w.aplicarDados(snapshot(A,{
+    tarefas:[{id:'t1',titulo:'Tarefa de teste',status:'aberta',data:w.hojeISO()}],
+    projetos:[{id:'p1',nome:'Projeto de teste',status:'ativo'}],
+    metas:[{id:'m1',titulo:'Meta de teste',status:'ativa'}],
+    habitos:[{id:'h1',nome:'Hábito de teste',ativo:'Sim',dias:'1,2,3,4,5,6,0'}],
+    notas:[{id:'n1',titulo:'Nota de teste',conteudo:'## Título de teste'}],
+    financas:[{id:'f1',descricao:'Conta de teste',tipo:'despesa',status:'pendente',valor_centavos:'1000',data:w.hojeISO()}]
+  }));
+  w.irPara('hoje');assert.ok(d.querySelector('#v-hoje .sc148-root'));
+  w.irPara('agenda');assert.ok(d.querySelector('#v-agenda .sc148-root'));
+  w.irPara('organizar');
+  for(const [key,label] of [['tarefas','Tarefa'],['projetos','Projeto'],['metas','Meta'],['habitos','Hábito'],['financas','Conta']]){
+    const host=d.getElementById('v-organizar'),b=host.querySelector('[data-sc126-organize="'+key+'"]');
+    assert.ok(b,key);b.click();assert.ok(host.textContent.includes(label+' de teste'),key);
+  }
+  w.irPara('biblioteca');assert.ok(d.getElementById('v-biblioteca').textContent.includes('Nota de teste'));
+  w.SC138Notes.open('n1');assert.equal(d.querySelector('.np-reader h2').textContent,'Título de teste');
+  w.irPara('config');assert.ok(d.getElementById('sc134-settings'));
+  assert.equal(w.lerFila().length,0);
+});
