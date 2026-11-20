@@ -2159,10 +2159,10 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-20b-sc1137151"></script>
+<script src="./pwa-transport.js?v=2026-11-20c-sc1137151"></script>
 <script>
-var VERSAO_TELA = '2026-11-20b';
-function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a','2026-11-18b','2026-11-19a','2026-11-19b','2026-11-20a','2026-11-20b'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
+var VERSAO_TELA = '2026-11-20c';
+function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a','2026-11-18b','2026-11-19a','2026-11-19b','2026-11-20a','2026-11-20b','2026-11-20c'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
 var VERSAO_STUDIO = '11.37.15.1'; // validação atômica das notas com servidor compatível
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
 function sc168EventWindow(e,day,fallback=30){
@@ -2297,6 +2297,10 @@ var SC167=(function(){
     if(status==='padrao_agenda'&&remote)return {state:'default',label:'Lembretes da agenda',remote:true};
     if(status==='confirmado'&&remote)return {state:'confirmed',label:'Lembrete confirmado no Google',remote:true};
     if(remote)return {state:'sent',label:'Enviado ao Google Agenda',remote:true};
+    if(tab==='tarefas'&&sc155Lifecycle(row)==='open'){
+      if(!row.data||!row.hora)return {state:'unscheduled',label:'Sem lembrete: falta '+(!row.data?'a data':'a hora de início'),remote:false};
+      if(!lembreteSolicitado(row.lembrete))return {state:'none-task',label:'Sem lembrete configurado',remote:false};
+    }
     return {state:'saved',label:'Salvo no 2º Cérebro',remote:false};
   }
   function project(id,tasks){
@@ -3342,7 +3346,7 @@ function campoDe(n){ if(!n) return null; if(n.type === 'checkbox') return n.clos
 function modalSimples(tipo){
   if(!simples()) return;
   var corpo = el('modal-corpo'); if(!corpo) return;
-  var ids = { abrirTarefa:['f-not','f-proj','f-dur','f-prio','f-rec','f-etq','f-meta','f-rev','f-feito','f-est'], abrirEvento:['f-not','f-g'], abrirNota:['f-tipo','f-etq','f-fix','f-area'] }[tipo] || [], alvos = [];
+  var ids = { abrirTarefa:['f-not','f-proj','f-prio','f-rec','f-etq','f-meta','f-rev','f-feito','f-est'], abrirEvento:['f-not','f-g'], abrirNota:['f-tipo','f-etq','f-fix','f-area'] }[tipo] || [], alvos = [];
   ids.forEach(function(i){ var c = campoDe(el(i)); if(c && alvos.indexOf(c) < 0) alvos.push(c); });
   if(tipo === 'abrirTarefa'){ var q = corpo.querySelector('button[onclick*="encaixarNoModal"]'); if(q && q.parentNode) alvos.push(q.parentNode); var sub = corpo.querySelector('.sub-secao'); if(sub && !corpo.querySelector('#sub-lista .sub-i')) alvos.push(sub); }
   Array.prototype.forEach.call(corpo.querySelectorAll('.bloco-local'), function(b){ if(!(el('f-loc') && val('f-loc').trim())) alvos.push(b); });
@@ -6424,18 +6428,20 @@ function abrirTarefa(x){
     campo('Notas e passos', edBarraHtml()+'<div id="ed" class="ed-curto"></div><textarea id="f-not" class="hidden">'+h(window.SC170?.withoutDeadline(t.notas)??(t.notas||''))+'</textarea><div class="flex items-center gap-2 mt-1"><button type="button" class="chip chip-f" onclick="adicionarPasso()">+ Adicionar passo</button><span class="subt">Toque na caixa do passo para marcar como feito.</span></div>') +
     (id ? subSecao(id) : '') + (window.SC170?.startTools(t)||'') +
     linha2(campo('Área', selHtml('f-area', areaPares(), t.area || (id ? '' : (lsGet('sc_ult_area') || '')))), campo('Projeto', selHtml('f-proj', projs, t.projeto))) +
-    linha2(campo('Planejado para', inp('f-data', t.data, 'date')), campo('Hora', inp('f-hora', t.hora, 'time'))) +
+    linha2(campo('Planejado para', inp('f-data', t.data, 'date')), campo('Hora de início', inp('f-hora', t.hora, 'time'))) +
+    linha2(campo('Duração prevista', selHtml('f-dur', duracoesTarefa(t.duracao), t.duracao||'')),
+      '<div><label class="rot">Término previsto</label><output id="sc171-task-end" for="f-hora f-dur" aria-live="polite">—</output></div>') +
     campo('Prazo final (opcional)',inp('f-prazo-final',window.SC170?.deadline(t)||'','date')) +
     '<p id="sc170-task-warning" class="sc170-warning" role="status" hidden></p>' +
     campo('Local', inp('f-loc', t.local)) + blocoLocal('f-hora') +
-    linha2(campo('Avisar no celular', selHtml('f-lemb', [['','Sem aviso'],['0','No horário'],['10','10 min antes'],['30','30 min antes'],['60','1 h antes'],['1440','1 dia antes']], id ? t.lembrete : '10')), campo('Duração', selHtml('f-dur', [['','Não definir'],['15','15 min'],['30','30 min'],['45','45 min'],['60','1 h'],['90','1 h 30'],['120','2 h'],['180','3 h']], t.duracao || ''))) +
-    '<p class="subt -mt-1">Para receber aviso de tarefa, informe data e hora. Sem hora, o aplicativo não configura lembrete dessa tarefa. O aviso depende do Google Agenda e das notificações do Android.</p>' +
+    campo('Lembrete no Google Agenda', selHtml('f-lemb', opcoesLembreteTarefa(t.lembrete), id ? lembreteValor(t.lembrete) : lembreteValor(t.lembrete??'10'))) +
+    '<p id="sc171-task-reminder" class="sc171-reminder-hint" role="status" hidden></p>' +
     '<div id="f-est" class="subt"></div>' +
     '<div class="flex gap-1.5 flex-wrap"><button type="button" class="chip chip-f" onclick="'+C('encaixarNoModal',id)+'">⏱ Sugerir o próximo horário livre</button><button type="button" class="chip chip-f" onclick="criarAlarmeRelogio()">🔔 Avisar no horário</button>' + (id ? '<button type="button" class="chip chip-f" onclick="'+C('virarCompromisso',id)+'">📅 Virar compromisso</button>' : '') + (id ? '' : '<button type="button" class="chip chip-f" onclick="abrirModelos(\'tarefa\')">📋 Modelos</button>') + '<button type="button" class="chip chip-f" onclick="salvarComoModelo(\'tarefa\')">+ Salvar como modelo</button>' + (id ? '<button type="button" class="chip chip-f" onclick="'+C('duplicarTarefa',id,'hoje')+'">⧉ Duplicar p/ hoje</button><button type="button" class="chip chip-f" onclick="'+C('duplicarTarefa',id,'amanha')+'">⧉ Duplicar p/ amanhã</button>' : '') + '</div>' +
     (id ? campo('Tempo já feito (min)', inp('f-feito', tempoFeito(t) || '', 'number', 'min="0" max="9999" placeholder="0"')) : '') +
     linha2(campo('Prioridade', selHtml('f-prio', [['baixa','Baixa'],['media','Média'],['alta','Alta']], t.prioridade||'media')), campo('Repetir', selHtml('f-rec', [['','Não repete'],['diaria','Todo dia'],['semanal','Toda semana'],['mensal','Todo mês']], t.recorrencia))) +
     linha2(campo('Etiquetas (vírgula)', inp('f-etq', t.etiquetas)), campo('Meta', selHtml('f-meta', [['','—']].concat(D.metas.filter(function(m){ return m.status!=='concluida' || String(m.id)===String(t.meta_id); }).map(function(m){ return [m.id,m.titulo]; })), t.meta_id))) +
-    '<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="f-rev" '+(etiquetasDe(t.etiquetas).indexOf('revisar')>=0?'checked':'')+'> Agendar revisões (1, 7 e 30 dias) ao concluir</label>',
+    '<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="f-rev" '+(etiquetasDe(t.etiquetas).indexOf('revisar')>=0?'checked':'')+'> Agendar revisões em 1, 7 e 30 dias ao concluir, usando a hora e o lembrete desta tarefa, se definidos</label>',
     (function(r){ return id ? r : r.replace('>Cancelar</button>', '>Cancelar</button><button onclick="salvarTarefaModal(\'\',true)" class="btn btn-s">Salvar + nova</button>'); })(rodape(id ? C('excluirItem','tarefas',id) : '', C('salvarTarefaModal', id))));
   if(id && el('sub-lista') && !el('sc-converter-passos')){
     var bc=document.createElement('button');bc.id='sc-converter-passos';bc.type='button';bc.className='chip chip-f mt-1';bc.textContent='Transformar passos [ ] em subtarefas';
@@ -6444,7 +6450,7 @@ function abrirTarefa(x){
   edAlvo = 'f-not'; edIniciar(window.SC170?.withoutDeadline(t.notas)??(t.notas||''));
   rascAbrir('tarefa', id, typeof x === 'object' && !!x && Object.keys(x).length > 0 && !x.id);
   ['f-area','f-dur'].forEach(function(k){ var n = el(k); if(n) n.addEventListener('change', atualizarEstimativa); });
-  atualizarEstimativa(); window.SC170?.taskWarning();
+  atualizarEstimativa(); window.SC170?.taskWarning(); atualizarHorarioTarefa();
   setTimeout(function(){ var n = el('f-tit'); if(n && !id) n.focus(); }, 50);
 }
 // Tarefa com dia e lugar certos é, na prática, um compromisso: vira evento (agenda + Google Agenda) e a tarefa sai
@@ -6486,10 +6492,16 @@ function salvarTarefaModal(id, outra){
   var o = { titulo:tit, notas:window.SC170?.withDeadline(val('f-not'),val('f-prazo-final'))??val('f-not'), area:val('f-area'), projeto:val('f-proj'), data:val('f-data'), hora:val('f-hora'), prioridade:val('f-prio'), recorrencia:val('f-rec'), etiquetas:val('f-etq'), meta_id:val('f-meta'), lembrete:val('f-lemb'), duracao:val('f-dur'), local:val('f-loc').trim() };
   if(id && el('f-feito')) o.tempo_feito = String(Math.max(0, parseInt(val('f-feito'),10) || 0));
   var tg = etiquetasDe(o.etiquetas).filter(function(x){ return x!=='revisar'; }); if(marcado('f-rev')) tg.push('revisar'); o.etiquetas = tg.join(',');
+  var avisoTarefa='';
   if(!o.hora) o.lembrete = '';
-  else { var ajT = ajustarLembrete(o.data, o.hora, o.lembrete); o.lembrete = ajT.lembrete; if(ajT.aviso) toast(ajT.aviso); }
+  else {
+    var anterior=obter('tarefas',id);
+    if(o.hora!==anterior.hora||o.data!==anterior.data||o.lembrete!==lembreteValor(anterior.lembrete)){
+      var ajT=ajustarLembrete(o.data,o.hora,o.lembrete);o.lembrete=ajT.lembrete;avisoTarefa=ajT.aviso;
+    }
+  }
   if(id) o.id = id; else { if(!o.area) o.area = areaAuto(o.titulo + ' ' + o.notas); o.status = 'aberta'; lsSet('sc_ult_area', o.area || null);  }
-  if(!salvar('tarefas',o))return;rascLimpar();saidaAuto('tarefas', o, null);
+  if(!salvar('tarefas',o))return;rascLimpar();saidaAuto('tarefas', o, null);if(avisoTarefa)toast(avisoTarefa);
   if(outra && !id){ toast('Salva. Próxima:'); abrirTarefa({ area:o.area, projeto:o.projeto, data:o.data, prioridade:o.prioridade, duracao:o.duracao }); } else fecharModal();
 }
 
@@ -6548,7 +6560,7 @@ function abrirEvento(x){
   var gDef = id ? !!e.google_id : cfgSim('google_criar');
   abrirModal(id?'Evento':'Novo evento',
     campo('Título', inp('f-tit', e.titulo)) +
-    linha2(campo('Data', inp('f-data', e.data || hojeISO(), 'date')), campo('Lembrete', selHtml('f-lemb', [['','Padrão da agenda'],['-1','Sem lembrete'],['0','No horário'],['10','10 min antes'],['30','30 min antes'],['60','1 h antes'],['1440','1 dia antes']], id ? e.lembrete : ((e.lembrete != null && e.lembrete !== '') ? e.lembrete : '30')))) +
+    linha2(campo('Data', inp('f-data', e.data || hojeISO(), 'date')), campo('Lembrete', selHtml('f-lemb', [['','Padrão da agenda'],['-1','Sem lembrete'],['0','No horário'],['5','5 min antes'],['10','10 min antes'],['30','30 min antes'],['60','1 h antes'],['1440','1 dia antes']], id ? e.lembrete : ((e.lembrete != null && e.lembrete !== '') ? e.lembrete : '30')))) +
     linha2(campo('Início', inp('f-ini', e.inicio, 'time')), campo('Fim', inp('f-fim', e.fim, 'time'))) +
     '<p class="subt -mt-1">Sem horário de início = evento de dia inteiro.</p>' +
     linha2(campo('Área', selHtml('f-area', areaPares(), e.area)), campo('Local', inp('f-loc', e.local))) +
@@ -7034,17 +7046,45 @@ function calcularFim(inicio, fim, duracaoMin){
 }
 // ==== /PARSER ====
 
-// Se o lembrete pedido já passou (ex.: evento das 19h criado às 18:31 com "30 min antes"), usa o maior lembrete que
-// ainda dá tempo de tocar (60, 30, 10 min ou "no horário"). Evento já iniciado ou sem hora: não mexe.
-var OPCOES_LEMBRETE = [1440, 60, 30, 10, 0];
-function ajustarLembrete(data, inicio, lemb, agora){
-  if(lemb === '' || lemb == null || !inicio || !data) return { lembrete: lemb == null ? '' : String(lemb), aviso:'' };
-  var p = inicio.split(':'), d = deISO(data); d.setHours(+p[0], +p[1], 0, 0);
-  var min = Math.floor((d - (agora || new Date())) / 60000), L = +lemb;
-  if(isNaN(L) || min <= 0 || min >= L) return { lembrete: String(lemb), aviso:'' };
-  var nova = 0;
-  for(var i=0;i<OPCOES_LEMBRETE.length;i++){ if(OPCOES_LEMBRETE[i] <= min){ nova = OPCOES_LEMBRETE[i]; break; } }
-  return { lembrete: String(nova), aviso: 'O lembrete de ' + L + ' min já passou; ajustei para ' + (nova===0 ? 'tocar no horário do evento' : nova + ' min antes') + '.' };
+// Só sugere lembretes que ainda estejam no futuro. A confirmação vem do Google.
+var OPCOES_LEMBRETE = [1440,60,30,10,5,0];
+function lembreteSolicitado(valor){
+ return valor!=null&&String(valor).trim()!==''&&Number.isInteger(Number(valor))&&Number(valor)>=0&&Number(valor)<=40320;
+}
+function lembreteValor(valor){return lembreteSolicitado(valor)?String(Number(valor)):'';}
+function opcoesLembreteTarefa(valor){
+ var op=[['','Sem lembrete'],['0','No horário'],['5','5 min antes'],['10','10 min antes'],['30','30 min antes'],['60','1 h antes'],['1440','1 dia antes']];
+ var v=lembreteValor(valor);
+ if(v&&!op.some(function(o){return o[0]===v;}))op.push([v,v+' min antes']);
+ return op;
+}
+function duracoesTarefa(valor){
+ var op=[['','Não definir'],['15','15 min'],['30','30 min'],['45','45 min'],['60','1 h'],['90','1 h 30'],['120','2 h'],['180','3 h']];
+ var v=String(valor||'');if(/^\d+$/.test(v)&&Number(v)>0&&!op.some(function(o){return o[0]===v;}))op.push([v,v+' min']);
+ return op;
+}
+function atualizarHorarioTarefa(){
+ var out=el('sc171-task-end'),hint=el('sc171-task-reminder');
+ if(!out||!hint)return;
+ var inicio=val('f-hora'),d=Number(val('f-dur')),data=val('f-data');
+ var definido=!!inicio&&Number.isInteger(d)&&d>0;
+ var end=definido?minutos(inicio)+Math.min(d,1440):0;
+ out.textContent=definido?hhmm(end%1440)+(end>=1440?' · dia seguinte':''):'—';
+ var lemb=val('f-lemb'),msg=lembreteSolicitado(lemb)&&(!data||!inicio)?'Informe data e hora de início para gerar o lembrete.':
+  lembreteSolicitado(lemb)?ajustarLembrete(data,inicio,lemb).aviso:'';
+ hint.hidden=!msg;hint.textContent=msg;
+}
+document.addEventListener('change',function(e){if(e.target.matches?.('#f-data,#f-hora,#f-dur,#f-lemb'))atualizarHorarioTarefa();});
+document.addEventListener('input',function(e){if(e.target.matches?.('#f-data,#f-hora,#f-dur,#f-lemb'))atualizarHorarioTarefa();});
+function ajustarLembrete(data,inicio,lemb,agora){
+ var original={lembrete:lemb==null?'':String(lemb),aviso:''};
+ if(!lembreteSolicitado(lemb)||!sc120Date_(data)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(inicio))return original;
+ var d=deISO(data),p=inicio.split(':');d.setHours(+p[0],+p[1],0,0);
+ var restante=d-(agora||new Date()),L=Number(lemb);
+ if(restante<=0)return {lembrete:original.lembrete,aviso:'O horário de início já passou. Se quiser receber um novo aviso, escolha um horário futuro.'};
+ if(restante>L*60000)return original;
+ var nova=OPCOES_LEMBRETE.find(function(n){return n*60000<restante;});
+ return {lembrete:String(nova),aviso:'O aviso de '+L+' min já passou. Será solicitado '+(nova===0?'no horário de início':nova+' min antes')+'.'};
 }
 
 // prévia ao vivo do que será criado
@@ -8266,7 +8306,7 @@ function encaixarTarefa(id, quieto, desde){
 function encaixarNoModal(id){
   var dur = parseInt(val('f-dur'),10) || 0; if(!dur){toast('Defina uma duração para sugerir horário.',true);return;} var w = acharJanela(dur, id);
   if(!w){ toast('Não achei janela livre de ' + duracaoTxt(dur) + ' nos próximos 14 dias.', true); return; }
-  el('f-data').value = w.dia; el('f-hora').value = hhmm(w.ini);
+  el('f-data').value = w.dia; el('f-hora').value = hhmm(w.ini); atualizarHorarioTarefa();
   if(!val('f-dur')) el('f-dur').value = '30';
   if(!val('f-lemb')) el('f-lemb').value = '10';
   toast('Sugestão: ' + dataBonita(w.dia) + ' ' + hhmm(w.ini) + '–' + hhmm(w.ini+dur) + '. Toque em Salvar para confirmar.');
@@ -8361,7 +8401,7 @@ function atualizarEstimativa(){
   else txt += ' Você costuma gastar ' + Math.round(s.fator*100) + '% do estimado.';
   box.innerHTML = h(txt) + ((Math.abs(s.fator - 1) >= 0.2 && best !== cur) ? ' <button type="button" class="chip chip-f" onclick="' + C('usarDuracao', best) + '">Usar ' + (best >= 60 ? duracaoTxt(best) : best + ' min') + '</button>' : '');
 }
-function usarDuracao(m){ var s = el('f-dur'); if(!s) return; s.value = String(m); atualizarEstimativa(); }
+function usarDuracao(m){ var s = el('f-dur'); if(!s) return; var v=String(m);if(!s.querySelector('option[value="'+Number(m)+'"]')&&Number.isInteger(Number(m))&&Number(m)>0)s.add(new Option(v+' min',v));s.value=v;atualizarEstimativa();atualizarHorarioTarefa(); }
 
 /* ───────── Aviso de PWA desatualizado ───────── */
 // O service worker guarda os arquivos em um cache com o nome da própria versão (sc-<versão>). Se esse nome não bate com a versão
@@ -8646,7 +8686,13 @@ function criarRevisoes(t){
   var base = hojeISO(), nome = String(t.titulo||'').replace(/^Revisar:\s*/i, ''), novas = [];
   [1, 7, 30].forEach(function(dd){
     var id = 'rv' + t.id + '_' + dd;
-    if(!obter('tarefas', id).id) novas.push({ id:id, titulo:'Revisar: ' + nome, area:t.area, projeto:t.projeto, prioridade:'media', data:somaDias(base, dd), etiquetas:'revisao', status:'aberta' });
+    if(!obter('tarefas',id).id){
+      var r={id:id,titulo:'Revisar: '+nome,area:t.area,projeto:t.projeto,prioridade:'media',data:somaDias(base,dd),etiquetas:'revisao',status:'aberta'};
+      if(/^([01]\d|2[0-3]):[0-5]\d$/.test(t.hora||'')){
+        r.hora=t.hora;if(lembreteSolicitado(t.lembrete))r.lembrete=lembreteValor(t.lembrete);
+      }
+      novas.push(r);
+    }
   });
   return novas;
 }
@@ -12699,7 +12745,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-20b-sc1137151"></script>
+<script src="./pwa-install.js?v=2026-11-20c-sc1137151"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13706,7 +13752,7 @@ html.sc126.sc11-active.sc100-active[data-sc-theme] #toasts .toast.bg-red-600{bac
 window.sc143AlertHTML=function(tab,x){
  if(!x.id)return '';
  var pending=fila.some(c=>c.tabela===tab&&(c.itens||[]).some(i=>String(i.id)===String(x.id)));
- var a=SC167.alert(tab,x,pending), defaultText=a.state==='confirmed'?'Configuração confirmada no Google. A entrega depende das notificações do dispositivo.':a.state==='sent'?'O item está no Google, mas o aplicativo não confirmou um aviso específico.':a.state==='saved'?'Nenhum envio ao Google foi confirmado.':a.state==='default'?'O evento foi enviado usando a configuração de lembretes da agenda.':a.state==='none'?'O evento foi enviado sem lembrete.':'';
+ var a=SC167.alert(tab,x,pending), defaultText=a.state==='confirmed'?'O lembrete está configurado. No computador, mantenha o Google Agenda aberto e permita as notificações de área de trabalho.':a.state==='sent'?'O item está no Google, mas o aplicativo não confirmou um aviso específico.':a.state==='saved'?'Nenhum envio ao Google foi confirmado.':a.state==='default'?'O evento foi enviado usando a configuração de lembretes da agenda.':a.state==='none'?'O evento foi enviado sem lembrete.':a.state==='none-task'?'Abra Editar ou Reprogramar para escolher um lembrete no Google Agenda.':a.state==='unscheduled'?'Defina a data, a hora de início e o lembrete para receber um aviso pelo Google Agenda.':'';
  return '<details class="sc126-details" data-sc167-alert="'+a.state+'"><summary>'+h(a.label)+'</summary><p class="subt">'+h(x.alerta_erro||defaultText)+'</p>'+
   (a.state==='failed'?'<button type="button" class="btn btn-s" data-sc143-retry="'+tab+'" data-id="'+h(x.id)+'">Tentar sincronizar novamente</button>':'')+'</details>';
 };
@@ -13910,6 +13956,8 @@ function sc148Plan(data, options) {
 if(typeof module!=='undefined'&&module.exports)module.exports={sc148Plan};
 </script>
 <style id="sc170-style">
+#sc171-task-end{display:flex;align-items:center;min-height:42px;font-weight:650;color:var(--sc128-ink)}
+.sc171-reminder-hint{margin:3px 0;font-size:12px;color:var(--sc128-muted);overflow-wrap:anywhere}
 .sc170-warning{padding:7px 10px;margin:5px 0;border-radius:9px;background:var(--sc153-late-bg,var(--sc11-soft));color:var(--sc153-late-ink,var(--sc128-ink));overflow-wrap:anywhere}
 .sc170-action-row{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:5px 0}
 .sc170-action-row .btn{white-space:normal}
@@ -14377,9 +14425,17 @@ function eventRow(e){
  return '<article class="sc148-item'+(state?' sc153-'+state:'')+'" data-sc167-kind="'+(e.rotina?'routine':'event')+'"><div><strong>'+esc(e.titulo)+'</strong><small>'+esc(eventHours(e)+(e.rotina?' · Rotina':' · Compromisso')+(state?' · '+SC153.label(state):''))+'</small></div>'+(e.plannerKind==='event'?button('Abrir','event','data-id="'+esc(e.id)+'"'):'')+'</article>';
 }
 function timelineEntries(d){
- const out=rows('tarefas').filter(t=>t.data===d&&min(t.hora)!==null&&sc155Lifecycle(t)!=='inactive').map(t=>{
+ const previous=somaDias(d,-1);
+ const out=rows('tarefas').flatMap(t=>{
+  const start=min(t.hora);
+  if(start===null||sc155Lifecycle(t)==='inactive')return [];
+  const end=start+taskMinutes(t),nextDay=end>=1440,continues=t.data===previous&&end>1440;
+  if(t.data!==d&&!continues)return [];
   const state=SC153.state(t,'tarefas');
-  return {kind:'task',id:t.id,title:t.titulo,start:min(t.hora),end:Math.min(1440,min(t.hora)+(Number(t.duracao)>0?Number(t.duracao):30)),label:t.hora+(Number(t.duracao)>0?'–'+hh(Math.min(1439,min(t.hora)+Number(t.duracao))):' · duração não definida'),done:state==='done',state};
+  const finish=hh(end%1440),length=Number(t.duracao),known=Number.isInteger(length)&&length>0;
+  const label=continues?(known?'Continua até '+finish:'Continuação · duração estimada'):
+   t.hora+(known?'–'+finish+(nextDay?' · dia seguinte':''):' · duração não definida');
+  return [{kind:'task',id:t.id,title:t.titulo,start:continues?0:start,end:continues?end-1440:Math.min(1440,end),label,done:state==='done',state}];
  });
  events(d).forEach(e=>{
   const {start,end,allDay}=e.plannerSpan;if(allDay)return;
@@ -14411,11 +14467,6 @@ function taskMinutes(t){
 function busyBlocks(d,exclude=''){
  const blocks=timelineEntries(d).filter(e=>!e.done&&e.state!=='cancel'&&!(e.kind==='task'&&String(e.id)===String(exclude)));
  events(d).filter(e=>e.plannerSpan.allDay&&active(e)).forEach(e=>blocks.push({start:0,end:1440,title:e.titulo}));
- const previous=somaDias(d,-1);
- rows('tarefas').forEach(t=>{
-  if(t.data!==previous||!active(t)||String(t.id)===String(exclude))return;
-  const a=min(t.hora);if(a!==null&&a+taskMinutes(t)>1440)blocks.push({start:0,end:a+taskMinutes(t)-1440,title:t.titulo});
- });
  return blocks;
 }
 function taskConflicts(d,time,t){
@@ -14714,7 +14765,9 @@ function open(id){
  const start=sc120Date_(x.data)&&x.data>=hojeISO()?x.data:hojeISO();
  abrirModal('Reprogramar tarefa','<div class="sc154-form" id="sc169-move-form"><strong>'+esc(x.titulo)+'</strong>'+(window.SC170?.deadlineCaption(x)?'<small>'+esc(SC170.deadlineCaption(x))+'</small>':'')+shortcuts('')+
   '<label id="sc169-move-date" hidden>Planejado para<input class="input" id="sc154-date" type="date" value="'+esc(start)+'" required></label>'+
-  '<label>Escolher horário<input class="input" id="sc154-time" type="time" value="'+esc(x.hora)+'"></label>'+
+  '<label>Hora de início<input class="input" id="sc154-time" type="time" value="'+esc(x.hora)+'"></label>'+
+  '<label>Lembrete no Google Agenda'+selHtml('sc171-move-reminder',opcoesLembreteTarefa(x.lembrete),lembreteValor(x.lembrete))+'</label>'+
+  '<p id="sc171-move-reminder-hint" class="sc171-reminder-hint" role="status" hidden></p>'+
   '<p id="sc169-move-conflict" class="sc154-hint sc169-conflict" role="status" hidden></p><p id="sc170-move-warning" class="sc170-warning" role="status" hidden></p></div>',
   '<button type="button" class="btn" data-sc154-cancel>Cancelar</button><button type="button" class="btn btn-p" data-sc154-save>Salvar</button>');
  updateConflict(true);
@@ -14727,11 +14780,16 @@ function updateConflict(checkGoogle=false){
  const m=currentDraft();if(!m)return [];
  const {form,date,time,x}=m,d=date.value,hora=time.value,msg=$('sc169-move-conflict');
  const key=sc120Date_(d)?d:'';
+ const lemb=$('sc171-move-reminder').value,reminderHint=$('sc171-move-reminder-hint');
+ const reminderText=lemb&&!hora?(x.hora?'Sem hora de início, o lembrete será removido.':'Escolha a hora de início para gerar o lembrete.'):lemb&&key?ajustarLembrete(key,hora,lemb).aviso:'';
+ reminderHint.hidden=!reminderText;reminderHint.textContent=reminderText;
  const end=hora?Number(hora.split(':')[0])*60+Number(hora.split(':')[1])+SC148.taskMinutes(x):0;
  const last=key&&end>1440?somaDias(key,1):key;
  const checkKey=key&&key+'|'+last;
- const hits=hora&&key?SC148.taskConflicts(key,hora,x):[];
- const googleUnknown=!!(hora&&key&&D.config.google_agenda==='Sim'&&(!SC144.loaded(key)||!SC144.loaded(last)));
+ const changed=key!==x.data||hora!==String(x.hora||'');
+ const reminderOnly=!changed&&lembreteValor(lemb)!==lembreteValor(x.lembrete);
+ const hits=hora&&key&&!reminderOnly?SC148.taskConflicts(key,hora,x):[];
+ const googleUnknown=!!(!reminderOnly&&hora&&key&&D.config.google_agenda==='Sim'&&(!SC144.loaded(key)||!SC144.loaded(last)));
  if(checkGoogle&&googleUnknown&&navigator.onLine!==false&&sc166Confirmado&&form.dataset.loading!==checkKey){
   form.dataset.loading=checkKey;
   SC167.calendar(key,last).then(()=>{
@@ -14759,15 +14817,18 @@ function save(){
  if(!date.value||!date.checkValidity()||!sc120Date_(date.value)){toast('Escolha uma data válida.',true);return false;}
  if(!time.checkValidity()){toast('Escolha um horário válido.',true);return false;}
  if(updateConflict().length||$('modal-rodape').querySelector('[data-sc154-save]').disabled)return false;
- const after={id:x.id,data:date.value,hora:time.value};if(x.data===after.data&&String(x.hora||'')===after.hora){fecharModal();draft=null;return false;}
+ const reminder=lembreteValor($('sc171-move-reminder').value);
+ if(reminder&&!time.value&&!x.hora){toast('Informe a hora de início para gerar o lembrete.',true);return false;}
+ const after={id:x.id,data:date.value,hora:time.value,lembrete:time.value?reminder:''};
+ const move=x.data!==after.data||String(x.hora||'')!==after.hora;
+ if(!move&&lembreteValor(x.lembrete)===after.lembrete){fecharModal();draft=null;return false;}
  let note='';
- if(!after.hora)after.lembrete='';
- else if(x.lembrete){const aj=ajustarLembrete(after.data,after.hora,x.lembrete);after.lembrete=aj.lembrete;note=aj.aviso;}
- if(!salvar('tarefas',after,{sc155_reschedule:after.hora?'reschedule-time':'reschedule-date'}))return false;
+ if(after.hora&&reminder){const aj=ajustarLembrete(after.data,after.hora,reminder);after.lembrete=aj.lembrete;note=aj.aviso;}
+ if(!salvar('tarefas',after,move?{sc155_reschedule:after.hora?'reschedule-time':'reschedule-date'}:null))return false;
  if(note)toast(note);
  draft=null;fecharModal();return true;
 }
-document.addEventListener('input',e=>{if(e.target.matches('#sc154-date,#sc154-time'))updateConflict(true);});
+document.addEventListener('input',e=>{if(e.target.matches('#sc154-date,#sc154-time,#sc171-move-reminder'))updateConflict(true);});
 function eventTools(){const date=$('f-data');if(!date||$('sc154-event-tools'))return;const bar=document.createElement('div');bar.id='sc154-event-tools';bar.innerHTML='<button type="button" class="btn" data-sc154-event>Reprogramar</button><div id="sc154-event-dates" hidden>'+shortcuts('data-event-date')+'</div>';date.parentNode.after(bar);}
 function init(){const old=window.abrirEvento;window.abrirEvento=function(x){const result=old.apply(this,arguments);if(obter('eventos',x).id)eventTools();return result;};}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-sc154-reschedule],[data-sc154-save],[data-sc154-cancel],[data-sc154-day],[data-sc154-choose],[data-sc154-event]');if(b){e.preventDefault();e.stopImmediatePropagation();if(b.hasAttribute('data-sc154-reschedule'))return open(b.dataset.id);if(b.hasAttribute('data-sc154-save'))return save();if(b.hasAttribute('data-sc154-cancel')){draft=null;return fecharModal();}if(b.hasAttribute('data-sc154-event')){$('sc154-event-dates').hidden=false;$('f-data').scrollIntoView({block:'center'});$('f-data').focus();return;}const date=$(b.hasAttribute('data-event-date')?'f-data':'sc154-date');if(!date)return;if(b.hasAttribute('data-sc154-day')){date.value=somaDias(hojeISO(),Number(b.dataset.sc154Day));date.dispatchEvent(new Event('input',{bubbles:true}));date.dispatchEvent(new Event('change',{bubbles:true}));}const custom=b.hasAttribute('data-sc154-choose'),event=b.hasAttribute('data-event-date');
