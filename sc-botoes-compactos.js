@@ -136,3 +136,52 @@ window.addEventListener('resize',()=>{if(opened&&previous)position(opened,previo
 document.addEventListener('visibilitychange',()=>{if(document.hidden)close(false);});
 window.SC182Buttons={createMenu,close,options,activeView};
 })();
+
+/* Studio 11.30 — sidebar responsiva; somente navegação já suportada. */
+(function(){
+'use strict';
+const items=[
+  {label:'Agenda',symbol:'◷',attr:'data-sc126-route',value:'agenda'},
+  {label:'Projetos',symbol:'▱',attr:'data-sc126-organize',value:'projetos'},
+  {label:'Finanças',symbol:'◈',attr:'data-sc126-organize',value:'financas'},
+  {label:'Ajustes',symbol:'⚙',attr:'data-sc126-extra',value:'ajustes'}
+];
+function make(tag,cls,text){
+  const e=document.createElement(tag);e.className=cls;
+  if(text!==undefined)e.textContent=text;
+  return e;
+}
+function decorate(){
+  const n=document.getElementById('nav-movel');
+  if(!n||n.querySelector('.sc183-sidebrand'))return;
+  const brand=make('div','sc183-sidebrand');
+  brand.setAttribute('aria-hidden','true');
+  const mark=make('span','sc183-sidemark','◈');
+  const title=make('span','sc183-side-title');
+  title.append(make('strong','', '2º Cérebro'),make('small','','Organizador pessoal'));
+  brand.append(mark,title);
+  const quick=make('div','sc183-sidelinks');
+  quick.append(make('span','sc183-caption','Acessos'));
+  for(const item of items){
+    const b=make('button','sc183-quick');
+    b.type='button';b.setAttribute(item.attr,item.value);
+    const ico=make('span','',item.symbol);
+    ico.setAttribute('aria-hidden','true');
+    b.append(ico,document.createTextNode(item.label));
+    quick.append(b);
+  }
+  n.prepend(brand);n.append(quick);
+}
+function init(){
+  decorate();
+  const nav=document.getElementById('nav-movel');
+  if(nav&&typeof MutationObserver!=='undefined'){
+    new MutationObserver(()=>{if(!nav.querySelector('.sc183-sidebrand'))decorate();})
+      .observe(nav,{childList:true});
+  }
+}
+if(document.readyState==='loading')
+  document.addEventListener('DOMContentLoaded',init,{once:true});
+else init();
+window.SC183Premium={decorate,version:'2026-11-21d'};
+})();
