@@ -9,7 +9,7 @@ const styles=[...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m=>m[
 const premium=fs.readFileSync('sc-botoes-compactos.css','utf8');
 const plugin=fs.readFileSync('sc-botoes-compactos.js','utf8');
 const fixture='<!doctype html><html lang="pt-BR" class="sc126 sc11-active sc100-active" data-sc-theme="minimal"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+
-  '.flex{display:flex}.min-h-screen{min-height:100vh}body{margin:0;min-width:0}main{width:100%;min-width:0}#test-content{height:140px;background:white;border:1px solid #dedeea;border-radius:18px;padding:20px}'+
+  '*,*::before,*::after{box-sizing:border-box}.flex{display:flex}.min-h-screen{min-height:100vh}body{margin:0;min-width:0}main{width:100%;min-width:0}#test-content{height:140px;background:white;border:1px solid #dedeea;border-radius:18px;padding:20px}'+
   styles+'</style><style>'+premium+'</style></head><body><div class="flex min-h-screen"><main><div id="topo"><div><input id="captura" placeholder="Converse ou peça algo"></div></div><div class="max-w-6xl"><section id="v-hoje" class="vista sc148-active"><section class="sc148-root"><div class="sc148-head"><h2>Hoje</h2></div><div id="test-content">Conteúdo do painel Hoje</div></section></section></div></main></div>'+
   '<nav id="nav-movel" class="fixed bottom-0 inset-x-0"><button class="nav-m" data-sc126-route="hoje" aria-current="page">Hoje</button><button class="nav-m" data-sc126-route="organizar" aria-current="false">Organizar</button><button class="nav-m" data-sc126-route="biblioteca" aria-current="false">Biblioteca</button></nav></body></html>';
 
@@ -27,7 +27,7 @@ const fixture='<!doctype html><html lang="pt-BR" class="sc126 sc11-active sc100-
             document.documentElement.classList.toggle('dark',['neural','executive'].includes(theme));
           },theme);
           await page.addScriptTag({content:plugin});
-          await page.waitForSelector('#sc183-sidebar');
+          await page.waitForSelector('#sc183-sidebar',{state:'attached'});
           const info=await page.evaluate(()=>{
             const rect=id=>{const r=document.getElementById(id).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
             const display=id=>getComputedStyle(document.getElementById(id)).display;
