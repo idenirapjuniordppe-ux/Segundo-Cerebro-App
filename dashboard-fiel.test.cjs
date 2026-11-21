@@ -11,7 +11,7 @@ function setup(){
   w.D={config:{nome:'Teste',sc147_account:JSON.stringify({initial:100000,date:'2026-11-01'})},tarefas:[
     {id:'t1',titulo:'Estudar recursos',data:'2026-11-21',hora:'11:00',prioridade:'Alta',status:'aberta',projeto:'p1'},
     {id:'t2',titulo:'Relatório concluído',data:'2026-11-21',status:'feita',projeto:'p1'},
-    {id:'t3',titulo:'Outra tarefa',data:'2026-11-21',status:'aberta'},
+    {id:'t3',titulo:'Outra tarefa',data:'2026-11-21',status:'aberta',top3:'2026-11-21'},
     {id:'t4',titulo:'Amanhã',data:'2026-11-22',status:'aberta'}],
     projetos:[{id:'p1',nome:'Projeto teste',status:'ativo'}],
     metas:[{id:'m1',titulo:'Estudar semanalmente',status:'ativa',progresso:65}],
@@ -81,7 +81,7 @@ test('Controles reais usam a delegação existente sem simularem ações',t=>{
 test('Filtros e navegação temporal funcionam e exibem resultados dos dados',t=>{
   const {dom,w}=setup();t.after(()=>dom.window.close());
   w.document.querySelector('#sc190-dashboard [data-sc190="filter"][data-value="priority"]').click();
-  assert.equal(w.document.querySelectorAll('#sc190-dashboard .sc190-task').length,1);
+  assert.equal(w.document.querySelectorAll('#sc190-dashboard .sc190-task').length,2,'Prioridade alta e top3 do dia');
   w.document.querySelector('#sc190-dashboard [data-sc190="next"]').click();
   assert.equal(w.SC190Dashboard.getDay(),'2026-11-22');
   assert.equal(w.SC190Dashboard.model().tasks.length,1);
