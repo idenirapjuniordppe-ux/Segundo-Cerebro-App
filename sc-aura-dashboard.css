@@ -374,3 +374,34 @@ html.sc190-premium.sc126 #sc190-dashboard .sc190-project small{
  html.sc190-premium.sc126 #sc190-dashboard .sc190-metric,
  html.sc190-premium.sc126 #sc190-dashboard .sc190-project{transition:none!important}
 }
+
+/* Refinamento de fidelidade: preencher a área útil como no mockup, sem coluna vazia. */
+@media(min-width:1100px){
+ html.sc190-premium.sc126 body>div.flex>main>div.max-w-6xl,
+ html.sc190-premium.sc126 main>div.max-w-6xl{
+   max-width:1540px!important;width:100%!important;
+   margin-left:0!important;margin-right:0!important;
+   padding-left:26px!important;padding-right:22px!important;
+ }
+ html.sc190-premium.sc126 #v-hoje{max-width:none!important;width:100%!important}
+ html.sc190-premium.sc126 #sc190-dashboard{max-width:none!important;width:100%!important}
+ html.sc190-premium.sc126 #topo>div:not(#sc126-brand){
+   max-width:1540px!important;width:100%!important;
+   margin-left:0!important;margin-right:0!important;
+   padding-left:26px!important;padding-right:22px!important;
+   justify-content:flex-end!important;
+ }
+ html.sc190-premium.sc126 #topo>div:not(#sc126-brand)>div.flex-1{
+   flex:0 1 510px!important;max-width:510px!important;
+   margin-left:auto!important;min-width:0!important;
+ }
+}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-metric-money .sc190-metric-value{
+ font-size:clamp(11px,.98vw,14px)!important;
+ letter-spacing:-.04em!important;text-overflow:clip!important;
+}
+@media(max-width:700px){
+ html.sc190-premium.sc126 #sc190-dashboard .sc190-metric-money .sc190-metric-value{
+   font-size:15px!important;
+ }
+}
