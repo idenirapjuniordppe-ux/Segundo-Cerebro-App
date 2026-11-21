@@ -13260,14 +13260,14 @@ function archiveNote(id,restore){const n=rows('notas').find(n=>String(n.id)===St
 function renderOrganize(){const host=$('v-organizar');if(!host)return;const counts={tarefas:rows('tarefas').filter(x=>!done(x)).length,projetos:rows('projetos').filter(x=>!done(x)).length,metas:rows('metas').filter(x=>!done(x)).length,habitos:rows('habitos').filter(x=>x.ativo!=='Não').length};
  let html='<h1>Organizar</h1><div class="sc182-tabstrip">'+tools([['resumo','Tudo'],['tarefas','Tarefas'],['projetos','Projetos'],['metas','Metas'],['habitos','Hábitos'],['financas','Finanças']],organize,'organize')+'</div>';
  if(organize==='resumo'){
- html+=list([['tarefas','Tarefas'],['projetos','Projetos'],['metas','Metas'],['habitos','Hábitos']].map(([k,t])=>'<div class="sc126-row"><button type="button" class="sc126-row-main" data-sc126-organize="'+k+'"><strong>'+t+'</strong><small>'+counts[k]+' '+(k==='habitos'?'ativos':'em aberto')+'</small></button><span aria-hidden="true">›</span></div>').join(''),'');
+ html+='<div class="aura-area-grid">'+[['tarefas','Tarefas','✓'],['projetos','Projetos','◇'],['metas','Metas','◎'],['habitos','Hábitos','↻']].map(([key,label,icon])=>'<button type="button" class="aura-area-card" data-sc126-organize="'+key+'"><span class="aura-area-icon" aria-hidden="true">'+icon+'</span><strong>'+label+'</strong><small>'+counts[key]+' '+(key==='habitos'?'ativos':'em aberto')+'</small></button>').join('')+'</div>';
  const projects=rows('projetos').filter(x=>!done(x)).slice(0,5);if(projects.length)html+='<h2>Em andamento</h2>'+list(projects.map(x=>{const pr=SC167.project(x.id);return row('projetos',x,pr.done+' de '+pr.count+' tarefas concluídas')}).join(''),'');
  }else if(organize==='financas'){html+=window.SC146?SC146.html():button('Abrir finanças','data-sc126-tool="financas"');
  }else {const k=organize;
  let all=rows(k).slice(),pending=all.filter(x=>k==='habitos'?x.ativo!=='Não':!done(x));
  const title={'tarefas':'Tarefas pendentes','projetos':'Projetos ativos','metas':'Metas em andamento','habitos':'Hábitos ativos'}[k];
  const create={'tarefas':'Nova tarefa','projetos':'Novo projeto','metas':'Nova meta','habitos':'Novo hábito'}[k];
- html+='<div class="sc182-section-heading"><h2>'+title+'</h2>'+button('＋','data-sc126-new="'+k+'" aria-label="'+create+'" title="'+create+'"','sc182-inline-create')+'</div>'+(k==='projetos'?(pending.map(projectCard).join('')||'<p class="sc126-empty">Nenhum projeto ativo.</p>'):list(pending.map(x=>row(k,x,meta(x),k==='tarefas')).join(''),'Nenhum registro por aqui.'));
+ html+='<div class="sc182-section-heading"><h2>'+title+'</h2>'+button('＋','data-sc126-new="'+k+'" aria-label="'+create+'" title="'+create+'"','sc182-inline-create')+'</div>'+(k==='projetos'?((pending.length?'<div class="aura-project-grid">'+pending.map(projectCard).join('')+'</div>':'<p class="sc126-empty">Nenhum projeto ativo.</p>')):list(pending.map(x=>row(k,x,meta(x),k==='tarefas')).join(''),'Nenhum registro por aqui.'));
  const completed=all.filter(x=>!pending.includes(x));if(completed.length)html+='<details class="sc126-details"><summary>'+completed.length+' concluído(s) ou inativo(s)</summary>'+list(completed.map(x=>row(k,x,meta(x),k==='tarefas')).join(''),'')+'</details>';
  if(k==='tarefas')html+='<details class="sc182-secondary-tools"><summary>Ferramentas e filtros</summary><div class="sc182-secondary-content">'+button('Horários livres','data-sc144="slots"')+button('Assistente','data-sc145="menu"')+button('Filtros e seleção em lote','data-sc126-route="tarefas"')+'</div></details>';
  if(k==='metas'||k==='habitos')html+='<p class="sc126-caption">'+button('Histórico e constância','data-sc126-route="metas"')+'</p>';
@@ -13286,7 +13286,7 @@ function renderLibrary(){const host=$('v-biblioteca');if(!host)return;
  current.sort((a,b)=>filter==='recentes'?recent.indexOf(String(a.id))-recent.indexOf(String(b.id)):(api?api.stamp(b)-api.stamp(a):0));
  const noteRow=n=>{const children=rows('notas').filter(y=>String(y.pagina_pai||'')===String(n.id)).length;const projects=rows('projetos').filter(p=>related(p).notas.some(x=>String(x.id)===String(n.id)));const snippet=api?api.snippet(n,libraryQuery):esc(resumoNota(n.conteudo).slice(0,110));return '<div class="sc129-note"><button type="button" class="sc126-row-main" data-sc138-open="'+esc(n.id)+'" style="padding:12px"><strong>'+esc(name(n))+'</strong>'+(snippet?'<small class="sc138-snippet">'+snippet+'</small>':'')+'<small>'+esc([children?children+' subpágina(s)':'',projects.map(name).join(' · '),n.last_modified?'Editada: '+n.last_modified:''].filter(Boolean).join(' · '))+'</small></button>'+button(n.fixada==='Sim'?'★':'☆','data-sc138-star="'+esc(n.id)+'" aria-label="'+(n.fixada==='Sim'?'Remover dos favoritos: ':'Favoritar: ')+esc(name(n))+'" aria-pressed="'+(n.fixada==='Sim')+'"')+button('⋯','data-sc129-note-menu="'+esc(n.id)+'" aria-label="Opções da nota '+esc(name(n))+'"')+'</div>'};
  const pinned=filter==='todas'&&!q?current.filter(n=>n.fixada==='Sim'):[],rest=pinned.length?current.filter(n=>n.fixada!=='Sim'):current;
- if(pinned.length)html+='<h2 class="sc138-section">Fixadas</h2>'+list(pinned.map(noteRow).join(''),'');
+ if(pinned.length)html+='<h2 class="sc138-section">Fixadas</h2><div class="aura-pinned-notes">'+pinned.map(noteRow).join('')+'</div>';
  const noteList=list(rest.map(noteRow).join(''),'Nenhuma nota encontrada.');
  if(filter==='todas'){
    html+='<details id="sc138-all-notes" class="sc126-details"'+(allNotesOpen?' open':'')+'><summary class="sc138-section">Todas as notas</summary>'+noteList+'</details>';
@@ -15354,7 +15354,7 @@ document.addEventListener('click',function(e){
 <script src="./sc-drive-projetos.js?v=2026-11-20d"></script>
 <link rel="stylesheet" href="./sc-botoes-compactos.css?v=2026-11-21c">
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
-<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21h">
-<script src="./sc-aura-dashboard.js?v=2026-11-21h"></script>
+<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21i">
+<script src="./sc-aura-dashboard.js?v=2026-11-21i"></script>
 </body></html>
 
