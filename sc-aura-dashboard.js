@@ -96,7 +96,7 @@ function header(m){
   const first=m.open.find(priority)||m.open[0];
   return '<div class="sc190-hero"><div class="sc190-hero-copy"><span class="sc190-eyebrow">SEU ESPAÇO DE ORGANIZAÇÃO</span>'+
     '<h1>'+greeting+(who?', '+esc(who):'')+'! <span class="sc190-wave" aria-hidden="true">✦</span></h1>'+
-    '<p>Planeje, execute e acompanhe o que importa.</p></div>'+
+    '<p>Seu 2º Cérebro está pronto para te ajudar.</p></div>'+
     '<span class="sc190-hero-mark" aria-hidden="true">✧</span></div>'+
     '<div class="sc190-datebar">'+button('‹','prev','aria-label="Dia anterior"','sc190-dayarrow')+
     '<span class="sc190-date-label"><span aria-hidden="true">▦</span> '+esc(asDate(m.d).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))+'</span>'+
