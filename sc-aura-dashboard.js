@@ -24,14 +24,15 @@ function nav(to){if(typeof irPara==='function')irPara(to);}
 function openDay(mode){
   if(typeof agDia==='string')agDia=day;
   nav('agenda');
-  const run=()=>{
-    const root=$('v-agenda');
-    const tab=root?.querySelector('[data-sc148="view"][data-view="'+mode+'"]');
-    if(tab)tab.click();
-    const input=root?.querySelector('[data-sc148-date]');
-    if(input&&input.value!==day){input.value=day;input.dispatchEvent(new Event('change',{bubbles:true}));}
-  };
-  run();
+  const root=$('v-agenda');
+  const input=root?.querySelector('[data-sc148-date]');
+  // A alteração da data força o planner a voltar ao modo Dia.
+  // Selecione Semana/Mês SOMENTE depois da data ter sido aplicada.
+  if(input&&input.value!==day){
+    input.value=day;
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  root?.querySelector('[data-sc148="view"][data-view="'+mode+'"]')?.click();
 }
 function accountBalance(){
   const c=data().config||{};
@@ -60,6 +61,10 @@ function actualAgenda(d){
     list=rows('eventos').filter(x=>x.data===d).map(x=>({...x,tipo:'evento',inicio:x.inicio||x.hora||''}));
     list.push(...rows('tarefas').filter(x=>x.data===d&&x.hora&&lifecycle(x)==='open').map(x=>({...x,tipo:'tarefa',inicio:x.hora})));
   }
+  // A agenda do dia também mostra tarefas concluídas com horário,
+  // porque a função legada itensDoDia() exclui tarefas finalizadas.
+  list.push(...rows('tarefas').filter(t=>t.data===d&&t.hora&&lifecycle(t)==='done')
+    .map(t=>({...t,tipo:'tarefa',inicio:t.hora,feito:true})));
   const seen=new Set();
   return list.filter(x=>x&&lifecycle(x)!=='cancel'&&lifecycle(x)!=='inactive').filter(x=>{
     const id=[x.tipo||'',x.id||'',x.titulo||'',x.inicio||''].join('|');
@@ -210,6 +215,15 @@ function bind(){
   if(initialized)return;initialized=true;
   const old=window.renderVista;
   if(typeof old==='function')window.renderVista=function(){const out=old.apply(this,arguments);render();return out;};
+  const oldAll=window.renderTudo;
+  if(typeof oldAll==='function')window.renderTudo=function(){const out=oldAll.apply(this,arguments);render();return out;};
+  // A interface legada pode concluir tarefas/hábitos sem chamar renderVista().
+  // Reconciliar a leitura DEPOIS da ação nativa, sem qualquer gravação adicional.
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#sc190-dashboard [data-sc126-check],#sc190-dashboard [data-sc126-habit]')){
+      Promise.resolve().then(render);
+    }
+  });
   document.addEventListener('click',function(e){
     const b=e.target.closest('[data-sc190]');if(!b)return;
     // Só gerencia controles próprios; criação e edição usam handlers originais.
