@@ -21,7 +21,7 @@ function fixture(){
 test('Mantém versões e integração sem migração nem mudanças de API',()=>{
   assert.match(html,/var VERSAO_TELA = '2026-11-20d';/);
   assert.match(worker,/const VERSION='2026-11-20d';/);
-  assert.match(worker,/premium-dashboard-fiel-20261121j/);
+  assert.match(worker,/premium-dashboard-fiel-20261121k/);
   assert.match(html,/sc-drive-projetos\.js\?v=2026-11-20d/);
   assert.match(css,/Studio 11\.30/);
   assert.match(js,/version:'2026-11-21e'/);

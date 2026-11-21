@@ -742,3 +742,65 @@ html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-progre
 }
 
 html.sc190-premium.sc126 #sc190-dashboard > .sc190-metrics {margin-top:16px}
+
+/* Organizar e Biblioteca usam o acabamento Coral nos temas claros. */
+html.sc126.sc11-active.sc100-active[data-sc-theme="glass"]:has(:is(#v-organizar,#v-biblioteca):not(.hidden)) {
+ --sc128-paper:#fffaf6!important;
+ --sc128-top:#fdf9f5!important;
+ --sc128-base:#faf5ef!important;
+ --sc128-ink:#28231f!important;
+ --sc128-muted:#67584e!important;
+ --sc128-border:#e7d6c9!important;
+ --sc11-accent:#a33d22!important;
+ --sc11-soft:#fce4d4!important;
+ --sc141-solid:#fffaf6!important;
+ --sc135-button:#a33d22!important;
+ --sc183-accent:#a33d22;
+ --sc183-soft:#fce4d4;
+}
+html.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]):has(:is(#v-organizar,#v-biblioteca):not(.hidden)) body::before {
+ background:#faf5ef!important;
+ opacity:1;
+}
+html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) :is(#v-organizar > h1,#v-biblioteca .sc182-library-header) {
+ background:linear-gradient(110deg,#fce4d4,#fff6ed)!important;
+ box-shadow:none!important;
+ border-radius:19px!important;
+}
+html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools button[aria-pressed="true"] {
+ background:#a33d22!important;
+ color:#fff!important;
+}
+html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) :is(#v-organizar,#v-biblioteca) :is(.sc182-inline-create,.sc182-utilities > summary) {
+ background:#fce4d4!important;
+ color:#a33d22!important;
+ border-color:#e7d6c9!important;
+}
+html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) #v-biblioteca .sc129-note > button:not(.sc126-row-main) {
+ flex:0 0 44px;
+ min-width:44px;
+ min-height:44px;
+ padding:4px!important;
+ border:0!important;
+ background:transparent!important;
+ color:#a33d22!important;
+}
+html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) #v-biblioteca .sc129-note > [data-sc138-star][aria-pressed="true"] {
+ background:#fce4d4!important;
+ border-radius:12px;
+}
+@media(max-width:600px) {
+ html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  width:100%;
+ }
+ html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) #v-biblioteca .sc182-tabstrip .sc126-tools {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"]) :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools button {
+  white-space:normal;
+  min-width:0!important;
+  padding-inline:3px!important;
+ }
+}
