@@ -98,15 +98,18 @@ function model(){
   return {d,tasks,open,done,projects,goals,habits,agenda,balance:accountBalance()};
 }
 function button(txt,action,extra='',cls=''){return '<button type="button" class="'+esc(cls)+'" data-sc190="'+esc(action)+'" '+extra+'>'+txt+'</button>';}
-function header(m){
+function hero(m){
   const now=new Date();
   const greeting=now.getHours()<12?'Bom dia':now.getHours()<18?'Boa tarde':'Boa noite';
   const who=String(data().config?.nome||'').trim().split(/\s+/)[0];
-  const first=m.open.find(priority)||m.open[0];
   return '<div class="sc190-hero"><div class="sc190-hero-copy">'+
-    '<h1>'+greeting+(who?', '+esc(who):'')+'! <span class="sc190-wave" aria-hidden="true">✦</span></h1>'+
-    '</div></div>'+
-    '<div class="sc190-datebar">'+button('‹','prev','aria-label="Dia anterior"','sc190-dayarrow')+
+    '<time datetime="'+esc(m.d)+'">'+esc(asDate(m.d).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}))+'</time>'+
+    '<h1>'+greeting+(who?', '+esc(who):'')+'!</h1>'+
+    button('+ Nova tarefa','new-task','','sc190-hero-create')+'</div></div>';
+}
+function header(m){
+  const first=m.open.find(priority)||m.open[0];
+  return '<div class="sc190-datebar">'+button('‹','prev','aria-label="Dia anterior"','sc190-dayarrow')+
     '<span class="sc190-date-label"><span aria-hidden="true">▦</span> '+esc(asDate(m.d).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))+'</span>'+
     button('›','next','aria-label="Próximo dia"','sc190-dayarrow')+
     '<span class="sc190-focus">'+(first?'<span aria-hidden="true">◎</span> Foco do dia: '+esc(name(first)):'Dia livre para planejar')+'</span>'+
@@ -183,10 +186,9 @@ function projectsPanel(m){
     }).join('')+'</div>':'<div class="sc190-empty">Nenhum projeto em andamento.</div>')+'</section>';
 }
 function markup(m){
-  // A referência posiciona saudação, data e indicadores à esquerda,
-  // enquanto Agenda/Hábitos/Metas iniciam no alto da coluna direita.
-  return '<div class="sc190-layout"><div class="sc190-left">'+header(m)+metrics(m)+taskPanel(m)+projectsPanel(m)+'</div>'+
-    '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>';
+  return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+
+    '<div class="sc190-layout"><div class="sc190-left">'+taskPanel(m)+projectsPanel(m)+'</div>'+
+    '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>'+metrics(m);
 }
 function decorateSidebar(){
   const aside=$('sc183-sidebar');if(!aside)return;
