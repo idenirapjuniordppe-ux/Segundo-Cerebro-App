@@ -1,8 +1,9 @@
-name: Validar botões compactos
+name: Validar interface 2º Cérebro
 
 on:
   push:
     branches:
+      - main
       - botoes-compactos-20261121
   pull_request:
     branches:
@@ -14,7 +15,7 @@ permissions:
 
 jobs:
   testar:
-    name: Regressão e navegação
+    name: Regressão, navegação e Premium Light
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
