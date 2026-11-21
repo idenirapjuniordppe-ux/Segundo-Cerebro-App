@@ -16,7 +16,7 @@ permissions:
 jobs:
   testar:
     name: Regressão, navegação e Premium Light
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
       - name: Obter arquivos
@@ -26,6 +26,17 @@ jobs:
         with:
           node-version: '22'
       - name: Instalar ferramentas de teste
-        run: npm install --no-save --package-lock=false jsdom@26
+        run: npm install --no-save --package-lock=false jsdom@26 playwright@1.56.1
       - name: Executar testes existentes e dos novos botões
         run: node --test *.test.cjs
+      - name: Instalar navegador Chromium para teste visual
+        run: npx playwright install --with-deps chromium
+      - name: Validar 5 temas e 7 larguras no Chromium real
+        run: node premium-layout-browser.cjs
+      - name: Guardar capturas reais de teste
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: premium-layout-corrigido
+          path: artefacts/premium-corrigido-*.png
+          if-no-files-found: ignore
