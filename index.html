@@ -2159,9 +2159,9 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-20c-sc1137151"></script>
+<script src="./pwa-transport.js?v=2026-11-20d-sc1137151"></script>
 <script>
-var VERSAO_TELA = '2026-11-20c';
+var VERSAO_TELA = '2026-11-20d';
 function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a','2026-11-18b','2026-11-19a','2026-11-19b','2026-11-20a','2026-11-20b','2026-11-20c'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
 var VERSAO_STUDIO = '11.37.15.1'; // validação atômica das notas com servidor compatível
 var ESCALAS = [['auto','Automático'],['1','Normal'],['1.2','Grande'],['1.4','Muito grande'],['1.6','Enorme']];
@@ -12745,7 +12745,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script src="./pwa-install.js?v=2026-11-20c-sc1137151"></script>
+<script src="./pwa-install.js?v=2026-11-20d-sc1137151"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13242,15 +13242,17 @@ function related(project){
 }
 function projectQueue(id){return ordenarTarefas(rows('tarefas').filter(t=>String(t.projeto||'')===String(id)&&sc155Lifecycle(t)==='open'));}
 function projectCard(p){const rel=related(p),{count:n,done:completed,percent}=SC167.project(p.id),pending=projectQueue(p.id);
- return '<article class="sc129-project"><div class="sc129-project-head"><button class="sc126-row-main" '+openAttr('projetos',p.id)+'><strong>'+esc(name(p))+'</strong></button>'+button('⋯','data-sc129-project-menu="'+esc(p.id)+'" aria-label="Opções do projeto '+esc(name(p))+'"')+'</div><div class="sc129-progress" role="progressbar" aria-label="Tarefas concluídas" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+percent+'%"></span></div><p class="sc126-caption">'+completed+' de '+n+' tarefas concluídas</p><div class="sc129-relations">'+[['tarefas','Tarefas'],['notas','Notas'],['eventos','Agenda'],['metas','Metas'],...(window.SC160?[['mural','Mural']]:[])].map(([k,title])=>button(title+(k==='mural'?'':' '+rel[k].length),'data-sc129-project="'+esc(p.id)+'" data-pane="'+k+'"')).join('')+'</div>'+(pending.length?row('tarefas',pending[0],meta(pending[0]),true,true):'<p class="sc126-caption">Sem tarefas pendentes.</p>')+(completed.length?'<details class="sc126-details"><summary>Concluídas · '+completed.length+'</summary>'+completed.map(t=>row('tarefas',t,meta(t),true)).join('')+'</details>':'')+'</article>';
+ return '<article class="sc129-project"><div class="sc129-project-head"><button class="sc126-row-main" '+openAttr('projetos',p.id)+'><strong>'+esc(name(p))+'</strong></button>'+button('⋯','data-sc129-project-menu="'+esc(p.id)+'" aria-label="Opções do projeto '+esc(name(p))+'"')+'</div><div class="sc129-progress" role="progressbar" aria-label="Tarefas concluídas" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+percent+'%"></span></div><p class="sc126-caption">'+completed+' de '+n+' tarefas concluídas</p><div class="sc129-relations">'+[['tarefas','Tarefas'],['notas','Notas'],['eventos','Agenda'],['metas','Metas'],...(window.SC160?[['mural','Mural']]:[]),['arquivos','Arquivos']].map(([k,title])=>button(title+((k==='mural'||k==='arquivos')?'':' '+rel[k].length),'data-sc129-project="'+esc(p.id)+'" data-pane="'+k+'"')).join('')+'</div>'+(pending.length?row('tarefas',pending[0],meta(pending[0]),true,true):'<p class="sc126-caption">Sem tarefas pendentes.</p>')+(completed.length?'<details class="sc126-details"><summary>Concluídas · '+completed.length+'</summary>'+completed.map(t=>row('tarefas',t,meta(t),true)).join('')+'</details>':'')+'</article>';
 }
-function projectDetail(id,pane){const p=rows('projetos').find(p=>String(p.id)===String(id));if(!p){toast('Projeto não encontrado.',true);return}const rel=related(p);pane=Object.hasOwn(rel,pane)||pane==='mural'&&window.SC160?pane:'tarefas';
+function projectDetail(id,pane){const p=rows('projetos').find(p=>String(p.id)===String(id));if(!p){toast('Projeto não encontrado.',true);return}const rel=related(p);pane=(Object.hasOwn(rel,pane)||(pane==='mural'&&window.SC160)||pane==='arquivos')?pane:'tarefas';
  const items=(rel[pane]||[]).slice().sort((a,b)=>Number(done(a))-Number(done(b)));let content='';
  if(pane==='tarefas'){const pending=projectQueue(id),finished=items.filter(t=>sc155Lifecycle(t)==='done');content=list(pending.map((t,i)=>row('tarefas',t,meta(t),true,i===0)).join(''),'Sem tarefas pendentes.')+(finished.length?'<details class="sc126-details"><summary>Concluídas · '+finished.length+'</summary>'+list(finished.map(t=>row('tarefas',t,meta(t),true)).join(''),'')+'</details>':'')+button('Nova tarefa vinculada','data-sc126-linked="projetos" data-id="'+esc(id)+'"');}
  else if(pane==='mural'){content=SC160.board(id);}
+ else if(pane==='arquivos'){content=window.SCDrive?SCDrive.shell(id):'<p>Arquivos não disponíveis nesta versão.</p>';}
  else {content=list(items.map(x=>row(pane,x,meta(x))).join(''),'Nenhum registro vinculado.');if(pane==='notas')content+=button('Nova nota vinculada','data-sc129-new-note="'+esc(id)+'"');if(pane==='eventos')content+=button('Novo compromisso vinculado','data-sc129-new-event="'+esc(id)+'"');if(pane==='metas')content+=button('Nova meta vinculada','data-sc129-new-goal="'+esc(id)+'"');}
- const tabs='<div class="sc129-relations">'+[['tarefas','Tarefas'],['notas','Notas'],['eventos','Agenda'],['metas','Metas'],...(window.SC160?[['mural','Mural']]:[])].map(([k,t])=>button(t+(k==='mural'?'':' '+rel[k].length),'data-sc129-project="'+esc(id)+'" data-pane="'+k+'" aria-pressed="'+(pane===k)+'"')).join('')+'</div>';
+ const tabs='<div class="sc129-relations">'+[['tarefas','Tarefas'],['notas','Notas'],['eventos','Agenda'],['metas','Metas'],...(window.SC160?[['mural','Mural']]:[]),['arquivos','Arquivos']].map(([k,t])=>button(t+((k==='mural'||k==='arquivos')?'':' '+rel[k].length),'data-sc129-project="'+esc(id)+'" data-pane="'+k+'" aria-pressed="'+(pane===k)+'"')).join('')+'</div>';
  abrirModal(name(p),'<div class="sc126-page">'+SC167.projectPanel(id)+tabs+content+'<div class="sc126-tools">'+button('Editar projeto','data-sc126-edit="projetos" data-id="'+esc(id)+'"')+'</div></div>','');const body=$('modal-corpo');body.dataset.sc126Detail='projetos';body.dataset.sc126Id=id;
+ if(pane==='arquivos'&&window.SCDrive)SCDrive.mount(id);
 }
 function archived(n){return /(?:^|[,;\s])#?arquivado(?:$|[,;\s])/i.test(String(n.etiquetas||''))}
 function archiveNote(id,restore){const n=rows('notas').find(n=>String(n.id)===String(id));if(!n)return;let tags=String(n.etiquetas||'').replace(/(^|[,;\s])#?arquivado(?=$|[,;\s])/gi,'$1').replace(/^[,;\s]+|[,;\s]+$/g,'');if(!restore)tags+=(tags?', ':'')+'#arquivado';salvar('notas',{id:n.id,etiquetas:tags});fecharModal();refresh();}
@@ -15348,5 +15350,6 @@ document.addEventListener('click',function(e){
   efeitoLocal(cmd);renderTudo();drenarFila();abrirHabito(hb.id);toast('Prática recuperada no histórico.');
 });
 </script>
+<script src="./sc-drive-projetos.js?v=2026-11-20d"></script>
 </body></html>
 
