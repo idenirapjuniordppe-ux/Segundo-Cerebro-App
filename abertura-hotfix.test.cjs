@@ -31,8 +31,8 @@ test('fresh PWA does not request records or show a data-loading error before con
 test('startup accepts the supported server without scheduling title, area or reminder rewrites',async t=>{
  const {w,reads,writes,delays,ready}=app(t);await ready;
  assert.equal(reads.length,1);
- reads[0].ok({versaoServidor:'2026-11-17g',usuario:'fixture@example.test',config:{},notas:[],tarefas:[{id:'id1',titulo:'Comprar café',status:'aberta'}],eventos:[],habitos:[],registros:[]});
- assert.equal(w.sc123VersoesCompativeis(w.VERSAO_TELA,'2026-11-17g'),true);
+ reads[0].ok({versaoServidor:'2026-11-20d',usuario:'fixture@example.test',config:{},notas:[],tarefas:[{id:'id1',titulo:'Comprar café',status:'aberta'}],eventos:[],habitos:[],registros:[]});
+ assert.equal(w.sc123VersoesCompativeis(w.VERSAO_TELA,'2026-11-20d'),true);
  assert.equal(w.sc123VersoesCompativeis(w.VERSAO_TELA,'unexpected'),false);
  assert.equal(delays.includes(6000),false);
  assert.equal(writes.length,0);
