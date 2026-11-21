@@ -39,11 +39,11 @@ function setup(){
   return {dom,w};
 }
 test('HTML inclui arquivos de estrutura real e service worker os instala offline',()=>{
-  assert.match(html,/sc-aura-dashboard\.css\?v=2026-11-21f/);
-  assert.match(html,/sc-aura-dashboard\.js\?v=2026-11-21f/);
-  assert.match(sw,/premium-dashboard-fiel-20261121f/);
-  assert.match(sw,/sc-aura-dashboard\.css\?v=2026-11-21f/);
-  assert.match(sw,/sc-aura-dashboard\.js\?v=2026-11-21f/);
+  assert.match(html,/sc-aura-dashboard\.css\?v=2026-11-21g/);
+  assert.match(html,/sc-aura-dashboard\.js\?v=2026-11-21g/);
+  assert.match(sw,/premium-dashboard-fiel-20261121g/);
+  assert.match(sw,/sc-aura-dashboard\.css\?v=2026-11-21g/);
+  assert.match(sw,/sc-aura-dashboard\.js\?v=2026-11-21g/);
   assert.match(sw,/const VERSION='2026-11-20d';/);
 });
 test('Código e CSS são legíveis e não alteram dados automaticamente',()=>{
@@ -151,4 +151,25 @@ test('Agenda preserva tarefas concluídas com horários',t=>{
   const m=w.SC190Dashboard.model();
   // itenDoDia omite a tarefa concluída; o painel deve apresentá-la mesmo assim.
   assert(m.agenda.some(x=>x.id==='t2'&&x.feito===true));
+});
+
+test('A agenda usa o estado dos registros originais e não modifica a lista recebida',t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  const list=w.itensDoDia('2026-11-21');
+  w.itensDoDia=()=>list;
+  w.D.tarefas[0].status='cancelada';
+  w.D.tarefas[1].hora='09:00';
+  w.sc155Lifecycle=x=>x.status==='feita'?'done':x.status==='cancelada'?'cancel':'open';
+  const agenda=w.SC190Dashboard.model().agenda;
+  assert.deepEqual(Array.from(agenda,x=>x.id),['t2','e1']);
+  assert.equal(list.length,2);
+});
+test('Selecionar um filtro mantém o foco no controle atualizado',t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  const selector='#sc190-dashboard [data-sc190="filter"][data-value="priority"]';
+  const button=w.document.querySelector(selector);
+  button.focus();
+  button.click();
+  assert(w.document.activeElement.matches(selector));
+  assert.equal(w.document.activeElement.getAttribute('aria-pressed'),'true');
 });

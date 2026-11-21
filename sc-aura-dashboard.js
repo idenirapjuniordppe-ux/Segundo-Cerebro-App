@@ -60,16 +60,26 @@ function actualAgenda(d){
   if(!Array.isArray(list)||!list.length){
     list=rows('eventos').filter(x=>x.data===d).map(x=>({...x,tipo:'evento',inicio:x.inicio||x.hora||''}));
     list.push(...rows('tarefas').filter(x=>x.data===d&&x.hora&&lifecycle(x)==='open').map(x=>({...x,tipo:'tarefa',inicio:x.hora})));
+  }else{
+    list = list.slice();
   }
   // A agenda do dia também mostra tarefas concluídas com horário,
   // porque a função legada itensDoDia() exclui tarefas finalizadas.
   list.push(...rows('tarefas').filter(t=>t.data===d&&t.hora&&lifecycle(t)==='done')
     .map(t=>({...t,tipo:'tarefa',inicio:t.hora,feito:true})));
+  const originals = {
+    tarefa: new Map(rows('tarefas').map(t=>[String(t.id),t])),
+    evento: new Map(rows('eventos').map(e=>[String(e.id),e]))
+  };
   const seen=new Set();
-  return list.filter(x=>x&&lifecycle(x)!=='cancel'&&lifecycle(x)!=='inactive').filter(x=>{
-    const id=[x.tipo||'',x.id||'',x.titulo||'',x.inicio||''].join('|');
+  return list.filter(x=>{
+    if(!x)return false;
+    const status=lifecycle(originals[x.tipo]?.get(String(x.id))||x);
+    return status!=='cancel'&&status!=='inactive';
+  }).filter(x=>{
+    const id=[x.tipo||'',x.id||'',x.titulo||'',hour(x.inicio)].join('|');
     if(seen.has(id))return false;seen.add(id);return true;
-  }).sort((a,b)=>String(a.inicio||'99:99').localeCompare(String(b.inicio||'99:99')));
+  }).map(x=>lifecycle(originals[x.tipo]?.get(String(x.id))||x)==='done'?{...x,feito:true}:x).sort((a,b)=>String(a.inicio||'99:99').localeCompare(String(b.inicio||'99:99')));
 }
 function priority(t){
   if(String(t.top3||'')===String(day||currentDay()))return true;
@@ -92,12 +102,10 @@ function header(m){
   const now=new Date();
   const greeting=now.getHours()<12?'Bom dia':now.getHours()<18?'Boa tarde':'Boa noite';
   const who=String(data().config?.nome||'').trim().split(/\s+/)[0];
-  const full=m.d===currentDay()?'Hoje':asDate(m.d).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   const first=m.open.find(priority)||m.open[0];
-  return '<div class="sc190-hero"><div class="sc190-hero-copy"><span class="sc190-eyebrow">SEU ESPAÇO DE ORGANIZAÇÃO</span>'+
+  return '<div class="sc190-hero"><div class="sc190-hero-copy">'+
     '<h1>'+greeting+(who?', '+esc(who):'')+'! <span class="sc190-wave" aria-hidden="true">✦</span></h1>'+
-    '<p>Seu 2º Cérebro está pronto para te ajudar.</p></div>'+
-    '<span class="sc190-hero-mark" aria-hidden="true">✧</span></div>'+
+    '</div></div>'+
     '<div class="sc190-datebar">'+button('‹','prev','aria-label="Dia anterior"','sc190-dayarrow')+
     '<span class="sc190-date-label"><span aria-hidden="true">▦</span> '+esc(asDate(m.d).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))+'</span>'+
     button('›','next','aria-label="Próximo dia"','sc190-dayarrow')+
@@ -140,7 +148,7 @@ function taskPanel(m){
 function agendaPanel(m){
   const list=m.agenda.filter(x=>x.inicio).slice(0,5);
   return '<section class="sc190-card sc190-agenda"><div class="sc190-cardhead"><h2><span class="sc190-heading-icon">▦</span> Agenda do dia</h2>'+button('Ver dia ›','calendar')+'</div>'+
-    (list.length?'<div class="sc190-timeline">'+list.map((e,i)=>'<div class="sc190-event">'+
+    (list.length?'<div class="sc190-timeline">'+list.map(e=>'<div class="sc190-event'+((e.feito||lifecycle(e)==='done')?' sc190-event-done':'')+'">'+
       '<span class="sc190-eventtime">'+esc(hour(e.inicio)||'—')+'</span><span class="sc190-dot" aria-hidden="true"></span>'+
       '<button type="button" class="sc190-eventtitle" data-sc190="event" data-type="'+esc(e.tipo||'evento')+'" data-id="'+esc(e.id||'')+'">'+esc(name(e))+'</button>'+
       '</div>').join('')+'</div>':'<div class="sc190-empty">Sem compromissos com horário para este dia.</div>')+'</section>';
@@ -190,7 +198,7 @@ function decorateSidebar(){
     access.innerHTML='<span class="sc183-caption">Planejamento e áreas</span>'+
       '<button type="button" class="sc183-quick" data-sc190="week"><span aria-hidden="true">▦</span> Semana</button>'+
       '<button type="button" class="sc183-quick" data-sc190="month"><span aria-hidden="true">▣</span> Mês</button>'+
-      '<button type="button" class="sc183-quick" data-sc126-route="biblioteca"><span aria-hidden="true">▤</span> Notas</button>'+
+      '<button type="button" class="sc183-quick" data-sc126-library="notas"><span aria-hidden="true">▤</span> Notas</button>'+
       '<button type="button" class="sc183-quick" data-sc126-organize="projetos"><span aria-hidden="true">▱</span> Projetos</button>'+
       '<button type="button" class="sc183-quick" data-sc126-organize="metas"><span aria-hidden="true">◎</span> Metas</button>'+
       '<button type="button" class="sc183-quick" data-sc126-organize="habitos"><span aria-hidden="true">♧</span> Hábitos</button>'+
@@ -208,7 +216,15 @@ function render(){
     if(!day)day=currentDay();
     let node=$(key);
     if(!node){node=document.createElement('section');node.id=key;node.className='sc190-dashboard';node.setAttribute('aria-label','Painel de organização do dia');home.prepend(node);}
+    const active=document.activeElement;
+    const restoreFocus=node.contains(active)&&active.matches('button[data-sc190]');
+    const action=restoreFocus?active.dataset.sc190:'';
+    const value=restoreFocus?active.dataset.value:undefined;
     node.innerHTML=markup(model());
+    if(restoreFocus){
+      Array.from(node.querySelectorAll('button[data-sc190]'))
+        .find(b=>b.dataset.sc190===action&&b.dataset.value===value)?.focus({preventScroll:true});
+    }
     document.documentElement.classList.add('sc190-premium');
     decorateSidebar();
   }finally{rendering=false;}
