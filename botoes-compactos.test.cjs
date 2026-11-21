@@ -28,7 +28,7 @@ test('O contrato da API não foi alterado e os assets estão no cache',()=>{
   assert.match(html,/sc-botoes-compactos\.css\?v=2026-11-21c/);
   assert.match(html,/sc-botoes-compactos\.js\?v=2026-11-21c/);
   assert.match(html,/sc166Vincular/);
-  assert.match(html,/scDriveProjetosApi/);
+  assert.match(html,/sc-drive-projetos\.js\?v=2026-11-20d/);
 });
 test('Organizar reúne filtros numa faixa única e cria pela seção selecionada',()=>{
   assert.match(html,/sc182-tabstrip/);
