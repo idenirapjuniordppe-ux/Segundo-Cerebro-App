@@ -36,7 +36,7 @@ const fixture='<!doctype html><html lang="pt-BR" class="sc126 sc11-active sc100-
             return {aside:rect('sc183-sidebar'),mobile:rect('nav-movel'),main:document.querySelector('main').getBoundingClientRect().toJSON(),
               content:rect('test-content'),asideDisplay:display('sc183-sidebar'),navDisplay:display('nav-movel'),
               navChildren:nav.querySelectorAll('[data-sc126-route]').length,
-              sideChildren:aside.querySelectorAll('[data-sc126-route]').length,
+              sideChildren:aside.querySelectorAll('.sc183-sideitem').length,
               documentWidth:document.documentElement.scrollWidth,
               viewport:innerWidth};
           });
