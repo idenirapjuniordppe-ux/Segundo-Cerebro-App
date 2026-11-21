@@ -670,3 +670,82 @@ html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row .sc153-status {
   white-space:normal;
  }
 }
+
+/* Organizar abre com cartões de acesso. Projetos usam a largura disponível. */
+#v-organizar .aura-area-grid {
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));
+ gap:12px;
+ margin:0 0 24px;
+}
+#v-organizar .aura-area-card {
+ --area-color:var(--aura-accent);
+ --area-tint:var(--aura-wash);
+ display:grid;
+ grid-template-columns:44px minmax(0,1fr);
+ align-items:center;
+ column-gap:12px;
+ min-height:92px;
+ padding:14px;
+ text-align:start;
+ border:1px solid var(--aura-line);
+ border-radius:18px;
+ background:var(--aura-paper);
+ color:var(--aura-ink);
+ box-shadow:var(--aura-shadow);
+}
+#v-organizar .aura-area-card:hover,
+#v-organizar .aura-area-card:focus-visible {
+ outline:2px solid var(--area-color);
+ outline-offset:2px;
+}
+#v-organizar .aura-area-icon {
+ grid-row:span 2;
+ display:grid;
+ place-items:center;
+ width:44px;
+ height:44px;
+ border-radius:14px;
+ background:var(--area-tint);
+ color:var(--area-color);
+ font-size:22px;
+}
+#v-organizar .aura-area-card small { color:var(--aura-muted); }
+#v-organizar .aura-project-grid {
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));
+ align-items:start;
+ gap:14px;
+}
+#v-organizar .aura-project-grid .sc129-project { margin:0; }
+@media (max-width:600px) {
+ #v-organizar .aura-area-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ #v-organizar .aura-area-card {
+  grid-template-columns:minmax(0,1fr);
+  gap:5px;
+ }
+ #v-organizar .aura-area-icon { grid-row:auto; }
+}
+
+#v-biblioteca .aura-pinned-notes {
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));
+ gap:12px;
+ margin-bottom:20px;
+}
+#v-biblioteca .aura-pinned-notes .sc129-note {
+ border:1px solid var(--aura-line);
+ border-radius:17px;
+ background:var(--aura-paper);
+ box-shadow:var(--aura-shadow);
+}
+@media (min-width:880px) {
+ #v-config #sc134-settings {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:12px;
+ }
+ #v-config #sc134-settings .sc134-group { margin:0; }
+ #v-config #sc134-settings .sc134-group[open] { grid-column:1 / -1; }
+}
