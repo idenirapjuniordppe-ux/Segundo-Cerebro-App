@@ -263,9 +263,9 @@ html.sc126.sc11-active.sc100-active[data-sc-theme="glass"]{
   --sc128-base:#f7f8fe!important;--sc128-ink:#243349!important;
   --sc128-muted:#65758f!important;--sc128-border:#dce4f1!important;
   --sc128-paper:#ffffff!important;--sc128-top:#fafbff!important;
-  --sc11-accent:#6564cd!important;--sc11-soft:#ebeefd!important;
+  --sc11-accent:#5554b4!important;--sc11-soft:#ebeefd!important;
   --sc141-solid:#ffffff!important;--sc141-field:#fff!important;
-  --sc135-button:#6564cd!important;--sc135-on-button:#fff!important;
+  --sc135-button:#5554b4!important;--sc135-on-button:#fff!important;
   --sc183-glow:rgba(145,169,243,.19);
   --sc183-highlight:#eaf0ff;
 }
@@ -273,9 +273,9 @@ html.sc126.sc11-active.sc100-active[data-sc-theme="editorial"]{
   --sc128-base:#f8faf6!important;--sc128-ink:#273c3b!important;
   --sc128-muted:#637874!important;--sc128-border:#dbe5de!important;
   --sc128-paper:#ffffff!important;--sc128-top:#fcfdfa!important;
-  --sc11-accent:#477f71!important;--sc11-soft:#e9f2eb!important;
+  --sc11-accent:#366a5b!important;--sc11-soft:#e9f2eb!important;
   --sc141-solid:#ffffff!important;--sc141-field:#fff!important;
-  --sc135-button:#477f71!important;--sc135-on-button:#fff!important;
+  --sc135-button:#366a5b!important;--sc135-on-button:#fff!important;
   --sc183-glow:rgba(127,173,142,.16);
   --sc183-highlight:#edf6ef;
 }
