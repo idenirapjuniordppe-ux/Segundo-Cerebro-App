@@ -10,7 +10,7 @@ const dashboardJS=fs.readFileSync('sc-aura-dashboard.js','utf8');
 const css=inlineStyles+'\n'+oldCss+'\n'+newCss;
 const fixture='<!doctype html><html lang="pt-BR" class="sc126 sc11-active sc100-active" data-sc-theme="minimal"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+
   '*,*::before,*::after{box-sizing:border-box}body{margin:0;min-width:0} .flex{display:flex}.min-h-screen{min-height:100vh}main{flex:1;min-width:0} .max-w-6xl{width:100%;margin:auto}'+
-  css+'</style></head><body><div class="flex min-h-screen"><main><div id="topo"><div class="max-w-6xl"><form><input id="captura" placeholder="Converse ou peça algo"></form><button class="btn" type="button">Buscar</button></div></div>'+
+  css+'</style></head><body><div class="flex min-h-screen"><main><div id="topo"><div id="sc129-header"><strong>2º Cérebro</strong><div><button type="button" aria-label="Buscar">⌕</button><button type="button" aria-label="Ajustes">⚙</button></div></div><div class="max-w-6xl"><div class="flex-1"><form><input id="captura" placeholder="Converse ou peça algo"></form></div></div></div>'+
   '<div class="max-w-6xl"><section id="v-hoje" class="vista sc148-active"><div class="sc148-root"><h2>Planner antigo</h2></div></section><section id="v-agenda" class="vista hidden"></section></div></main></div>'+
   '<nav id="nav-movel" class="fixed bottom-0 inset-x-0"><button type="button" class="nav-m ativo" data-sc126-route="hoje" aria-current="page">Hoje</button><button type="button" class="nav-m" data-sc126-route="organizar" aria-current="false">Organizar</button><button type="button" class="nav-m" data-sc126-route="biblioteca" aria-current="false">Biblioteca</button></nav></body></html>';
 const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,date:'2026-11-01'})},
@@ -32,7 +32,7 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
  try{
   let n=0;
   for(const theme of ['minimal','glass','editorial','neural','executive']){
-   for(const width of [390,768,1100,1440,1849]){
+   for(const width of [320,390,768,1100,1440,1849]){
     const page=await browser.newPage({viewport:{width,height:950},deviceScaleFactor:1});
     try{
      await page.setContent(fixture,{waitUntil:'domcontentloaded'});
@@ -77,7 +77,10 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
          mainX:document.querySelector('main').getBoundingClientRect().x,
          rightPanels:root.querySelectorAll('.sc190-right .sc190-card').length,
          heroY:root.querySelector('.sc190-hero').getBoundingClientRect().top,
-         agendaY:root.querySelector('.sc190-agenda').getBoundingClientRect().top
+         agendaY:root.querySelector('.sc190-agenda').getBoundingClientRect().top,
+         capture:rect('captura'),
+         actions:rect('sc129-header'),
+         filtersFit:[...root.querySelectorAll('.sc190-chip')].every(chip=>chip.scrollWidth<=chip.clientWidth+1)
        };
      });
      assert.equal(info.root.display,'block','Dashboard não visível '+theme+' '+width);
@@ -88,6 +91,8 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
      assert.equal(info.taskCount,5,'Tarefas reais '+theme+' '+width);
      assert(info.bodyWidth<=width+2,'Rolagem lateral '+theme+' '+width+' '+JSON.stringify(info));
      assert(info.root.right<=width+2,'Dashboard além da tela '+theme+' '+width);
+     assert(info.capture.right<=info.actions.x,'Captura e ações se sobrepõem '+theme+' '+width);
+     assert(info.filtersFit,'Filtros cortados '+theme+' '+width);
      assert(info.root.x>=-2,'Dashboard começa fora da tela '+theme+' '+width);
      if(width>=1100){
        assert.equal(info.sidebarDisplay,'flex','Sidebar deve aparecer '+theme+' '+width);
@@ -111,6 +116,6 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
     }finally{await page.close();}
    }
   }
-  console.log('PASS dashboard: '+n+' cenários (5 temas × 5 larguras), desktop/mobile, sem sobreposição, cartões e filtros funcionando.');
+  console.log('PASS dashboard: '+n+' cenários (5 temas × 6 larguras), desktop/mobile, sem sobreposição, cartões e filtros funcionando.');
  }finally{await browser.close();}
 })().catch(err=>{console.error(err);process.exitCode=1;});
