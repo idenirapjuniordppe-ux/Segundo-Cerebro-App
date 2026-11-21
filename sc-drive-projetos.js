@@ -26,9 +26,11 @@ function paint(){
  '<div class="scd-files">'+((d.arquivos||[]).map(x=>'<div class="scd-file"><span>'+mime(x)+'</span><span class="scd-name"><strong>'+esc(x.nome)+'</strong><small>'+(Number(x.tamanho)>0?(Number(x.tamanho)/1048576).toFixed(1)+' MB':'Drive')+(x.vinculado?' · Vinculado':'')+'</small></span><button data-scd="preview" data-id="'+esc(x.id)+'" title="Visualizar">◉</button><button data-scd="open" data-url="'+esc(x.url)+'" title="Abrir no Drive">↗</button><button data-scd="menu" data-id="'+esc(x.id)+'" title="Ações">⋯</button></div>').join('')||'<p>Nenhum arquivo nesta pasta.</p>')+'</div>'+
  '<div class="scd-bottom"><button data-scd="organize">Organizar agora</button><button data-scd="auto">⚙ Organização automática: '+(d.regras&&d.regras.auto?'ligada':'desligada')+'</button></div><div id="scd-menu"></div><div id="scd-preview"></div><input id="scd-file" type="file" hidden>';
 }
+var scdRequest=0;
 async function load(){
+ var request=++scdRequest,project=S.id;
  status('Consultando o Google Drive…');
- try{var d=await call('listar',{pastaId:S.folder,busca:S.query});if(!get('scd-box')||get('scd-box').dataset.scdProject!==S.id)return;if(!d||!Array.isArray(d.pastas)||!Array.isArray(d.arquivos))throw Error('Resposta inesperada do servidor.');S.data=d;S.folder=d.pastaAtual;S.root=d.pastaRaiz;paint();status(d.arquivos.length+' arquivo(s) encontrado(s).'+(d.parcial?' Resultado parcial.':''));}
+ try{var d=await call('listar',{pastaId:S.folder,busca:S.query});if(request!==scdRequest||project!==S.id||!get('scd-box')||get('scd-box').dataset.scdProject!==project)return;if(!d||!Array.isArray(d.pastas)||!Array.isArray(d.arquivos))throw Error('Resposta inesperada do servidor.');S.data=d;S.folder=d.pastaAtual;S.root=d.pastaRaiz;paint();status(d.arquivos.length+' arquivo(s) encontrado(s).'+(d.parcial?' Resultado parcial.':''));}
  catch(e){status(/function|não permitida|not found|inválid/i.test(String(e.message||e))?'O módulo Drive ainda não foi ativado no Apps Script. Seus arquivos foram preservados.':e.message||String(e),true);}
 }
 function mount(id){S={id:String(id),folder:'',root:'',stack:[],query:'',data:null,selected:'',busy:false};load();}
