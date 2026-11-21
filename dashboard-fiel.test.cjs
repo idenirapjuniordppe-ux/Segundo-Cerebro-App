@@ -30,6 +30,7 @@ function setup(){
   w.pct=x=>Number(x.progresso)||0;
   w.itensDoDia=(day)=>[{tipo:'tarefa',id:'t1',titulo:'Estudar recursos',inicio:'11:00'},{tipo:'evento',id:'e1',titulo:'Reunião',inicio:'14:00'}].filter(x=>day==='2026-11-21');
   w.renderVista=()=>{};
+  w.renderTudo=()=>{};
   w.irPara=to=>w.vistaAtual=to;
   w.abrirTarefa=()=>{};
   w.SC148={refresh:()=>{}};
@@ -102,4 +103,52 @@ test('Sem conta configurada, saldo não é inventado',t=>{
   w.SC190Dashboard.render();
   assert.equal(w.SC190Dashboard.model().balance,null);
   assert(w.document.getElementById('sc190-dashboard').textContent.includes('Configure nas Finanças'));
+});
+
+test('Concluir tarefa pela interface original atualiza o novo painel',async t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  w.document.addEventListener('click',e=>{
+    if(e.target.closest('#sc190-dashboard [data-sc126-check="t1"]')){
+      w.D.tarefas[0].status='feita';
+    }
+  });
+  w.document.querySelector('#sc190-dashboard [data-sc126-check="t1"]').click();
+  await Promise.resolve();
+  const r=w.document.getElementById('sc190-dashboard');
+  assert.equal(w.SC190Dashboard.model().open.length,1);
+  assert.equal(r.querySelectorAll('.sc190-task-done').length,2);
+  assert(r.textContent.includes('2 concluídas'));
+});
+test('Rerender global atualiza indicadores quando os dados são sincronizados',t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  w.D.projetos.push({id:'p2',nome:'Novo projeto',status:'ativo'});
+  w.renderTudo();
+  assert.equal(w.document.querySelectorAll('#sc190-dashboard .sc190-project').length,2);
+});
+test('Trocar a data preserva os modos Semana e Mês do planner',t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  const agenda=w.document.getElementById('v-agenda');
+  agenda.innerHTML='<input type="date" data-sc148-date value="2026-11-20">'+
+    '<button data-sc148="view" data-view="semana">Semana</button><button data-sc148="view" data-view="mes">Mês</button>';
+  let mode='dia';const trace=[];
+  agenda.querySelector('input').addEventListener('change',()=>{
+    mode='dia';trace.push('date');
+  });
+  for(const v of ['semana','mes']){
+    agenda.querySelector('[data-view="'+v+'"]').addEventListener('click',()=>{
+      mode=v;trace.push(v);
+    });
+  }
+  w.SC190Dashboard.openDay('semana');
+  assert.deepEqual(trace,['date','semana']);
+  assert.equal(mode,'semana');
+  w.SC190Dashboard.openDay('mes');
+  assert.equal(mode,'mes');
+});
+test('Agenda preserva tarefas concluídas com horários',t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  w.D.tarefas[1].hora='09:00';
+  const m=w.SC190Dashboard.model();
+  // itenDoDia omite a tarefa concluída; o painel deve apresentá-la mesmo assim.
+  assert(m.agenda.some(x=>x.id==='t2'&&x.feito===true));
 });
