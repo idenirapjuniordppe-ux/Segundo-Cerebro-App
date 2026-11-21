@@ -75,7 +75,9 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
          head:root.querySelector('.sc190-hero h1')?.textContent,
          oldPlannerDisplay:getComputedStyle(document.querySelector('#v-hoje .sc148-root')).display,
          mainX:document.querySelector('main').getBoundingClientRect().x,
-         rightPanels:root.querySelectorAll('.sc190-right .sc190-card').length
+         rightPanels:root.querySelectorAll('.sc190-right .sc190-card').length,
+         heroY:root.querySelector('.sc190-hero').getBoundingClientRect().top,
+         agendaY:root.querySelector('.sc190-agenda').getBoundingClientRect().top
        };
      });
      assert.equal(info.root.display,'block','Dashboard não visível '+theme+' '+width);
@@ -90,7 +92,10 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
      if(width>=1100){
        assert.equal(info.sidebarDisplay,'flex','Sidebar deve aparecer '+theme+' '+width);
        assert(info.root.x>=info.sidebar.right+12,'Sidebar invade painel '+theme+' '+width+' '+JSON.stringify(info));
-       if(width>=1440)assert(info.columns>=2,'Layout desktop deve ter duas colunas '+theme+' '+width);
+       if(width>=1440){
+         assert(info.columns>=2,'Layout desktop deve ter duas colunas '+theme+' '+width);
+         assert(Math.abs(info.agendaY-info.heroY)<10,'Agenda deve iniciar alinhada à saudação '+theme+' '+width+' '+JSON.stringify(info));
+       }
      }else assert.equal(info.sidebarDisplay,'none','Sidebar deve ficar oculta no mobile '+theme+' '+width);
      if(theme==='minimal'&&(width===1440||width===390||width===1849)){
        fs.mkdirSync('artefacts',{recursive:true});
