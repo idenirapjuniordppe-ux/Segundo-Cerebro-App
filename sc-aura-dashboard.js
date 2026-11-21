@@ -186,9 +186,9 @@ function projectsPanel(m){
     }).join('')+'</div>':'<div class="sc190-empty">Nenhum projeto em andamento.</div>')+'</section>';
 }
 function markup(m){
-  return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+metrics(m)+
+  return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+
     '<div class="sc190-layout"><div class="sc190-left">'+taskPanel(m)+projectsPanel(m)+'</div>'+
-    '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>';
+    '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>'+metrics(m);
 }
 function decorateSidebar(){
   const aside=$('sc183-sidebar');if(!aside)return;

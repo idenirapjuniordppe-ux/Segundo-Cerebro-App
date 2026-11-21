@@ -672,7 +672,7 @@ html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row .sc153-status {
 }
 
 /* Paleta quente para o tema claro principal. */
-html.sc190-premium.sc126[data-sc-theme="minimal"] {
+html.sc190-premium.sc126.sc11-active.sc100-active[data-sc-theme="minimal"] {
  --sc128-paper:#fffaf6!important;
  --sc128-top:#fdf9f5!important;
  --sc128-base:#faf5ef!important;
@@ -682,6 +682,9 @@ html.sc190-premium.sc126[data-sc-theme="minimal"] {
  --sc11-accent:#a33d22!important;
  --sc11-soft:#fce4d4!important;
  --sc141-solid:#fffaf6!important;
+ --sc135-button:#a33d22!important;
+ --sc183-accent:#a33d22;
+ --sc183-soft:#fce4d4;
 }
 html.sc190-premium.sc126[data-sc-theme="minimal"] body,
 html.sc190-premium.sc126[data-sc-theme="minimal"] body::before {
@@ -719,7 +722,7 @@ html.sc190-premium.sc126 #sc190-dashboard .sc190-hero-create {
 }
 html.sc190-premium.sc126 #sc190-dashboard .sc190-toolbar .sc190-datebar {margin-bottom:12px}
 html.sc190-premium.sc126 #sc190-dashboard .sc190-layout {margin-top:14px}
-html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-metric {
+html.sc190-premium.sc126.sc11-active.sc100-active[data-sc-theme="minimal"] #sc190-dashboard .sc190-metric {
  background:#fff5eb!important;
 }
 html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-metric-icon {
@@ -737,3 +740,5 @@ html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-progre
   background-image:linear-gradient(90deg,#fff0df 0%,rgba(255,240,223,.9) 34%,rgba(255,240,223,.34) 70%,transparent),url("./aura-coral-mesa.webp");
  }
 }
+
+html.sc190-premium.sc126 #sc190-dashboard > .sc190-metrics {margin-top:16px}
