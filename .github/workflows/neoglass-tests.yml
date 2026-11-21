@@ -1,0 +1,30 @@
+name: Validar redesign Neo Glass
+
+on:
+  push:
+    branches:
+      - redesign-neoglass-2026-11-21
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    name: Testes de regressão e visual
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Dependência de testes
+        run: npm install --no-save --package-lock=false jsdom@26
+      - name: Executar todos os testes automatizados
+        run: node --test *.test.cjs
