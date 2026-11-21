@@ -1,16 +1,16 @@
-/* 2º Cérebro • Neo Glass 2026-11-21a — apresentação progressiva e reversível.
+/* 2º Cérebro • Neo Glass 2026-11-21b — apresentação progressiva e reversível.
    Não altera registros, filas, autenticação ou integrações Google. */
 (function(){
   'use strict';
-  const VERSION='2026-11-21a', KEY='scng_visual_preset';
+  const VERSION='2026-11-21b', KEY='scng_visual_preset';
   const PRESETS=['auto','aurora','neon','executive'];
   const root=document.documentElement,byId=id=>document.getElementById(id);
   let started=false,lastStamp='',observer=null;
-  function storageRead(){try{return localStorage.getItem(KEY)||'auto';}catch(_){return 'auto';}}
+  function storageRead(){try{return localStorage.getItem(KEY)||'neon';}catch(_){return 'neon';}}
   function storageWrite(value){try{localStorage.setItem(KEY,value);}catch(_){}}
   function preset(){
     const saved=storageRead();
-    return PRESETS.includes(saved)?saved:'auto';
+    return PRESETS.includes(saved)?saved:'neon';
   }
   function applyPreset(next,save){
     const value=PRESETS.includes(next)?next:'auto';
@@ -50,6 +50,7 @@
       '<div class="scng-overline"><span class="scng-pulse" aria-hidden="true"></span><span id="scng-date-label">Visão do dia</span></div>'+
       '<h1 id="scng-hero-title">Seu dia, com clareza.</h1>'+
       '<p class="scng-intro">Tudo o que importa, no seu ritmo.</p>'+
+      '<div class="scng-brain" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>'+ 
       '<div class="scng-stats" aria-label="Resumo do dia">'+
       '<div class="scng-stat"><span class="scng-stat-icon" aria-hidden="true"><i class="fa-solid fa-list-check"></i></span><span><b id="scng-today-tasks">—</b><small>Tarefas hoje</small></span></div>'+
       '<div class="scng-stat"><span class="scng-stat-icon" aria-hidden="true"><i class="fa-regular fa-calendar"></i></span><span><b id="scng-today-events">—</b><small>Compromissos</small></span></div>'+
