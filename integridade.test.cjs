@@ -22,7 +22,7 @@ assert(src.includes('sc166Serie(t)'), 'Recorrência sem origem única');
 assert(src.includes("'sc148-idea-'"), 'Ideias não persistidas separadamente');
 assert(!src.includes('Sem hora, ele vem no horário padrão do dia'), 'Mensagem de lembrete contraditória');
 assert(transport.includes('scPwaSessionMarker'), 'Sessão sem vínculo do cache');
-assert(worker.includes("VERSION='2026-11-20d'"), 'Versões do cache não correspondem');
+assert(worker.includes("VERSION='2026-11-20c'"), 'Versões do cache não correspondem');
 const statusStyle=src.match(/<style id="sc153-state-style">([\s\S]*?)<\/style>/)[1];
 const neutralStyle=src.match(/<style id="sc167-tools-style">([\s\S]*?)<\/style>/)[1];
 assert.match(statusStyle,/background:var\(--sc153-bg\)!important/);
