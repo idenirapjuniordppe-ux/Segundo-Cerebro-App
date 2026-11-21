@@ -1,0 +1,30 @@
+name: Validar botões compactos
+
+on:
+  push:
+    branches:
+      - botoes-compactos-20261121
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testar:
+    name: Regressão e navegação
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Obter arquivos
+        uses: actions/checkout@v4
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar ferramentas de teste
+        run: npm install --no-save --package-lock=false jsdom@26
+      - name: Executar testes existentes e dos novos botões
+        run: node --test *.test.cjs
