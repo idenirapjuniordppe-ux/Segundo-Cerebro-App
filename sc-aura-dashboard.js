@@ -175,7 +175,9 @@ function projectsPanel(m){
     }).join('')+'</div>':'<div class="sc190-empty">Nenhum projeto em andamento.</div>')+'</section>';
 }
 function markup(m){
-  return header(m)+'<div class="sc190-layout"><div class="sc190-left">'+metrics(m)+taskPanel(m)+projectsPanel(m)+'</div>'+
+  // A referência posiciona saudação, data e indicadores à esquerda,
+  // enquanto Agenda/Hábitos/Metas iniciam no alto da coluna direita.
+  return '<div class="sc190-layout"><div class="sc190-left">'+header(m)+metrics(m)+taskPanel(m)+projectsPanel(m)+'</div>'+
     '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>';
 }
 function decorateSidebar(){
