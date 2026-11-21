@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   testar:
-    name: Regressão, navegação e Premium Light
+    name: Regressão, navegação e Dashboard Aura
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -33,6 +33,15 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Validar 5 temas e 7 larguras no Chromium real
         run: node premium-layout-browser.cjs
+      - name: Validar dashboard real em 25 combinações de tela e tema
+        run: node dashboard-fiel-browser.cjs
+      - name: Guardar capturas do dashboard real
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aura-dashboard-fiel
+          path: artefacts/aura-dashboard-*.png
+          if-no-files-found: ignore
       - name: Guardar capturas reais de teste
         if: always()
         uses: actions/upload-artifact@v4
