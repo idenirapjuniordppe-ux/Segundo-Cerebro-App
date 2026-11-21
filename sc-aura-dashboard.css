@@ -670,3 +670,70 @@ html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row .sc153-status {
   white-space:normal;
  }
 }
+
+/* Paleta quente para o tema claro principal. */
+html.sc190-premium.sc126[data-sc-theme="minimal"] {
+ --sc128-paper:#fffaf6!important;
+ --sc128-top:#fdf9f5!important;
+ --sc128-base:#faf5ef!important;
+ --sc128-ink:#28231f!important;
+ --sc128-muted:#67584e!important;
+ --sc128-border:#e7d6c9!important;
+ --sc11-accent:#a33d22!important;
+ --sc11-soft:#fce4d4!important;
+ --sc141-solid:#fffaf6!important;
+}
+html.sc190-premium.sc126[data-sc-theme="minimal"] body,
+html.sc190-premium.sc126[data-sc-theme="minimal"] body::before {
+ background:#faf5ef!important;
+}
+html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-hero {
+ min-height:clamp(175px,19vw,246px);
+ margin:0 0 14px;
+ background:#f4dcc6 linear-gradient(90deg,#fff0df 0%,rgba(255,240,223,.85) 28%,transparent 61%);
+ background-image:linear-gradient(90deg,#fff0df 0%,rgba(255,240,223,.85) 28%,transparent 61%),url("./aura-coral-mesa.webp");
+ background-size:cover;
+ background-position:center;
+ border-color:#e7c9b0;
+}
+html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-hero::after {display:none}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-hero time {
+ display:block;
+ font-size:13px;
+ font-weight:650;
+ margin-bottom:8px;
+ color:#493729;
+}
+html.sc190-premium.sc126:is([data-sc-theme="neural"],[data-sc-theme="executive"]) #sc190-dashboard .sc190-hero time {
+ color:#f5f1ff;
+}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-hero-create {
+ margin-top:14px;
+ min-height:44px;
+ padding:8px 16px;
+ border-radius:12px;
+ border:0;
+ background:#b8452a!important;
+ color:#fff!important;
+ font-weight:700;
+}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-toolbar .sc190-datebar {margin-bottom:12px}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-layout {margin-top:14px}
+html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-metric {
+ background:#fff5eb!important;
+}
+html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-metric-icon {
+ background:#fce4d4;
+ color:#a33d22;
+}
+html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-chip.selected,
+html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-progress span {
+ background:#b8452a!important;
+}
+@media (max-width:700px) {
+ html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-hero {
+  min-height:180px;
+  background-position:61% center;
+  background-image:linear-gradient(90deg,#fff0df 0%,rgba(255,240,223,.9) 34%,rgba(255,240,223,.34) 70%,transparent),url("./aura-coral-mesa.webp");
+ }
+}
