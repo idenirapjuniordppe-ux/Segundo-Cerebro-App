@@ -67,6 +67,7 @@ function actualAgenda(d){
   }).sort((a,b)=>String(a.inicio||'99:99').localeCompare(String(b.inicio||'99:99')));
 }
 function priority(t){
+  if(String(t.top3||'')===String(day||currentDay()))return true;
   const v=String(t.prioridade||t.prioritaria||t.importancia||'').toLowerCase();
   return /alta|urgente|prior|important|^1$|^sim$|^true$/.test(v);
 }
