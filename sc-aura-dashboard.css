@@ -1,6 +1,6 @@
 /* 2º Cérebro — Aura Dashboard 12.0. Estrutura real inspirada na prévia aprovada. */
 /* O planner original continua disponível na rota Agenda: NÃO é removido. */
-html.sc190-premium.sc126.sc100-active #v-hoje.sc148-active>.sc148-root{display:none!important}
+html.sc190-premium.sc126.sc100-active #v-hoje.sc148-active>.sc148-root:not(#sc100-home){display:none!important}
 html.sc190-premium.sc126 #v-hoje.sc148-active>#sc190-dashboard{display:block!important}
 html.sc190-premium.sc126 #sc190-dashboard{
  --a-ink:var(--sc128-ink,#24324a);
