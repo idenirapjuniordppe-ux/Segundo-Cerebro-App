@@ -405,3 +405,39 @@ html.sc190-premium.sc126 #sc190-dashboard .sc190-metric-money .sc190-metric-valu
    font-size:15px!important;
  }
 }
+
+/* Acabamento final alinhado à referência visual aprovada. */
+html.sc190-premium.sc126:not([data-sc-theme="neural"]):not([data-sc-theme="executive"]) #sc190-dashboard .sc190-metric-task{
+ background:linear-gradient(155deg,#f2ecff,#e8e0fd)!important;
+}
+html.sc190-premium.sc126:not([data-sc-theme="neural"]):not([data-sc-theme="executive"]) #sc190-dashboard .sc190-metric-calendar{
+ background:linear-gradient(155deg,#eef5ff,#e1edff)!important;
+}
+html.sc190-premium.sc126:not([data-sc-theme="neural"]):not([data-sc-theme="executive"]) #sc190-dashboard .sc190-metric-project{
+ background:linear-gradient(155deg,#fff6ee,#fae9dc)!important;
+}
+html.sc190-premium.sc126:not([data-sc-theme="neural"]):not([data-sc-theme="executive"]) #sc190-dashboard .sc190-metric-habit{
+ background:linear-gradient(155deg,#eff9f1,#e1f2e7)!important;
+}
+html.sc190-premium.sc126:not([data-sc-theme="neural"]):not([data-sc-theme="executive"]) #sc190-dashboard .sc190-metric-money{
+ background:linear-gradient(155deg,#eff5ff,#e0ebfb)!important;
+}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-task-done{
+ background:linear-gradient(90deg,rgba(87,192,118,.10),transparent 65%)!important;
+ border-left:3px solid #48b46d;padding-left:9px;
+ border-radius:8px;
+}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-task:not(.sc190-task-done){
+ border-left:3px solid transparent;padding-left:9px;
+}
+html.sc190-premium.sc126 #sc190-dashboard .sc190-task:not(.sc190-task-done):has(.sc190-tag){
+ border-left-color:#ed727d;
+}
+@media(min-width:1440px){
+ html.sc190-premium.sc126 #sc183-sidebar{
+  width:270px!important;max-width:270px!important;
+ }
+ html.sc190-premium.sc126 body>div.flex>main{
+  margin-left:306px!important;width:calc(100% - 306px)!important;
+ }
+}
