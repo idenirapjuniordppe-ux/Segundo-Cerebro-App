@@ -112,6 +112,35 @@ const data={config:{nome:'Teste',sc147_account:JSON.stringify({initial:432000,da
        await page.locator('#sc190-dashboard [data-sc190="filter"][data-value="all"]').click();
        assert.equal(await page.locator('#sc190-dashboard .sc190-task').count(),5,'Filtro Todas');
      }
+     // Preserve as estruturas e seletores usados pelas rotas reais.
+     await page.locator('#v-hoje').evaluate(node=>node.classList.add('hidden'));
+     const routes=[
+       ['organizar','<h1>Organizar</h1><div class="sc182-tabstrip"><div class="sc126-tools"><button aria-pressed="true">Tarefas</button><button>Projetos</button></div></div><div class="sc126-list"><div class="sc126-row sc153-late"><button class="sc126-row-main"><strong>Tarefa atrasada</strong></button><small class="sc153-status">Atrasado</small></div></div>','h1','.sc126-list'],
+       ['biblioteca','<header class="sc182-library-header"><h1>Biblioteca</h1></header><div class="sc182-search"><input aria-label="Buscar na biblioteca"></div><div class="sc126-list"><button class="sc126-row-main">Nota de teste</button></div>','.sc182-library-header','.sc126-list'],
+       ['agenda','<header class="sc148-head"><h2>Agenda</h2></header><div class="sc148-card">Horários do dia</div>','.sc148-head','.sc148-card'],
+       ['config','<h1>Ajustes</h1><details class="sc134-group"><summary>Aparência</summary></details>','h1','.sc134-group']
+     ];
+     for(const [route,markup,header,card] of routes){
+       const result=await page.evaluate(({route,markup,header,card})=>{
+         const host=document.createElement('section');
+         host.id='v-'+route;
+         document.getElementById(host.id)?.remove();
+         host.innerHTML=markup;
+         document.getElementById('v-hoje').parentElement.append(host);
+         const result={
+           header:getComputedStyle(host.querySelector(header)).backgroundImage,
+           card:getComputedStyle(host.querySelector(card)).borderRadius,
+           wallpaper:getComputedStyle(document.body,'::before').opacity,
+           overflow:document.documentElement.scrollWidth>innerWidth+2
+         };
+         host.remove();
+         return result;
+       },{route,markup,header,card});
+       assert.match(result.header,/linear-gradient/,'Cabeçalho Aura '+route+' '+theme+' '+width);
+       assert.equal(result.card,'17px','Cartão Aura '+route+' '+theme+' '+width);
+       assert.equal(result.wallpaper,'0.17','Fundo discreto '+route+' '+theme+' '+width);
+       assert(!result.overflow,'Rolagem lateral '+route+' '+theme+' '+width);
+     }
      n++;
     }finally{await page.close();}
    }

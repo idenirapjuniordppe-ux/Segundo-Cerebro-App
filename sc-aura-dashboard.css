@@ -546,3 +546,127 @@ html.sc190-premium.sc126[data-sc-theme="executive"] #sc190-dashboard .sc190-hero
   min-width:0;
  }
 }
+
+/* Aura nas áreas de trabalho: cabeçalho contínuo, superfícies e navegação segmentada. */
+html.sc126.sc11-active.sc100-active[data-sc-theme]:has(:is(#v-organizar,#v-biblioteca,#v-agenda,#v-config,#v-notas,#v-tarefas,#v-metas):not(.hidden)) body::before {
+ opacity:.17;
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca,#v-agenda,#v-config,#v-notas,#v-tarefas,#v-metas) {
+ --aura-paper:var(--sc128-paper,#fff);
+ --aura-line:var(--sc128-border,#dedff0);
+ --aura-ink:var(--sc128-ink,#24324a);
+ --aura-muted:var(--sc128-muted,#55637c);
+ --aura-accent:var(--sc11-accent,#6b46c7);
+ --aura-wash:var(--sc11-soft,#eeeafd);
+ --aura-shadow:0 6px 20px rgba(43,32,78,.06);
+ max-width:1120px!important;
+ min-width:0;
+ margin-inline:auto!important;
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca,#v-agenda,#v-config,#v-notas,#v-tarefas,#v-metas) :is(.sc182-library-header,.sc148-head),
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-config,#v-notas,#v-tarefas,#v-metas)>h1 {
+ box-sizing:border-box;
+ width:100%;
+ padding:clamp(14px,2vw,24px)!important;
+ margin:0 0 14px!important;
+ border:1px solid var(--aura-line)!important;
+ border-radius:20px!important;
+ background:linear-gradient(105deg,var(--aura-wash),var(--aura-paper) 80%)!important;
+ box-shadow:var(--aura-shadow)!important;
+ color:var(--aura-ink)!important;
+}
+html.sc126.sc11-active[data-sc-theme] #v-biblioteca .sc182-library-header h1,
+html.sc126.sc11-active[data-sc-theme] #v-agenda .sc148-head h2 {
+ background:none!important;
+ padding:0!important;
+ margin:0!important;
+ box-shadow:none!important;
+ color:var(--aura-ink)!important;
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools,
+html.sc126.sc11-active[data-sc-theme] #v-agenda .sc148-tabs {
+ display:flex;
+ flex-wrap:wrap;
+ width:fit-content;
+ max-width:100%;
+ gap:4px!important;
+ padding:4px!important;
+ border:1px solid var(--aura-line)!important;
+ border-radius:15px!important;
+ background:var(--aura-paper)!important;
+ box-shadow:var(--aura-shadow);
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools button {
+ min-height:44px!important;
+ border:0!important;
+ background:transparent!important;
+ color:var(--aura-muted)!important;
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools button[aria-pressed="true"] {
+ background:var(--aura-wash)!important;
+ color:var(--aura-accent)!important;
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca,#v-agenda,#v-config,#v-notas,#v-tarefas,#v-metas) :is(.sc126-list,.sc129-project,.sc148-card,.sc134-group,.card,.sc126-details) {
+ border:1px solid var(--aura-line)!important;
+ border-radius:17px!important;
+ background:var(--aura-paper)!important;
+ box-shadow:var(--aura-shadow)!important;
+}
+html.sc126.sc11-active[data-sc-theme] #v-biblioteca .sc138-section,
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc182-section-heading h2 {
+ background:none!important;
+ padding-inline:0!important;
+ box-shadow:none!important;
+ color:var(--aura-ink)!important;
+}
+html.sc126.sc11-active[data-sc-theme] #v-biblioteca .sc182-search {max-width:none!important}
+html.sc126.sc11-active[data-sc-theme] #v-biblioteca .sc182-search input {width:100%;min-height:46px!important}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) :is(.sc126-row,.sc129-note) {
+ padding:4px 10px!important;
+ min-width:0;
+}
+html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc126-row-main {
+ min-width:0;
+ padding:8px 7px!important;
+ overflow-wrap:anywhere;
+}
+html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row:is(.sc153-done,.sc153-late,.sc153-cancel) {
+ --aura-status:#33724d;
+ --aura-status-bg:#e2f2e8;
+ background:transparent!important;
+ border-inline-start:3px solid var(--aura-status)!important;
+}
+html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row.sc153-late {
+ --aura-status:#945019;
+ --aura-status-bg:#fff0dc;
+}
+html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row.sc153-cancel {
+ --aura-status:#9e3c4b;
+ --aura-status-bg:#fce8ed;
+}
+html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row .sc126-row-main strong {
+ color:var(--aura-ink)!important;
+}
+html.sc126.sc11-active[data-sc-theme] #v-organizar .sc126-row .sc153-status {
+ color:var(--aura-status,var(--aura-ink))!important;
+ background:var(--aura-status-bg,var(--aura-wash))!important;
+ font-weight:650;
+ border-radius:999px;
+ padding:4px 8px;
+ margin:0;
+}
+@media (max-width:600px) {
+ html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  width:100%;
+ }
+ html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools button {
+  min-width:0!important;
+  padding-inline:6px!important;
+ }
+ html.sc126.sc11-active[data-sc-theme] #v-agenda .sc148-head {flex-wrap:wrap}
+ html.sc126.sc11-active[data-sc-theme] :is(#v-organizar,#v-biblioteca) .sc126-row-main strong {
+  white-space:normal;
+ }
+}
