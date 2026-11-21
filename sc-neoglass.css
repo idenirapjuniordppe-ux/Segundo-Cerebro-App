@@ -300,7 +300,7 @@ html.scng #sc69-theme-status{color:var(--ng-muted)!important}
 /* Telas e modais no smartphone: espaço interno e alvos de toque confortáveis. */
 @media(min-width:900px){
  html.scng #sc100-home .sc100-layout{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)!important}
- html.scng .sc129-project{display:inline-block;vertical-align:top;width:calc(50% - 9px);margin-right:12px!important}
+ html.scng .sc129-project{display:inline-block;vertical-align:top;width:calc(50% - 16px);margin-right:12px!important}
  html.scng.sc126 main>div.max-w-6xl{padding-top:28px!important}
 }
 @media(max-width:700px){
