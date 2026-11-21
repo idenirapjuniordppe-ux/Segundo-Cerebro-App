@@ -1,15 +1,16 @@
 /* 2º Cérebro Studio 9.0 — cache isolado da interface; NUNCA armazena respostas Google. */
 const VERSION='2026-11-20d';
-const CACHE='segundo-cerebro-2026-11-21c-botoes-premium-dashboard-fiel-20261121k-'+encodeURIComponent(self.registration.scope);
+const REVISION='2026-11-21l';
+const CACHE='segundo-cerebro-2026-11-21c-botoes-premium-dashboard-fiel-20261121l-'+encodeURIComponent(self.registration.scope);
 const PREFIX='segundo-cerebro-';
-const ESSENCIAIS=['./hero-neural-11-21.webp','./hero-minimal-11-21.webp','./hero-glass-11-21.webp','./hero-executive-11-21.webp','./hero-editorial-11-21.webp','./aura-coral-mesa.webp','./wallpaper-neural-11-21.webp','./wallpaper-minimal-11-21.webp','./wallpaper-glass-11-21.webp','./wallpaper-executive-11-21.webp','./wallpaper-editorial-11-21.webp','./index.html','./sc-botoes-compactos.css?v=2026-11-21c','./sc-botoes-compactos.js?v=2026-11-21c','./sc-aura-dashboard.css?v=2026-11-21k','./sc-aura-dashboard.js?v=2026-11-21k','./sc-drive-projetos.js?v=2026-11-20d','./pwa-transport.js?v=2026-11-20d-sc1137151','./pwa-install.js?v=2026-11-20d-sc1137151'];
+const ESSENCIAIS=['./hero-neural-11-21.webp','./hero-minimal-11-21.webp','./hero-glass-11-21.webp','./hero-executive-11-21.webp','./hero-editorial-11-21.webp','./aura-coral-mesa.webp','./wallpaper-neural-11-21.webp','./wallpaper-minimal-11-21.webp','./wallpaper-glass-11-21.webp','./wallpaper-executive-11-21.webp','./wallpaper-editorial-11-21.webp','./index.html','./sc-botoes-compactos.css?v=2026-11-21c','./sc-botoes-compactos.js?v=2026-11-21c','./sc-aura-dashboard.css?v=2026-11-21l','./sc-aura-dashboard.js?v=2026-11-21l','./sc-drive-projetos.js?v=2026-11-20d','./pwa-transport.js?v=2026-11-20d-sc1137151','./pwa-install.js?v=2026-11-21l'];
 const OPCIONAIS=['./offline.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
  for(const path of ESSENCIAIS){
   const response=await fetch(new Request(new URL(path,self.registration.scope),{cache:'no-store'}));
   if(!response.ok)throw new Error('Shell indisponível');
-  if(path==='./index.html'&&!((await response.clone().text()).includes("var VERSAO_TELA = '"+VERSION+"'")))throw new Error('Shell ainda não publicado nesta versão');
+  if(path==='./index.html'&&!((await response.clone().text()).includes('window.SC_SHELL_REVISION = "'+REVISION+'"')))throw new Error('Shell ainda não publicado nesta versão');
   await cache.put(path,response);
  } // sem app shell funcional, manter SW anterior
  await Promise.all(OPCIONAIS.map(async path=>{try{await cache.add(path);}catch(e){console.warn('[SW] recurso opcional:',path);}}));
@@ -26,7 +27,7 @@ self.addEventListener('activate',event=>{event.waitUntil((async()=>{
  }));
  await self.clients.claim();
 })());});
-self.addEventListener('message',e=>{if(e.data?.type==='SC_SHELL_VERSION'){e.ports?.[0]?.postMessage({version:VERSION});return}if(e.data&&['SKIP_WAITING','SC55_ACTIVATE_APPROVED','SC73_ACTIVATE_APPROVED','SC74_ACTIVATE_APPROVED','SC75_ACTIVATE_APPROVED'].includes(e.data.type))self.skipWaiting();});
+self.addEventListener('message',e=>{if(e.data?.type==='SC_SHELL_VERSION'){e.ports?.[0]?.postMessage({version:VERSION,revision:REVISION});return}if(e.data&&['SKIP_WAITING','SC55_ACTIVATE_APPROVED','SC73_ACTIVATE_APPROVED','SC74_ACTIVATE_APPROVED','SC75_ACTIVATE_APPROVED'].includes(e.data.type))self.skipWaiting();});
 self.addEventListener('fetch',event=>{
  const r=event.request;if(r.method!=='GET')return;
  const url=new URL(r.url);if(url.origin!==self.location.origin)return;
@@ -34,7 +35,7 @@ self.addEventListener('fetch',event=>{
   event.respondWith((async()=>{try{
     const response=await fetch(new Request(r,{cache:'no-store'}));
     const start=new URL('./',self.registration.scope);
-    if(response.ok && response.url && new URL(response.url).origin===self.location.origin && new URL(response.url).pathname===url.pathname && (url.pathname===start.pathname || url.pathname===start.pathname+'index.html') && (response.headers.get('Content-Type')||'').includes('text/html')){const cache=await caches.open(CACHE);if(!(await response.clone().text()).includes("var VERSAO_TELA = '"+VERSION+"'"))return (await cache.match('./index.html'))||response;cache.put('./index.html',response.clone()).catch(()=>{});}
+    if(response.ok && response.url && new URL(response.url).origin===self.location.origin && new URL(response.url).pathname===url.pathname && (url.pathname===start.pathname || url.pathname===start.pathname+'index.html') && (response.headers.get('Content-Type')||'').includes('text/html')){const cache=await caches.open(CACHE);if(!(await response.clone().text()).includes('window.SC_SHELL_REVISION = "'+REVISION+'"'))return (await cache.match('./index.html'))||response;cache.put('./index.html',response.clone()).catch(()=>{});}
     return response;
    }catch(e){const cache=await caches.open(CACHE);return (await cache.match('./index.html'))||(await cache.match('./offline.html'))||Response.error();}})());return;
  }

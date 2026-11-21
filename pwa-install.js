@@ -11,13 +11,16 @@
   if(window.SC115&&['','-m'].some(k=>{const s=SC115.state(k);return s.armed||s.composing}))return false;
   return true;
  }
- function version(worker){return new Promise(resolve=>{if(!worker)return resolve(null);const c=new MessageChannel(),timer=setTimeout(()=>{c.port1.close();resolve(null)},1500);c.port1.onmessage=e=>{clearTimeout(timer);c.port1.close();resolve(e.data&&e.data.version||null)};worker.postMessage({type:'SC_SHELL_VERSION'},[c.port2])})}
+ function version(worker){return new Promise(resolve=>{if(!worker)return resolve(null);const c=new MessageChannel(),timer=setTimeout(()=>{c.port1.close();resolve(null)},1500);c.port1.onmessage=e=>{clearTimeout(timer);c.port1.close();resolve(e.data||null)};worker.postMessage({type:'SC_SHELL_VERSION'},[c.port2])})}
  async function check(){
   if(!safe()||reloading)return;
   if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});return}
   const active=await version(navigator.serviceWorker.controller);
-  if(!active||active===window.VERSAO_TELA||!safe())return;
-  const key='sc_shell_reloaded_'+active;
+  if(!active||!safe())return;
+  const revision=active.revision||active.version;
+  const current=active.revision?window.SC_SHELL_REVISION:window.VERSAO_TELA;
+  if(!revision||revision===current)return;
+  const key='sc_shell_reloaded_'+revision;
   try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1')}catch(_){return}
   reloading=true;location.reload();
  }
