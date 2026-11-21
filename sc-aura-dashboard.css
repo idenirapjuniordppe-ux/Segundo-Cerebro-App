@@ -537,3 +537,12 @@ html.sc190-premium.sc126[data-sc-theme="executive"] #sc190-dashboard .sc190-hero
  }
  html.sc190-premium.sc126 #sc190-dashboard .sc190-metric small {white-space:normal}
 }
+
+@media (max-width:400px) {
+ html.sc190-premium.sc126 #sc190-dashboard .sc190-filters {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+ html.sc190-premium.sc126 #sc190-dashboard .sc190-filters .sc190-chip {
+  min-width:0;
+ }
+}
