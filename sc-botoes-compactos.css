@@ -560,8 +560,10 @@ html.sc126 .sc183-sidelinks{display:none}
     overflow-x:hidden;overflow-y:auto;
     border:1px solid var(--sc183-border);
     border-radius:25px;
-    background:var(--sc183-paper);
-    color:var(--sc183-ink);
+    /* As regras legadas `aside` usam background !important; escopo preciso. */
+    background:var(--sc128-paper,var(--sc183-paper))!important;
+    color:var(--sc128-ink,var(--sc183-ink))!important;
+    border-color:var(--sc128-border,var(--sc183-border))!important;
     box-shadow:var(--sc183-shadow);
     padding:21px 13px;
     z-index:32;
