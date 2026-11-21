@@ -38,11 +38,26 @@ const fixture='<!doctype html><html lang="pt-BR" class="sc126 sc11-active sc100-
               navChildren:nav.querySelectorAll('[data-sc126-route]').length,
               sideChildren:aside.querySelectorAll('.sc183-sideitem').length,
               documentWidth:document.documentElement.scrollWidth,
-              viewport:innerWidth};
+              viewport:innerWidth,
+              colors:{background:getComputedStyle(aside).backgroundColor,
+                title:getComputedStyle(aside.querySelector('.sc183-sidebrand strong')).color,
+                normal:getComputedStyle(aside.querySelector('.sc183-sideitem:not(.active)')).color,
+                activeBackground:getComputedStyle(aside.querySelector('.sc183-sideitem.active')).backgroundColor,
+                activeText:getComputedStyle(aside.querySelector('.sc183-sideitem.active')).color}};
           });
           assert.equal(info.navChildren,3,'Navegação original intacta: '+theme+' '+width);
           assert.equal(info.sideChildren,3,'Atalhos da sidebar: '+theme+' '+width);
           assert(info.documentWidth<=width+3,'Transbordamento horizontal: '+theme+' '+width+' '+JSON.stringify(info));
+          const luminance=rgb=>{
+            const values=(rgb.match(/\d+(?:\.\d+)?/g)||[]).slice(0,3).map(Number);
+            assert.equal(values.length,3,'Cor não reconhecida: '+rgb);
+            const channels=values.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});
+            return .2126*channels[0]+.7152*channels[1]+.0722*channels[2];
+          };
+          const contrast=(a,b)=>{
+            const l1=luminance(a),l2=luminance(b);
+            return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+          };
           if(width>=1100){
             assert.notEqual(info.asideDisplay,'none','Sidebar desktop oculta: '+theme+' '+width);
             assert.equal(info.navDisplay,'none','Navegação móvel sobreposta no desktop: '+theme+' '+width);
@@ -50,6 +65,9 @@ const fixture='<!doctype html><html lang="pt-BR" class="sc126 sc11-active sc100-
             assert(info.aside.x>=12&&info.aside.right<=250,'Sidebar fora do canto esquerdo: '+theme+' '+width);
             assert(info.content.x>=250,'Conteúdo encoberto pela sidebar: '+theme+' '+width+' '+JSON.stringify(info));
             assert(info.aside.right+8<=info.main.x,'Sidebar cruzou região principal: '+theme+' '+width+' '+JSON.stringify(info));
+            assert(contrast(info.colors.background,info.colors.title)>=4.5,'Título da sidebar ilegível: '+theme+' '+width+' '+JSON.stringify(info.colors));
+            assert(contrast(info.colors.background,info.colors.normal)>=4.5,'Texto da sidebar ilegível: '+theme+' '+width+' '+JSON.stringify(info.colors));
+            assert(contrast(info.colors.activeBackground,info.colors.activeText)>=4.5,'Seleção da sidebar ilegível: '+theme+' '+width+' '+JSON.stringify(info.colors));
           }else{
             assert.equal(info.asideDisplay,'none','Sidebar desktop aparecendo no celular/tablet: '+theme+' '+width);
             assert.notEqual(info.navDisplay,'none','Barra inferior não visível: '+theme+' '+width);
