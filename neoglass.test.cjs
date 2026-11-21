@@ -5,16 +5,19 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('sc-neoglass.css','utf8');
+const cssV2=fs.readFileSync('sc-neoglass-v2.css','utf8');
 const js=fs.readFileSync('sc-neoglass.js','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
 test('backup-friendly: Neo Glass é aditivo e mantém protocolo 2026-11-20d',()=>{
  assert.match(html,/var VERSAO_TELA = '2026-11-20d'/);
  assert.match(sw,/const VERSION='2026-11-20d'/);
- assert.match(sw,/segundo-cerebro-2026-11-21a-neoglass/);
+ assert.match(sw,/segundo-cerebro-2026-11-21b-neoglass/);
  assert.match(html,/sc-neoglass\.css\?v=2026-11-21a/);
- assert.match(html,/sc-neoglass\.js\?v=2026-11-21a/);
+ assert.match(html,/sc-neoglass\.js\?v=2026-11-21b/);
  assert.match(sw,/sc-neoglass\.css\?v=2026-11-21a/);
- assert.match(sw,/sc-neoglass\.js\?v=2026-11-21a/);
+ assert.match(sw,/sc-neoglass\.js\?v=2026-11-21b/);
+ assert.match(html,/sc-neoglass-v2\.css\?v=2026-11-21b/);
+ assert.match(sw,/sc-neoglass-v2\.css\?v=2026-11-21b/);
  assert.match(html,/SCDrive\.shell/);
  assert.match(html,/SCDrive\.mount/);
  assert.match(html,/sc166Vincular/);
@@ -40,6 +43,11 @@ test('CSS cobre modos, acessibilidade e responsividade',()=>{
  assert.match(css,/#scng-fab/);
  assert.match(css,/#modal-caixa/);
  assert.match(css,/#scd-box/);
+ assert.match(cssV2,/sc148-active > #sc100-home/);
+ assert.match(cssV2,/data-scng-preset="neon"/);
+ assert.match(cssV2,/#v-organizar/);
+ assert.match(cssV2,/#v-biblioteca/);
+ assert.match(cssV2,/#sc100-home/);
  let count=0,quoted='',escape=false,comment=false;
  for(let i=0;i<css.length;i++){
   const c=css[i],n=css[i+1];
@@ -73,8 +81,8 @@ test('atmosferas persistem sem gravar em planilhas ou apagar dados',()=>{
  };
  vm.runInNewContext(js,context);
  const api=context.window.SCNeoGlass;
- assert.equal(api.version,'2026-11-21a');
- assert.equal(api.preset(),'auto');
+ assert.equal(api.version,'2026-11-21b');
+ assert.equal(api.preset(),'neon');
  api.applyPreset('neon',true);
  assert.equal(api.preset(),'neon');
  assert.equal(document.documentElement.attributes['data-scng-preset'],'neon');
