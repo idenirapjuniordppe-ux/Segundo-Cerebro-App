@@ -3371,6 +3371,7 @@ function montarNav(){
 }
 function irPara(v){
   vistaAtual = v;
+  document.documentElement.classList.toggle('sc-lavanda-abas', v==='organizar' || v==='biblioteca');
   if(v!=='tarefas' && modoSel){ modoSel = false; selecao = {}; }
   atualizarLote();
   document.querySelectorAll('.vista').forEach(function(s){ s.classList.toggle('hidden', s.id!=='v-'+v); });
@@ -12745,8 +12746,8 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-21m";</script>
-<script src="./pwa-install.js?v=2026-11-21m"></script>
+<script>window.SC_SHELL_REVISION = "2026-11-21n";</script>
+<script src="./pwa-install.js?v=2026-11-21n"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -15355,7 +15356,7 @@ document.addEventListener('click',function(e){
 <script src="./sc-drive-projetos.js?v=2026-11-20d"></script>
 <link rel="stylesheet" href="./sc-botoes-compactos.css?v=2026-11-21c">
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
-<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21m">
-<script src="./sc-aura-dashboard.js?v=2026-11-21m"></script>
+<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21n">
+<script src="./sc-aura-dashboard.js?v=2026-11-21n"></script>
 </body></html>
 

@@ -744,7 +744,7 @@ html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-progre
 html.sc190-premium.sc126 #sc190-dashboard > .sc190-metrics {margin-top:16px}
 
 /* Organizar e Biblioteca seguem a paleta lavanda da tela Hoje. */
-html.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]):has(:is(#v-organizar,#v-biblioteca):not(.hidden)) {
+html.sc-lavanda-abas.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) {
  --sc128-paper:#ffffff!important;
  --sc128-top:#f8f9fd!important;
  --sc128-base:#eef1f9!important;
@@ -758,7 +758,8 @@ html.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme=
  --sc183-accent:#504592;
  --sc183-soft:#ebeefd;
 }
-html.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]):has(:is(#v-organizar,#v-biblioteca):not(.hidden)) body::before {
+html.sc-lavanda-abas.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) body,
+html.sc-lavanda-abas.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) body::before {
  background:#eef1f9!important;
  opacity:1;
 }
