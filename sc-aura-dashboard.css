@@ -743,40 +743,39 @@ html.sc190-premium.sc126[data-sc-theme="minimal"] #sc190-dashboard .sc190-progre
 
 html.sc190-premium.sc126 #sc190-dashboard > .sc190-metrics {margin-top:16px}
 
-/* Organizar e Biblioteca usam o acabamento Coral nos temas claros. */
-html.sc126.sc11-active.sc100-active:is([data-sc-theme="glass"],[data-sc-theme="editorial"]):has(:is(#v-organizar,#v-biblioteca):not(.hidden)) {
- --sc128-paper:#fffaf6!important;
- --sc128-top:#fdf9f5!important;
- --sc128-base:#faf5ef!important;
- --sc128-ink:#28231f!important;
- --sc128-muted:#67584e!important;
- --sc128-border:#e7d6c9!important;
- --sc11-accent:#a33d22!important;
- --sc11-soft:#fce4d4!important;
- --sc141-solid:#fffaf6!important;
- --sc135-button:#a33d22!important;
- --sc183-accent:#a33d22;
- --sc183-soft:#fce4d4;
+/* Organizar e Biblioteca seguem a paleta lavanda da tela Hoje. */
+html.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]):has(:is(#v-organizar,#v-biblioteca):not(.hidden)) {
+ --sc128-paper:#ffffff!important;
+ --sc128-top:#f8f9fd!important;
+ --sc128-base:#eef1f9!important;
+ --sc128-ink:#243044!important;
+ --sc128-muted:#526078!important;
+ --sc128-border:#d8dfee!important;
+ --sc11-accent:#504592!important;
+ --sc11-soft:#ebeefd!important;
+ --sc141-solid:#ffffff!important;
+ --sc135-button:#504592!important;
+ --sc183-accent:#504592;
+ --sc183-soft:#ebeefd;
 }
 html.sc126.sc11-active.sc100-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]):has(:is(#v-organizar,#v-biblioteca):not(.hidden)) body::before {
- background:#faf5ef!important;
+ background:#eef1f9!important;
  opacity:1;
 }
 html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) :is(#v-organizar > h1,#v-biblioteca .sc182-library-header) {
- background:linear-gradient(110deg,#f6c8b0,#ffead9)!important;
- border-inline-start:5px solid #b8452a!important;
+ background:#fff!important;
  min-height:72px;
  box-shadow:none!important;
  border-radius:19px!important;
 }
 html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) :is(#v-organizar,#v-biblioteca) .sc182-tabstrip .sc126-tools button[aria-pressed="true"] {
- background:#a33d22!important;
+ background:#6c4dc3!important;
  color:#fff!important;
 }
 html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) :is(#v-organizar,#v-biblioteca) :is(.sc182-inline-create,.sc182-utilities > summary) {
- background:#fce4d4!important;
- color:#a33d22!important;
- border-color:#e7d6c9!important;
+ background:#ebeefd!important;
+ color:#504592!important;
+ border-color:#d8dfee!important;
 }
 html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) #v-biblioteca .sc129-note > button:not(.sc126-row-main) {
  flex:0 0 44px;
@@ -785,10 +784,10 @@ html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[dat
  padding:4px!important;
  border:0!important;
  background:transparent!important;
- color:#a33d22!important;
+ color:#504592!important;
 }
 html.sc126.sc11-active:is([data-sc-theme="minimal"],[data-sc-theme="glass"],[data-sc-theme="editorial"]) #v-biblioteca .sc129-note > [data-sc138-star][aria-pressed="true"] {
- background:#fce4d4!important;
+ background:#ebeefd!important;
  border-radius:12px;
 }
 @media(max-width:600px) {
