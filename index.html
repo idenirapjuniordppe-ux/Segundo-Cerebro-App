@@ -12302,7 +12302,7 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
 </style>
 <script id="sc117-floating-create">
 /* Studio 11.7: botão independente, arrastável e acessível. */
-(function(){'use strict';return; // Captura centralizada na barra; antigo botão flutuante desativado.
+(function(){'use strict';
  const KEY='sc117_fab_position_v1';
  const buttonId='sc117-fab';
  let button=null, gesture=null, ignoreClickUntil=0;
@@ -12357,8 +12357,8 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
    },{passive:false});
    function finish(e){let g=gesture;if(!g||g.id!==e.pointerId)return;
      gesture=null;button.classList.remove('sc117-dragging');
+     if(e.type==='pointercancel'){setRatio(safeRead());return;}
      if(g.drag){let r=button.getBoundingClientRect();setXY(r.left,r.top,true);ignoreClickUntil=Date.now()+550;}
-     else if(e.type==='pointercancel')setRatio(safeRead());
    }
    button.addEventListener('pointerup',finish);
    button.addEventListener('pointercancel',finish);
@@ -12746,8 +12746,8 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-21p";</script>
-<script src="./pwa-install.js?v=2026-11-21p"></script>
+<script>window.SC_SHELL_REVISION = "2026-11-21q";</script>
+<script src="./pwa-install.js?v=2026-11-21q"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -13392,7 +13392,7 @@ html[data-sc-theme] body #sc100-home .sc100-overline{color:var(--sc128-muted)!im
 </style>
 
 <style id="sc129-compact">
-html.sc126 #sc117-fab,html.sc126 #sc5-fab,html.sc126 #fab{display:none!important}
+html.sc126 #sc5-fab,html.sc126 #fab{display:none!important}
 #sc129-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 auto;max-width:1120px;padding:8px 10px 0!important;color:var(--sc128-ink)}
 #sc129-header strong{font-size:18px;font-weight:750}#sc129-header>div{display:flex;gap:4px}#sc129-header button{min-height:38px;min-width:38px;padding:6px;border:0;background:transparent!important;box-shadow:none!important;color:inherit!important}
 html.sc126 #topo>div:not(#sc129-header){padding:6px 10px 9px!important}
@@ -15356,7 +15356,7 @@ document.addEventListener('click',function(e){
 <script src="./sc-drive-projetos.js?v=2026-11-20d"></script>
 <link rel="stylesheet" href="./sc-botoes-compactos.css?v=2026-11-21c">
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
-<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21p">
-<script src="./sc-aura-dashboard.js?v=2026-11-21p"></script>
+<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21q">
+<script src="./sc-aura-dashboard.js?v=2026-11-21q"></script>
 </body></html>
 
