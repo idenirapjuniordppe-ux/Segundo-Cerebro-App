@@ -160,19 +160,19 @@ function habitsPanel(m){
   if(!habit)return '<section class="sc190-card sc190-habits"><div class="sc190-cardhead"><h2><span class="sc190-heading-icon">♧</span> Hábitos</h2></div><div class="sc190-empty">Nenhum hábito cadastrado.</div>'+button('+ Criar hábito','habits')+'</section>';
   const days=Array.from({length:7},(_,i)=>addDays(m.d,i-6));
   const streak=typeof sequencia==='function'?sequencia(habit):0;
-  return '<section class="sc190-card sc190-habits"><div class="sc190-cardhead"><h2><span class="sc190-heading-icon">♧</span> Hábitos</h2>'+
+  return '<section class="sc190-card sc190-habits" data-habit-id="'+esc(habit.id)+'" data-streak="'+esc(streak)+'"><div class="sc190-cardhead"><h2><span class="sc190-heading-icon">♧</span> Hábitos</h2>'+
     '<span class="sc190-streak">'+esc(habit.nome)+(streak?' · '+streak+' dias':'')+'</span></div>'+
     '<div class="sc190-habitdays">'+days.map(d=>{
       const done=habitDone(habit.id,d),weekday=asDate(d).toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','');
       const scheduled=String(habit.dias||'').split(',').map(x=>x.trim()).includes(String(asDate(d).getDay()));
       const action=d===currentDay()&&scheduled?'data-sc126-habit="'+esc(habit.id)+'"':'data-sc126-open="habitos" data-id="'+esc(habit.id)+'"';
-      return '<button type="button" class="sc190-habitday '+(done?'done':'')+'" '+action+' aria-label="'+(done?'Realizado: ':'Consultar: ')+esc(weekday)+'"><span class="sc190-habitcircle">'+(done?'✓':'')+'</span><small>'+esc(weekday)+'</small></button>';
+      return '<button type="button" data-habit-day="'+esc(d)+'" class="sc190-habitday '+(done?'done':'')+'" '+action+' aria-label="'+(done?'Realizado: ':'Consultar: ')+esc(weekday)+'"><span class="sc190-habitcircle">'+(done?'✓':'')+'</span><small>'+esc(weekday)+'</small></button>';
     }).join('')+'</div></section>';
 }
 function goalsPanel(m){
   const chosen=m.goals.slice(0,3);
   return '<section class="sc190-card sc190-goals"><div class="sc190-cardhead"><h2><span class="sc190-heading-icon">◎</span> Metas em andamento</h2>'+button('Ver metas ›','goals')+'</div>'+
-    (chosen.length?chosen.map(g=>{const pct=pctGoal(g);return '<button type="button" class="sc190-goal" data-sc126-open="metas" data-id="'+esc(g.id)+'"><span>'+esc(name(g))+' <strong>'+pct+'%</strong></span><span class="sc190-goalbar"><span style="width:'+pct+'%"></span></span></button>';}).join(''):'<div class="sc190-empty">Nenhuma meta ativa cadastrada.</div>')+'</section>';
+    (chosen.length?chosen.map(g=>{const pct=pctGoal(g);return '<button type="button" class="sc190-goal" data-progress="'+pct+'" data-sc126-open="metas" data-id="'+esc(g.id)+'"><span>'+esc(name(g))+' <strong>'+pct+'%</strong></span><span class="sc190-goalbar"><span style="width:'+pct+'%"></span></span></button>';}).join(''):'<div class="sc190-empty">Nenhuma meta ativa cadastrada.</div>')+'</section>';
 }
 function projectsPanel(m){
   const projects=m.projects.slice(0,3);
@@ -208,6 +208,41 @@ function decorateSidebar(){
     access.dataset.sc190='ready';
   }
 }
+const depthMarkup=new WeakMap();
+function renderDepth(node, m){
+  const nextMarkup=markup(m);
+  if(depthMarkup.get(node)===nextMarkup)return;
+  depthMarkup.set(node,nextMarkup);
+  const sameDay=node.dataset.depthDay===m.d;
+  const pending=new Set(Array.from(node.querySelectorAll('.sc190-task:not(.sc190-task-done)'),el=>el.dataset.sc133Task));
+  const progress=new Map(Array.from(node.querySelectorAll('.sc190-goal'),el=>[el.dataset.id,Number(el.dataset.progress)]));
+  const habit=node.querySelector('[data-habit-id]');
+  const unmarked=new Set(Array.from(habit?.querySelectorAll('.sc190-habitday:not(.done)')||[],el=>el.dataset.habitDay));
+  node.innerHTML=nextMarkup;
+  node.dataset.depthDay=m.d;
+  if(!sameDay)return;
+
+  for(const el of node.querySelectorAll('.sc190-task-done')){
+    if(pending.has(el.dataset.sc133Task))el.classList.add('sc190-just-done');
+  }
+  const currentHabit=node.querySelector('[data-habit-id]');
+  if(habit&&currentHabit?.dataset.habitId===habit.dataset.habitId){
+    for(const el of currentHabit.querySelectorAll('.sc190-habitday.done')){
+      if(unmarked.has(el.dataset.habitDay))el.classList.add('sc190-just-done');
+    }
+    const streak=Number(currentHabit.dataset.streak);
+    if(streak>Number(habit.dataset.streak)&&streak%7===0)currentHabit.classList.add('sc190-milestone');
+  }
+  for(const goal of node.querySelectorAll('.sc190-goal')){
+    const before=progress.get(goal.dataset.id);
+    const after=Number(goal.dataset.progress);
+    if(after>before){
+      goal.style.setProperty('--sc190-progress-start',String(before/after));
+      goal.classList.add('sc190-progress-advanced');
+      if(after===100)goal.classList.add('sc190-milestone');
+    }
+  }
+}
 function render(){
   if(rendering)return;
   if(typeof vistaAtual!=='undefined'&&vistaAtual!=='hoje'){decorateSidebar();return;}
@@ -221,7 +256,7 @@ function render(){
     const restoreFocus=node.contains(active)&&active.matches('button[data-sc190]');
     const action=restoreFocus?active.dataset.sc190:'';
     const value=restoreFocus?active.dataset.value:undefined;
-    node.innerHTML=markup(model());
+    renderDepth(node,model());
     if(restoreFocus){
       Array.from(node.querySelectorAll('button[data-sc190]'))
         .find(b=>b.dataset.sc190===action&&b.dataset.value===value)?.focus({preventScroll:true});
@@ -265,7 +300,7 @@ function bind(){
     }
   });
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
-  window.addEventListener('sc166:conta-limpa',()=>{day=currentDay();filter='all';render();});
+  window.addEventListener('sc166:conta-limpa',()=>{const node=$(key);if(node)delete node.dataset.depthDay;day=currentDay();filter='all';render();});
   render();
 }
 function asideFilter(k){return document.querySelector('#sc183-sidebar [data-sc126-organize="'+k+'"]');}

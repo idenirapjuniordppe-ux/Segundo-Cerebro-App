@@ -39,11 +39,11 @@ function setup(){
   return {dom,w};
 }
 test('HTML inclui arquivos de estrutura real e service worker os instala offline',()=>{
-  assert.match(html,/sc-aura-dashboard\.css\?v=2026-11-21r/);
-  assert.match(html,/sc-aura-dashboard\.js\?v=2026-11-21r/);
-  assert.match(sw,/premium-dashboard-fiel-20261121r/);
-  assert.match(sw,/sc-aura-dashboard\.css\?v=2026-11-21r/);
-  assert.match(sw,/sc-aura-dashboard\.js\?v=2026-11-21r/);
+  assert.match(html,/sc-aura-dashboard\.css\?v=2026-11-22a/);
+  assert.match(html,/sc-aura-dashboard\.js\?v=2026-11-22a/);
+  assert.match(sw,/premium-dashboard-fiel-20261122a/);
+  assert.match(sw,/sc-aura-dashboard\.css\?v=2026-11-22a/);
+  assert.match(sw,/sc-aura-dashboard\.js\?v=2026-11-22a/);
   assert.match(sw,/const VERSION='2026-11-20d';/);
 });
 test('Código e CSS são legíveis e não alteram dados automaticamente',()=>{
@@ -172,4 +172,21 @@ test('Selecionar um filtro mantém o foco no controle atualizado',t=>{
   button.click();
   assert(w.document.activeElement.matches(selector));
   assert.equal(w.document.activeElement.getAttribute('aria-pressed'),'true');
+});
+
+test('profundidade sinaliza apenas conclusões e progresso novos', t=>{
+  const {dom,w}=setup();t.after(()=>dom.window.close());
+  const query=s=>w.document.querySelector(s);
+  assert.equal(query('.sc190-just-done'),null);
+  w.D.tarefas[0].status='feita';
+  w.D.metas[0].progresso=100;
+  w.D.registros.push({habito_id:'h1',data:'2026-11-21'});
+  w.sequencia=()=>7;
+  w.renderTudo();
+  assert.equal(query('.sc190-task.sc190-just-done').dataset.sc133Task,'t1');
+  assert.equal(query('.sc190-goal.sc190-milestone').style.getPropertyValue('--sc190-progress-start'),'0.65');
+  assert(query('.sc190-habits.sc190-milestone .sc190-habitday.sc190-just-done'));
+  const marked=query('.sc190-task.sc190-just-done');
+  w.renderTudo();
+  assert.equal(query('.sc190-task.sc190-just-done'),marked);
 });
