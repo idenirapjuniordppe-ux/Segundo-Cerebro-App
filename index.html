@@ -12314,14 +12314,18 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
  function bounds(){
    let w=button?.offsetWidth||58,h=button?.offsetHeight||58;
    const vw=document.documentElement.clientWidth||innerWidth;
-   const vh=innerHeight;
+   const viewport=window.visualViewport;
+   const top=viewport?.offsetTop||0;
+   const vh=viewport?.height||innerHeight;
+   const header=document.getElementById('topo')?.getBoundingClientRect();
+   const minY=Math.max(top+12,(header?.bottom||0)+10);
    let nav=document.getElementById('nav-movel');
-   let bottom=vh-14;
+   let bottom=top+vh-14;
    if(nav&&getComputedStyle(nav).display!=='none'){
      const r=nav.getBoundingClientRect();
      if(r.height>0&&r.top>0)bottom=Math.min(bottom,r.top-12);
    }
-   return {minX:18,maxX:Math.max(18,vw-w-18),minY:12,maxY:Math.max(12,bottom-h)};
+   return {minX:18,maxX:Math.max(18,vw-w-18),minY:Math.min(minY,Math.max(top+12,bottom-h)),maxY:Math.max(top+12,bottom-h)};
  }
  function setXY(x,y,save){if(!button)return;
    const b=bounds(); x=limit(x,b.minX,b.maxX); y=limit(y,b.minY,b.maxY);
@@ -12331,7 +12335,7 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
    button.style.setProperty('bottom','auto','important');
    if(save)safeWrite(b.maxX>b.minX?(x-b.minX)/(b.maxX-b.minX):1,b.maxY>b.minY?(y-b.minY)/(b.maxY-b.minY):1);
  }
- function setRatio(s){let b=bounds();let p=s||{x:1,y:.91};
+ function setRatio(s){let b=bounds();let p=s||{x:1,y:1};
    setXY(b.minX+p.x*(b.maxX-b.minX),b.minY+p.y*(b.maxY-b.minY),false);
  }
  function open(){if(window.SC182Buttons&&typeof window.SC182Buttons.createMenu==='function')window.SC182Buttons.createMenu(button);else if(typeof window.abrirNovo==='function')window.abrirNovo();}
@@ -12362,6 +12366,10 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
    }
    button.addEventListener('pointerup',finish);
    button.addEventListener('pointercancel',finish);
+   button.addEventListener('lostpointercapture',e=>{
+     if(gesture?.id!==e.pointerId)return;
+     gesture=null;button.classList.remove('sc117-dragging');setRatio(safeRead());
+   });
    button.addEventListener('click',function(e){
      if(Date.now()<ignoreClickUntil){e.preventDefault();e.stopImmediatePropagation();return;}
      open();
@@ -12375,6 +12383,7 @@ html.sc11-active #nav-movel .sc11-nav-create { display:none!important; }
    function resize(){if(!button)return;setRatio(safeRead());}
    addEventListener('resize',resize,{passive:true});
    addEventListener('orientationchange',resize,{passive:true});
+   window.visualViewport?.addEventListener('resize',resize,{passive:true});
    /* Não sobrepõe a barra após ajustes de layout. */
    const nav=document.getElementById('nav-movel');
    if(nav&&typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(nav);
@@ -12746,8 +12755,8 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-21q";</script>
-<script src="./pwa-install.js?v=2026-11-21q"></script>
+<script>window.SC_SHELL_REVISION = "2026-11-21r";</script>
+<script src="./pwa-install.js?v=2026-11-21r"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
 (function(){'use strict';
@@ -15356,7 +15365,7 @@ document.addEventListener('click',function(e){
 <script src="./sc-drive-projetos.js?v=2026-11-20d"></script>
 <link rel="stylesheet" href="./sc-botoes-compactos.css?v=2026-11-21c">
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
-<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21q">
-<script src="./sc-aura-dashboard.js?v=2026-11-21q"></script>
+<link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-21r">
+<script src="./sc-aura-dashboard.js?v=2026-11-21r"></script>
 </body></html>
 
