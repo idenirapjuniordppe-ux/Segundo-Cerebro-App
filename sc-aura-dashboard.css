@@ -710,16 +710,6 @@ html.sc190-premium.sc126 #sc190-dashboard .sc190-hero time {
 html.sc190-premium.sc126:is([data-sc-theme="neural"],[data-sc-theme="executive"]) #sc190-dashboard .sc190-hero time {
  color:#f5f1ff;
 }
-html.sc190-premium.sc126 #sc190-dashboard .sc190-hero-create {
- margin-top:14px;
- min-height:44px;
- padding:8px 16px;
- border-radius:12px;
- border:0;
- background:#b8452a!important;
- color:#fff!important;
- font-weight:700;
-}
 html.sc190-premium.sc126 #sc190-dashboard .sc190-toolbar .sc190-datebar {margin-bottom:12px}
 html.sc190-premium.sc126 #sc190-dashboard .sc190-layout {margin-top:14px}
 html.sc190-premium.sc126.sc11-active.sc100-active[data-sc-theme="minimal"] #sc190-dashboard .sc190-metric {

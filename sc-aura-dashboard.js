@@ -104,8 +104,7 @@ function hero(m){
   const who=String(data().config?.nome||'').trim().split(/\s+/)[0];
   return '<div class="sc190-hero"><div class="sc190-hero-copy">'+
     '<time datetime="'+esc(m.d)+'">'+esc(asDate(m.d).toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}))+'</time>'+
-    '<h1>'+greeting+(who?', '+esc(who):'')+'!</h1>'+
-    button('+ Nova tarefa','new-task','','sc190-hero-create')+'</div></div>';
+    '<h1>'+greeting+(who?', '+esc(who):'')+'!</h1></div></div>';
 }
 function header(m){
   const first=m.open.find(priority)||m.open[0];
