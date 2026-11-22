@@ -21,7 +21,7 @@ function fixture(){
 test('Mantém versões e integração sem migração nem mudanças de API',()=>{
   assert.match(html,/var VERSAO_TELA = '2026-11-20d';/);
   assert.match(worker,/const VERSION='2026-11-20d';/);
-  assert.match(worker,/premium-dashboard-fiel-20261121n/);
+  assert.match(worker,/premium-dashboard-fiel-20261121o/);
   assert.match(html,/sc-drive-projetos\.js\?v=2026-11-20d/);
   assert.match(css,/Studio 11\.30/);
   assert.match(js,/version:'2026-11-21e'/);
@@ -98,4 +98,19 @@ test('CSS está estruturalmente equilibrado',()=>{
     assert(depth>=0,'CSS contém fechamento inesperado');
   }
   assert.equal(depth,0,'CSS possui bloco não fechado');
+});
+
+test('navegação online entrega a revisão mais recente sem substituir o cache offline do worker',async()=>{
+ const listeners={};
+ const scope='https://example.test/app/';
+ const online=new Response('window.SC_SHELL_REVISION = "posterior";',{headers:{'Content-Type':'text/html'}});
+ Object.defineProperty(online,'url',{value:scope});
+ let writes=0,result;
+ vm.runInNewContext(worker,{
+   self:{registration:{scope},location:new URL(scope),addEventListener:(name,fn)=>{listeners[name]=fn;}},
+   URL,Request:class {},Response,fetch:async()=>online,caches:{open:async()=>({put:async()=>{writes++;},match:async()=>new Response('anterior')})}
+ });
+ listeners.fetch({request:{url:scope,method:'GET',mode:'navigate'},respondWith:value=>{result=value;}});
+ assert.equal(await result,online);
+ assert.equal(writes,0);
 });
