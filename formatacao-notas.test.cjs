@@ -134,7 +134,8 @@ test('listas, numeração, níveis, citação, destaque, bloco de código, divis
   choose('blocks','block','dest');assert.match(field(),/\n> \[!\] antes/);
   choose('blocks','block','cod');assert.match(field(),/\n```\nantes trecho depois\n```/);
   choose('more','command','columns');assert.equal(w.edColunas(),'2');
-  choose('more','command','block:hr');assert.match(field(),/\n---$/);
+  assert.equal(d.querySelector('[data-ed-note-panel=more] [data-ed-note-command="block:hr"]'),null);
+  choose('blocks','block','hr');assert.match(field(),/\n---$/);
   choose('more','command','close');assert.equal(d.activeElement,d.body);
 });
 
