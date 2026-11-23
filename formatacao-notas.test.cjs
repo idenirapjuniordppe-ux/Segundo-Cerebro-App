@@ -163,3 +163,17 @@ test('links da web, links de notas e inserção de data e hora funcionam na posi
     assert.match(field(),pattern);
   }
 });
+
+test('sublinhado, sobrescrito e subscrito afetam apenas a seleção e reaparecem na leitura',async t=>{
+  const {w,choose,selectNode,field,text}=await fixture(t);
+  for(const [command,tag] of [['underline','u'],['sup','sup'],['sub','sub']]){
+    selectNode(text().firstChild,6,12);
+    choose('more','command','fmt:'+command);
+    assert.equal(field(),'Introdução\nantes ['+tag+']trecho[/'+tag+'] depois');
+    assert.equal(text().querySelector(tag).textContent,'trecho');
+    assert.equal(w.mdInline(field().split('\n')[1]),'antes <'+tag+'>trecho</'+tag+'> depois');
+    choose('more','command','fmt:limpar');
+    assert.equal(field(),'Introdução\nantes trecho depois');
+    text().normalize();
+  }
+});

@@ -4950,6 +4950,10 @@ function htmlParaMd(n){
     else if(tg === 'STRONG' || tg === 'B') o += W('**');
     else if(tg === 'EM' || tg === 'I') o += W('*');
     else if(tg === 'S' || tg === 'STRIKE' || tg === 'DEL') o += W('~~');
+    else if(['U','SUP','SUB'].includes(tg)){
+      var style = tg.toLowerCase();
+      o += '['+style+']'+i+'[/'+style+']';
+    }
     else if(tg === 'CODE') o += W('`');
     else if(tg === 'MARK'){
       var corMarca = c.getAttribute('data-marca');
@@ -4968,6 +4972,9 @@ function mdInline(s, linkNota){
   s = s.replace(/`([^`]+)`/g, function(m, c){ return P('<code>' + c + '</code>'); });
   s = s.replace(/\[\[([^\[\]\n]+)\]\]/g, function(m, t){ if(linkNota)return P(linkNota(t));var ref=SC167.noteLink(t),label=ref?(ref.n.id?h(ref.n.titulo):ref.label):t;return P('<a class="lnota" data-nota="'+t+'" contenteditable="false">')+label+P('</a>'); });
   s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g, function(m, t, u){ return P('<a href="' + u + '" target="_blank" rel="noopener">') + t + P('</a>'); });
+  s = s.replace(/\[(u|sup|sub)\]([^\n]+?)\[\/\1\]/g,function(m,tag,content){
+    return P('<'+tag+'>')+content+P('</'+tag+'>');
+  });
   s = s.replace(/\[cor=(#[0-9a-f]{6})\]/gi,function(m,c){return P('<span style="color:'+c+'!important">');}).replace(/\[\/cor\]/g,function(){return P('</span>');});
   s = s.replace(/\[marca=(#[0-9a-f]{6})\]([^\n]+?)\[\/marca\]/gi,function(m,cor,conteudo){
     return P('<mark data-marca="'+cor+'" style="'+estiloMarca(cor)+'">')+conteudo+P('</mark>');
@@ -5140,6 +5147,20 @@ function edFmt(k){
       });
     }
   }
+  else if(['underline','sup','sub'].includes(k)){
+    if(r.collapsed){ toast('Selecione o texto primeiro.'); return; }
+    var inlineTag = k === 'underline' ? 'u' : k;
+    var wasActive = !!edAncora(t,inlineTag.toUpperCase());
+    var wrapper;
+    edEditarTrecho(t,r,function(f){
+      f.querySelectorAll(inlineTag==='u'?'u':'sup,sub').forEach(edDesembrulhar);
+      if(wasActive) return f;
+      wrapper = document.createElement(inlineTag);
+      wrapper.appendChild(f);
+      return wrapper;
+    });
+    if(wrapper){ r.selectNodeContents(wrapper); edSelecionar(r); }
+  }
   else if(k === 'code' || k === 'mark'){
     var tagBloco = k === 'code' ? 'CODE' : 'MARK', ja = edAncora(t, tagBloco);
     if(r.collapsed){
@@ -5160,7 +5181,7 @@ function edFmt(k){
     if(r.collapsed){ toast('Selecione o texto primeiro.'); return; }
     edEditarTrecho(t,r,function(f){
       // Links de navegação para outras notas não são marcas visuais.
-      f.querySelectorAll('strong,b,em,i,s,strike,del,u,span,font,code,mark,a:not(.lnota)').forEach(edDesembrulhar);
+      f.querySelectorAll('strong,b,em,i,s,strike,del,u,sup,sub,span,font,code,mark,a:not(.lnota)').forEach(edDesembrulhar);
       return f;
     });
   }
@@ -5262,6 +5283,7 @@ function edNoteFormatHtml(){
  var group=function(title,html){return '<div class="ed-note-category"><div class="ed-note-category-title">'+title+'</div><div class="ed-note-options">'+html+'</div></div>';};
  var extras=[
  ['link','Inserir ou editar link','fmt:link','link'],['[[ ]]','Link para outra nota','fmt:nota'],
+ ['U','Sublinhado','fmt:underline','underline'],['x²','Sobrescrito','fmt:sup','sup'],['x₂','Subscrito','fmt:sub','sub'],
  ['S','Riscado','fmt:strike','strike'],['code','Código','fmt:code','code'],
  ['Tₓ','Limpar formatação','fmt:limpar'],['number','Opções de numeração','num'],['⇤','Diminuir recuo','block:rec'],
  ['⇥','Aumentar recuo','block:avanca'],['＋','Inserir bloco, data ou hora','insert'],['×','Fechar teclado e menus','close']
@@ -5455,6 +5477,7 @@ function edBarraAtualizar(){
   var on = {};
   if(t && document.activeElement === t){
     try { on.bold = document.queryCommandState('bold'); on.italic = document.queryCommandState('italic'); on.strike = document.queryCommandState('strikeThrough'); } catch(e){}
+    on.underline = !!edAncora(t,'U'); on.sup = !!edAncora(t,'SUP'); on.sub = !!edAncora(t,'SUB');
     on.code = !!edAncora(t, 'CODE'); on.mark = !!edAncora(t, 'MARK'); on.link = !!edAncora(t, 'A');
   }
   Array.prototype.forEach.call(bar.querySelectorAll('.ed-b'), function(b){ var a = b.getAttribute('data-a'); b.classList.toggle('on', b.classList.contains('f') ? !!on[a] : (b.classList.contains('b') && a === tp)); });
@@ -12755,7 +12778,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-22b";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-22c";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
