@@ -252,3 +252,16 @@ test('edição móvel oculta a navegação e a captura flutuante e acompanha o t
   w.edDockPosicionar();
   assert.equal(dock.style.getPropertyValue('--ed-note-bottom'),'0px');
 });
+
+test('ações do trecho selecionam e copiam todo o texto da nota',async t=>{
+  const {w,q,selectNode,text}=await fixture(t);
+  let copied;
+  Object.defineProperty(w.navigator,'clipboard',{value:{async writeText(value){copied=value;}}});
+  selectNode(text().firstChild,0,5);
+  await sleep(60);
+  q('[data-sc138-select-all]').click();
+  assert.equal(w.getSelection().getRangeAt(0).startContainer,q('#ed .b-t'));
+  assert.equal(w.getSelection().getRangeAt(0).endContainer,text());
+  q('[data-sc138-copy-all]').click();
+  assert.equal(copied,'Introdução\nantes trecho depois');
+});
