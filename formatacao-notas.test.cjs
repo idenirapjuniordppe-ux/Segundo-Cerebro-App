@@ -101,7 +101,7 @@ test('atalhos e menu More preservam a seleção original ao formatar',async t=>{
   assert.equal(text().textContent,'antes trecho depois');
   assert.deepEqual([...text().querySelectorAll('s')].map(x=>x.textContent),['t','o']);
   const middle=[...text().childNodes].find(x=>x.nodeValue==='rech');assert.ok(middle);
-  selectNode(middle,0,4);choose('more','command','fmt:code');
+  selectNode(middle,0,4);choose('insert','command','fmt:code');
   assert.equal(q('#ed code').textContent,'rech');
   selectNode(q('#ed code').firstChild,0,4);toggle('ink');const color=q('#ed-text-color');
   color.value='#7c3aed';color.dispatchEvent(new w.Event('change',{bubbles:true}));
@@ -142,24 +142,24 @@ test('listas, numeração, níveis, citação, destaque, bloco de código, divis
 test('links da web, links de notas e inserção de data e hora funcionam na posição escolhida',async t=>{
   const {w,d,q,selectNode,tap,choose,field,text}=await fixture(t);
   selectNode(text().firstChild,6,12);
-  choose('more','command','fmt:link');
+  choose('insert','command','fmt:link');
   assert.equal(d.activeElement,q('#ed-url'));
   q('#ed-url').value='example.test';
   const web=q('#ed-link');
   tap([...web.querySelectorAll('button')].find(x=>/^OK$/i.test(x.textContent)));
   assert.ok(field().includes('[trecho](https://example.test)'));
   selectNode(q('#ed a').firstChild,1);
-  choose('more','command','fmt:link');
+  choose('insert','command','fmt:link');
   tap([...web.querySelectorAll('button')].find(x=>/remover/i.test(x.textContent)));
   assert.equal(field(),'Introdução\nantes trecho depois');
   assert.equal(text().textContent,'antes trecho depois');
   selectNode(text().lastChild,text().lastChild.length);
-  choose('more','command','fmt:nota');
+  choose('insert','command','fmt:nota');
   tap(q('#ed-nota-l button'),true);
   assert.equal(q('#ed a.lnota').textContent,'Outra nota');
   assert.match(field(),/\[\[.*Outra nota\]\]/);
   for(const [label,pattern] of [['Data de hoje',/\d{2}\/\d{2}\/\d{4}/],['Hora agora',/\d{2}:\d{2}/]]){
-    choose('more','command','insert');
+    choose('insert','command','insert');
     tap([...q('#ed-ins').querySelectorAll('button')].find(b=>b.textContent.includes(label)),true);
     assert.match(field(),pattern);
   }
@@ -260,4 +260,41 @@ test('ações do trecho permitem copiar a nota inteira',async t=>{
   assert.equal(w.document.querySelector('[data-sc138-select-all],[data-ed-note-command=select-all]'),null);
   q('[data-sc138-copy-all]').click();
   assert.equal(copied,'Introdução\nantes trecho depois');
+});
+
+test('sumário acompanha os títulos durante a edição e navega na leitura',async t=>{
+  const {w,q,selectNode,choose,text}=await fixture(t);
+  let jumped;
+  w.HTMLElement.prototype.scrollIntoView=function(){jumped=this.textContent;};
+  selectNode(text().firstChild,0);
+  choose('blocks','block','h2');
+  const details=q('#sc138-inline .ed-note-outline');
+  assert.equal(details.open,false);
+  details.open=true;
+  q('.ed-note-outline button').click();
+  assert.equal(jumped,'antes trecho depois');
+  assert.equal(w.SC138Notes.finish(),true);
+  q('.ed-note-outline button').click();
+  assert.equal(jumped,'antes trecho depois');
+});
+
+test('formata uma seleção entre blocos sem tocar no texto que ficou fora',async t=>{
+  const {w,d,q,text,tap,choose,field}=await fixture(t);
+  const first=q('#ed .b-t');
+  first.focus();
+  const range=d.createRange();
+  range.setStart(first.firstChild,4);
+  range.setEnd(text().firstChild,5);
+  w.getSelection().removeAllRanges();
+  w.getSelection().addRange(range);
+  d.dispatchEvent(new w.Event('selectionchange'));
+  const underline=q('.ed-note-main [data-ed-note-command="fmt:underline"]');
+  tap(underline,true);
+  assert.equal(field(),'Intr[u]odução[/u]\n[u]antes[/u] trecho depois');
+  tap(underline,true);
+  assert.equal(field(),'Introdução\nantes trecho depois');
+  choose('mark','mark','#fff3a3');
+  assert.equal(field(),'Intr[marca=#fff3a3]odução[/marca]\n[marca=#fff3a3]antes[/marca] trecho depois');
+  choose('more','command','fmt:limpar');
+  assert.equal(field(),'Introdução\nantes trecho depois');
 });
