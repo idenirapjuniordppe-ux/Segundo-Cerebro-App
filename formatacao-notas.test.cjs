@@ -51,7 +51,7 @@ test('H1 a H4 funcionam com cursor e toque, persistem na nota e aparecem na leit
   const {w,d,q,selectNode,tap,toggle,choose,field,block,text}=await fixture(t);
   for(let level=1;level<=4;level++){
     selectNode(text().firstChild,6);
-    choose(level===4?'more':'blocks','block','h'+level);
+    choose('blocks','block','h'+level);
     assert.equal(block().dataset.t,'h'+level);
     assert.equal(q('#ed-note-block-label').textContent,'Título '+level);
     assert.equal(field(),'Introdução\n'+'#'.repeat(level)+' antes trecho depois');
@@ -141,14 +141,14 @@ test('listas, numeração, níveis, citação, destaque, bloco de código, divis
 test('links da web, links de notas e inserção de data e hora funcionam na posição escolhida',async t=>{
   const {w,d,q,selectNode,tap,choose,field,text}=await fixture(t);
   selectNode(text().firstChild,6,12);
-  tap(q('[data-ed-note-command="fmt:link"]'),true);
+  choose('more','command','fmt:link');
   assert.equal(d.activeElement,q('#ed-url'));
   q('#ed-url').value='example.test';
   const web=q('#ed-link');
   tap([...web.querySelectorAll('button')].find(x=>/^OK$/i.test(x.textContent)));
   assert.ok(field().includes('[trecho](https://example.test)'));
   selectNode(q('#ed a').firstChild,1);
-  tap(q('[data-ed-note-command="fmt:link"]'),true);
+  choose('more','command','fmt:link');
   tap([...web.querySelectorAll('button')].find(x=>/remover/i.test(x.textContent)));
   assert.equal(field(),'Introdução\nantes trecho depois');
   assert.equal(text().textContent,'antes trecho depois');
@@ -164,9 +164,9 @@ test('links da web, links de notas e inserção de data e hora funcionam na posi
   }
 });
 
-test('sublinhado, sobrescrito e subscrito afetam apenas a seleção e reaparecem na leitura',async t=>{
+test('sublinhado afeta apenas a seleção e formatações antigas continuam legíveis',async t=>{
   const {w,choose,selectNode,field,text}=await fixture(t);
-  for(const [command,tag] of [['underline','u'],['sup','sup'],['sub','sub']]){
+  for(const [command,tag] of [['underline','u']]){
     selectNode(text().firstChild,6,12);
     choose('more','command','fmt:'+command);
     assert.equal(field(),'Introdução\nantes ['+tag+']trecho[/'+tag+'] depois');
@@ -176,4 +176,21 @@ test('sublinhado, sobrescrito e subscrito afetam apenas a seleção e reaparecem
     assert.equal(field(),'Introdução\nantes trecho depois');
     text().normalize();
   }
+});
+
+test('barra contextual no computador atua sobre o trecho e oculta formatos removidos',async t=>{
+  const {w,d,q,selectNode,field,text,tap}=await fixture(t);
+  const tools=q('#ed-note-tools');
+  assert.equal(tools.querySelector('[data-ed-note-command="fmt:sup"],[data-ed-note-command="fmt:sub"]'),null);
+  assert.equal(w.mdInline('[sup]2[/sup] [sub]2[/sub]'),'<sup>2</sup> <sub>2</sub>');
+  const context=q('#ed-note-context');
+  w.matchMedia=()=>({matches:true});
+  w.Range.prototype.getBoundingClientRect=()=>({left:160,top:220,bottom:244,width:48});
+  selectNode(text().firstChild,6,12);
+  assert.equal(context.hidden,false);
+  tap(context.querySelector('[data-ed-note-command="fmt:underline"]'));
+  assert.match(field(),/\[u\]trecho\[\/u\]/);
+  w.matchMedia=()=>({matches:false});
+  d.dispatchEvent(new w.Event('selectionchange'));
+  assert.equal(context.hidden,true);
 });

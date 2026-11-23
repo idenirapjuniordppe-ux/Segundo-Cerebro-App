@@ -5147,13 +5147,13 @@ function edFmt(k){
       });
     }
   }
-  else if(['underline','sup','sub'].includes(k)){
+  else if(k==='underline'){
     if(r.collapsed){ toast('Selecione o texto primeiro.'); return; }
-    var inlineTag = k === 'underline' ? 'u' : k;
+    var inlineTag = 'u';
     var wasActive = !!edAncora(t,inlineTag.toUpperCase());
     var wrapper;
     edEditarTrecho(t,r,function(f){
-      f.querySelectorAll(inlineTag==='u'?'u':'sup,sub').forEach(edDesembrulhar);
+      f.querySelectorAll('u').forEach(edDesembrulhar);
       if(wasActive) return f;
       wrapper = document.createElement(inlineTag);
       wrapper.appendChild(f);
@@ -5271,23 +5271,29 @@ function edNoteFormatHtml(){
  };
  var as=function(icon,label,action,kind,mark){return btn(edNoteIcon(icon)+'<span>'+h(label)+'</span>',label,action,kind,mark);};
  var blockGroup=function(keys){return ED_NOTE_BLOCKS.filter(function(x){return keys.indexOf(x[0])>=0;}).map(function(b){return as(b[1],b[2],b[0],'block','block:'+b[0]);}).join('');};
- var lists=blockGroup(['todo','ul','ol','q']), headings=blockGroup(['p','h1','h2','h3','h4']), otherBlocks=blockGroup(['dest','cod','hr']);
- var blocks=ED_NOTE_BLOCKS.map(function(b){return as(b[1],b[2],b[0],'block','block:'+b[0]);}).join('');
- var fast=[
-  ['check','Checklist','block:todo','block:todo'],['list','Lista com marcadores','block:ul','block:ul'],
-  ['number','Lista numerada','block:ol','block:ol'],['link','Inserir ou editar link','fmt:link','link']
- ].map(function(x){return '<span class="ed-note-shortcut">'+btn(edNoteIcon(x[0]),x[1],x[2],'command',x[3])+'</span>';}).join('');
+ var blocks=blockGroup(ED_NOTE_BLOCKS.map(function(b){return b[0];}));
  var sizeOptions=[['12','Pequeno'],['14','Compacto'],['16','Normal'],['18','Grande'],['20','Muito grande'],['24','Extra grande']];
  var sizeMenu='<label class="ed-note-layout-size" for="sc-note-size"><span>Tamanho do texto</span><select class="input" id="sc-note-size" aria-label="Tamanho do texto da nota">'+sizeOptions.map(function(opt){return '<option value="'+opt[0]+'">'+h(opt[1])+' · '+opt[0]+' px</option>';}).join('')+'</select></label>';
  var columns='<button type="button" id="ed-note-columns" data-ed-note-command="columns" aria-controls="ed" aria-pressed="false">'+edNoteIcon('▥')+'<span>Duas colunas</span></button>';
  var group=function(title,html){return '<div class="ed-note-category"><div class="ed-note-category-title">'+title+'</div><div class="ed-note-options">'+html+'</div></div>';};
- var extras=[
- ['link','Inserir ou editar link','fmt:link','link'],['[[ ]]','Link para outra nota','fmt:nota'],
- ['U','Sublinhado','fmt:underline','underline'],['x²','Sobrescrito','fmt:sup','sup'],['x₂','Subscrito','fmt:sub','sub'],
- ['S','Riscado','fmt:strike','strike'],['code','Código','fmt:code','code'],
- ['Tₓ','Limpar formatação','fmt:limpar'],['number','Opções de numeração','num'],['⇤','Diminuir recuo','block:rec'],
- ['⇥','Aumentar recuo','block:avanca'],['＋','Inserir bloco, data ou hora','insert'],['×','Fechar teclado e menus','close']
- ].map(function(b){return as(b[0],b[1],b[2],'command',b[3]);}).join('');
+ var commands=function(items){return items.map(function(b){return as(b[0],b[1],b[2],'command',b[3]);}).join('');};
+ var format=commands([
+  ['U','Sublinhado','fmt:underline','underline'],['S','Riscado','fmt:strike','strike'],['Tₓ','Limpar formatação','fmt:limpar']
+ ]);
+ var insert=commands([
+  ['link','Inserir ou editar link','fmt:link','link'],['[[ ]]','Link para outra nota','fmt:nota'],
+  ['code','Código','fmt:code','code'],['＋','Inserir bloco, data ou hora','insert']
+ ]);
+ var layout=commands([
+  ['number','Opções de numeração','num'],['⇤','Diminuir recuo','block:rec'],
+  ['⇥','Aumentar recuo','block:avanca'],['×','Fechar teclado e menus','close']
+ ]);
+ var contextual='<div class="ed-note-context" id="ed-note-context" role="group" aria-label="Formatar seleção" hidden>'+
+  btn(edNoteIcon('bold'),'Negrito na seleção','fmt:bold','command','bold')+
+  btn(edNoteIcon('italic'),'Itálico na seleção','fmt:italic','command','italic')+
+  btn('U','Sublinhado na seleção','fmt:underline','command','underline')+
+  btn('Cor','Cor da seleção','ink','goto')+
+  btn(edNoteIcon('link'),'Link na seleção','fmt:link','command','link')+'</div>';
  var palette=function(kind,colors,custom){
   return '<div class="ed-note-palette">'+colors.map(function(c){
    return btn('<i style="--ed-swatch:'+c[1]+'" aria-hidden="true"></i><span>'+c[0]+'</span>',c[0],c[1],kind);
@@ -5299,11 +5305,11 @@ function edNoteFormatHtml(){
   btn(edNoteIcon('bold'),'Negrito (Ctrl+B)','fmt:bold','command','bold')+
   btn(edNoteIcon('italic'),'Itálico (Ctrl+I)','fmt:italic','command','italic')+
   btn('<span class="ed-note-color-icon" aria-hidden="true">A</span><span class="ed-note-touch-label" aria-hidden="true">Cor</span>','Cor do texto','ink','menu')+
-  btn(edNoteIcon('mark')+'<span class="ed-note-touch-label" aria-hidden="true">Marcar</span>','Marca-texto','mark','menu')+fast+
+  btn(edNoteIcon('mark')+'<span class="ed-note-touch-label" aria-hidden="true">Marcar</span>','Marca-texto','mark','menu')+
   btn('<span class="ed-note-more-label">Mais</span>'+edNoteIcon('more'),'Mais opções','more','menu')+'</div>'+
   panel('blocks','Tipo de bloco','<div class="ed-note-options">'+blocks+'</div>')+
-  panel('more','Mais opções',group('Listas e citações',lists)+group('Texto e títulos',headings+otherBlocks)+
-    group('Formatação e inserção',extras)+group('Layout da nota',sizeMenu+columns))+
+  panel('more','Mais opções',group('Formatar',format)+group('Inserir',insert)+
+    group('Layout',sizeMenu+columns+layout))+contextual+
   panel('ink','Cor do texto',palette('ink',[['Azul','#2563eb'],['Roxo','#7c3aed'],['Verde','#16835d'],['Vermelho','#c43c4e']],'#2563eb'))+
   panel('mark','Marca-texto',palette('mark',[['Amarelo','#fff3a3'],['Rosa','#ffc4e0'],['Verde','#c4f0d6'],['Laranja','#ffd2ab']],'#fff3a3'))+'</div>';
 }
@@ -5311,6 +5317,23 @@ function edNoteMenu(key){
  var n=el('ed-note-tools'); if(!n) return;
  n.querySelectorAll('[data-ed-note-menu]').forEach(function(b){b.setAttribute('aria-expanded',String(b.dataset.edNoteMenu===key));});
  n.querySelectorAll('[data-ed-note-panel]').forEach(function(p){p.hidden=p.dataset.edNotePanel!==key;});
+ edNotePositionContext();
+}
+function edNotePositionContext(){
+ var bar=el('ed-note-context');if(!bar)return;
+ var selection=window.getSelection(), range=selection?.rangeCount?selection.getRangeAt(0):null;
+ bar.hidden=true;
+ if(!window.matchMedia('(min-width: 761px) and (pointer: fine)').matches ||
+    !range || range.collapsed || !range.toString().trim() || !edRangeDoBloco(range) ||
+    bar.parentElement.querySelector('[data-ed-note-panel]:not([hidden])') ||
+    ['ed-link','ed-nota','ed-ins'].some(function(id){var x=el(id);return x&&x.getClientRects().length;}) ||
+    (el('ed-num')&&!el('ed-num').hidden))return;
+ var rect=range.getBoundingClientRect();
+ if(rect.bottom<0 || rect.top>window.innerHeight)return;
+ bar.hidden=false;
+ var left=rect.left+(rect.width-bar.offsetWidth)/2;
+ bar.style.left=Math.max(8,Math.min(left,window.innerWidth-bar.offsetWidth-8))+'px';
+ bar.style.top=(rect.top>bar.offsetHeight+8?rect.top-bar.offsetHeight-6:rect.bottom+6)+'px';
 }
 function edNoteDockPosicionar(dock){
  var inline=dock.closest('#sc138-inline');
@@ -5365,6 +5388,7 @@ function edNoteBind(){
   else if(key.indexOf('block:')===0)edBloco(key.slice(6));
   else if(key.indexOf('fmt:')===0)edFmt(key.slice(4));
   if(!noFocus)edNoteSignalChange();
+  edNotePositionContext();
   if(!noFocus&&trigger&&n.contains(document.activeElement))trigger.focus();
  });
  n.addEventListener('change',function(e){
@@ -5477,13 +5501,15 @@ function edBarraAtualizar(){
   var on = {};
   if(t && document.activeElement === t){
     try { on.bold = document.queryCommandState('bold'); on.italic = document.queryCommandState('italic'); on.strike = document.queryCommandState('strikeThrough'); } catch(e){}
-    on.underline = !!edAncora(t,'U'); on.sup = !!edAncora(t,'SUP'); on.sub = !!edAncora(t,'SUB');
+    on.underline = !!edAncora(t,'U');
     on.code = !!edAncora(t, 'CODE'); on.mark = !!edAncora(t, 'MARK'); on.link = !!edAncora(t, 'A');
   }
   Array.prototype.forEach.call(bar.querySelectorAll('.ed-b'), function(b){ var a = b.getAttribute('data-a'); b.classList.toggle('on', b.classList.contains('f') ? !!on[a] : (b.classList.contains('b') && a === tp)); });
   edNoteRefresh(tp,on);
 }
-document.addEventListener('selectionchange', function(){ if(el('ed-bar')){ edGuardarSelecao(); edBarraAtualizar(); } });
+document.addEventListener('selectionchange', function(){ if(el('ed-bar')){ edGuardarSelecao(); edBarraAtualizar(); edNotePositionContext(); } });
+window.addEventListener('resize',edNotePositionContext);
+window.addEventListener('scroll',edNotePositionContext,true);
 
 /* ───────── tarefas como banco de dados: Lista / Tabela / Quadro / Calendário ───────── */
 var tfv = (function(){ var o = {}; try { o = JSON.parse(lsGet('sc_tfv') || '{}') || {}; } catch(e){} return { modo:o.modo || 'lista', ordem:o.ordem || 'auto', dir:o.dir === -1 ? -1 : 1, grupo:o.grupo || 'auto', prio:o.prio || '', q:'' }; })();
@@ -12778,7 +12804,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-22c";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-22d";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
@@ -14878,13 +14904,14 @@ const row=e.target.closest('.sc126-row');if(row&&!e.target.closest('button,input
 window.SC154={open,save};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();</script>
 <style id="sc157-note-format">
-.ed-note-tools{--en-paper:var(--sc141-solid,var(--ne-panel,#f8faff));--en-ink:var(--sc128-ink,var(--ne-ink,#242e44));--en-edge:var(--sc128-border,var(--ne-line,#c6cfdf));--en-soft:var(--sc11-soft,#e8e0f5);--en-accent:var(--sc11-accent,#573b91);container-type:inline-size;color:var(--en-ink);min-width:0}
+.ed-note-tools{--en-paper:var(--sc141-solid,var(--ne-panel,#f8faff));--en-ink:var(--sc128-ink,var(--ne-ink,#242e44));--en-edge:var(--sc128-border,var(--ne-line,#c6cfdf));--en-soft:var(--sc11-soft,#e8e0f5);--en-accent:var(--sc11-accent,#573b91);color:var(--en-ink);min-width:0}
 .ed-note-tools [hidden]{display:none!important}
 html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible!important;touch-action:auto!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;min-height:0}
 .ed-note-main,.ed-note-panel{box-sizing:border-box;background:var(--en-paper);border:1px solid var(--en-edge);border-radius:11px;padding:5px}
 .ed-note-main{display:flex;align-items:center;gap:3px;flex-wrap:wrap;min-width:0}
-.ed-note-shortcut{display:none}
-@container(min-width:540px){.ed-note-shortcut{display:inline-flex}}
+.ed-note-context{position:fixed;z-index:70;display:flex;gap:2px;padding:4px;border:1px solid var(--en-edge);border-radius:10px;background:var(--en-paper);box-shadow:0 5px 16px #0003}
+.ed-note-context button+button{border-left-color:var(--en-edge)!important}
+.ed-note-layout-size{grid-column:1/-1}
 .ed-note-category+.ed-note-category{margin-top:6px;padding-top:5px;border-top:1px solid var(--en-edge)}
 .ed-note-category-title{font-size:12px;color:var(--sc128-muted,var(--en-ink));font-weight:650;padding:3px 7px}
 .ed-note-layout-size{padding:4px 7px;display:flex;align-items:center;gap:6px;font-size:13px;min-width:0;flex-wrap:wrap}
@@ -14895,7 +14922,7 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
 .ed-note-tools svg{width:17px;height:17px;flex:none}
 .ed-note-tools button[data-ed-note-menu=blocks]{min-width:89px;max-width:100%;justify-content:space-between;background:var(--en-paper)!important;border-color:var(--en-edge)!important;white-space:nowrap;margin-right:4px}
 .ed-note-color-icon{font-weight:700;border-bottom:3px solid var(--en-accent);line-height:1.15}
-.ed-note-tools .ed-note-touch-label{display:none}
+.ed-note-tools .ed-note-touch-label{display:inline}
 .ed-note-panel{margin-top:5px;overscroll-behavior:contain}
 .ed-note-panel-title{padding:3px 7px;font-size:12px;color:var(--sc128-muted,var(--en-ink));font-weight:600}
 .ed-note-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}
@@ -14919,13 +14946,13 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
  #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:3px;gap:1px}
  #sc138-inline .ed-note-main>button{padding:4px 1px;min-width:0;min-height:46px;flex-direction:column;gap:1px}
  #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks]{min-width:0;margin:0;justify-content:center;font-size:11px}
- #sc138-inline .ed-note-main .ed-note-shortcut{display:none}
+ @media(pointer:coarse){.ed-note-context{display:none!important}}
  #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks] svg{width:12px;height:12px}
  #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks] #ed-note-block-label{max-width:100%}
  #sc138-inline .ed-note-tools .ed-note-touch-label,#sc138-inline .ed-note-more-label{display:block;font-size:11px;line-height:1.1}
  #sc138-inline .ed-note-more-label{order:1}
  #sc138-inline .ed-note-tools{position:relative;container-type:normal}
- #sc138-inline .ed-note-panel{position:absolute;inset:auto 0 calc(100% + 5px);margin:0;max-height:min(300px,var(--ed-note-room,230px));overflow-y:auto;box-shadow:0 4px 18px #0002}
+ #sc138-inline .ed-note-panel{position:absolute;inset:auto 0 calc(100% + 5px);margin:0;max-height:min(340px,var(--ed-note-room,230px));overflow-y:auto;box-shadow:0 6px 24px #0003}
  #sc138-inline .ed-note-options button{min-height:44px}
  #sc138-inline .ed-note-panel button,#sc138-inline .ed-note-custom{min-height:44px}
  #sc138-inline #ed-dock.ed-note-dock :is(#ed-num,#ed-ins,#ed-nota,#ed-link){position:absolute;inset:auto 0 calc(100% + 5px);max-height:min(300px,var(--ed-note-room,230px));overflow:auto;padding:6px;margin:0;background:var(--sc141-solid,var(--sc128-paper,#fcfcff))!important;border:1px solid var(--sc128-border,#c6cfdf);border-radius:11px}
