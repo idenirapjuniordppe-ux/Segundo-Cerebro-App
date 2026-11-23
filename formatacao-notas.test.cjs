@@ -235,3 +235,20 @@ test('seleciona a nota inteira pelo menu e teclado, copia com quebras e alinha o
   choose('paragraph','command','align:center');
   assert.equal(field(),'Introdução [layout-nota:center,auto]\nantes trecho depois [layout-nota:center,auto]');
 });
+
+test('edição móvel oculta a navegação e a captura flutuante e acompanha o teclado',async t=>{
+  const {w,q}=await fixture(t);
+  const css=q('#sc157-note-format').textContent;
+  assert.match(css,/@media\(max-width:760px\)\s*\{[^}]+\}\s*html body:has\(#sc138-inline\) :is\(#fab,#sc5-fab,#sc117-fab,#nav-movel\)\{display:none!important\}/);
+  const dock=q('#sc138-inline #ed-dock');
+  Object.defineProperty(dock,'offsetHeight',{value:100});
+  Object.defineProperty(w,'innerHeight',{value:750});
+  Object.defineProperty(w,'visualViewport',{configurable:true,value:{height:425,offsetTop:25,scale:1}});
+  w.edDockPosicionar();
+  assert.equal(dock.style.getPropertyValue('--ed-note-bottom'),'300px');
+  assert.equal(dock.style.getPropertyValue('--ed-note-room'),'301px');
+  w.visualViewport.height=750;
+  w.visualViewport.offsetTop=0;
+  w.edDockPosicionar();
+  assert.equal(dock.style.getPropertyValue('--ed-note-bottom'),'0px');
+});
