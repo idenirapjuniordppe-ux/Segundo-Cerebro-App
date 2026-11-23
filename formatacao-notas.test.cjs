@@ -236,21 +236,18 @@ test('seleciona a nota inteira pelo menu e teclado, copia com quebras e alinha o
   assert.equal(field(),'Introdução [layout-nota:center,auto]\nantes trecho depois [layout-nota:center,auto]');
 });
 
-test('edição móvel oculta a navegação e a captura flutuante e acompanha o teclado',async t=>{
+test('na edição móvel a barra e os menus ocupam espaço fora do texto',async t=>{
   const {w,q}=await fixture(t);
   const css=q('#sc157-note-format').textContent;
-  assert.match(css,/@media\(max-width:760px\)\s*\{[^}]+\}\s*html body:has\(#sc138-inline\) :is\(#fab,#sc5-fab,#sc117-fab,#nav-movel\)\{display:none!important\}/);
+  assert.match(css,/#sc138-inline \.sc138-format #ed-dock\.ed-note-dock\{\s*position:static!important/);
+  assert.match(css,/#np-document:has\(#sc138-inline\) #sc138-selection\{position:static\}/);
+  assert.equal(css.includes('position:absolute'),false);
   const dock=q('#sc138-inline #ed-dock');
-  Object.defineProperty(dock,'offsetHeight',{value:100});
-  Object.defineProperty(w,'innerHeight',{value:750});
-  Object.defineProperty(w,'visualViewport',{configurable:true,value:{height:425,offsetTop:25,scale:1}});
+  assert.ok(dock.compareDocumentPosition(q('#ed')) & w.Node.DOCUMENT_POSITION_FOLLOWING);
+  dock.classList.add('fx');dock.style.bottom='300px';
   w.edDockPosicionar();
-  assert.equal(dock.style.getPropertyValue('--ed-note-bottom'),'300px');
-  assert.equal(dock.style.getPropertyValue('--ed-note-room'),'301px');
-  w.visualViewport.height=750;
-  w.visualViewport.offsetTop=0;
-  w.edDockPosicionar();
-  assert.equal(dock.style.getPropertyValue('--ed-note-bottom'),'0px');
+  assert.equal(dock.style.bottom,'');
+  assert.equal(dock.classList.contains('fx'),false);
 });
 
 test('ações do trecho selecionam e copiam todo o texto da nota',async t=>{

@@ -5424,17 +5424,6 @@ function edNotePositionContext(){
  bar.style.left=Math.max(8,Math.min(left,window.innerWidth-bar.offsetWidth-8))+'px';
  bar.style.top=(rect.top>bar.offsetHeight+8?rect.top-bar.offsetHeight-6:rect.bottom+6)+'px';
 }
-function edNoteDockPosicionar(dock){
- var inline=dock.closest('#sc138-inline');
- if(!inline || !dock.classList.contains('ed-note-dock'))return false;
- var vv=window.visualViewport;
- var height=vv&&Math.abs(vv.scale-1)<.02?vv.height:window.innerHeight;
- var offset=height===vv?.height?vv.offsetTop:0;
- var gap=Math.max(0,window.innerHeight-height-offset);
- dock.style.setProperty('--ed-note-bottom',gap+'px');
- dock.style.setProperty('--ed-note-room',Math.max(0,height-dock.offsetHeight-24)+'px');
- return true;
-}
 function edNoteCloseAux(){
  ['ed-link','ed-nota','ed-ins'].forEach(function(id){var x=el(id);if(x)x.style.display='none';});
  var num=el('ed-num');if(num)num.hidden=true;
@@ -5579,7 +5568,7 @@ function edFechar(){ edPainel(false); edNumMenu(false); var a = document.activeE
 function edDockSolto(dk, w){ dk.classList.remove('fx'); dk.style.bottom = ''; w.style.minHeight = ''; }
 function edDockPosicionar(){
   var dk = el('ed-dock'), w = el('ed-dockw'); if(!dk || !w) return;
-  if(edNoteDockPosicionar(dk)){edDockSolto(dk,w);return;}
+  if(dk.closest('#sc138-inline')){edDockSolto(dk,w);return;}
   var estreito = !document.documentElement.classList.contains('w-sm'), ins = el('ed-ins'), aberto = !!ins && ins.style.display !== 'none';
   aberto = aberto || !!(el('ed-num') && !el('ed-num').hidden);
   var a = document.activeElement, foco = !!(a && a.closest && (a.closest('#ed') || a.closest('#ed-dock'))), vv = window.visualViewport;
@@ -12911,7 +12900,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-22i";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-22j";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
@@ -15047,16 +15036,14 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
 @media(max-width:760px){
  html.sc126 #np-document:has(#sc138-inline){padding-inline:12px!important}
  html body:has(#sc138-inline) :is(#fab,#sc5-fab,#sc117-fab,#nav-movel){display:none!important}
- #sc138-inline{padding-bottom:120px}
  #sc138-inline #ed{max-height:none;overflow:visible;column-count:1;padding-inline:7px!important}
  #sc138-inline #ed .blk{max-width:100%}
  #sc138-inline #ed .b-h{left:-.8rem}
  #sc138-inline #ed .b-t{overflow-wrap:anywhere;word-break:normal}
- #sc138-inline .sc138-format{margin:0}
+ #sc138-inline .sc138-format{margin:0 0 10px}
  html body #sc138-inline .sc138-format #ed-dock.ed-note-dock{
-  position:fixed!important;inset:auto max(6px,env(safe-area-inset-right,0px)) max(calc(7px + env(safe-area-inset-bottom,0px)),calc(var(--ed-note-bottom,0px) + 5px)) max(6px,env(safe-area-inset-left,0px));
-  max-width:480px!important;width:auto;margin-inline:auto;z-index:45;
-  padding:0;background:transparent!important;box-shadow:0 4px 18px #0002;border-radius:11px
+  position:static!important;width:100%;max-width:none!important;
+  padding:0;background:transparent!important;box-shadow:none
  }
  #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:4px;gap:2px}
  #sc138-inline .ed-note-main>button{padding:4px 1px;min-width:0;min-height:46px;flex-direction:column;gap:1px}
@@ -15067,14 +15054,14 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
  #sc138-inline .ed-note-tools .ed-note-touch-label,#sc138-inline .ed-note-more-label{display:block;font-size:11px;line-height:1.1}
  #sc138-inline .ed-note-more-label{order:1}
  #sc138-inline .ed-note-tools{position:relative;container-type:normal}
- #sc138-inline .ed-note-panel{position:absolute;inset:auto 0 calc(100% + 5px);margin:0;max-height:min(340px,var(--ed-note-room,230px));overflow-y:auto;box-shadow:0 6px 24px #0003}
+
  #sc138-inline .ed-note-options button{min-height:44px}
  #sc138-inline .ed-note-panel button,#sc138-inline .ed-note-custom{min-height:44px}
- #sc138-inline #ed-dock.ed-note-dock :is(#ed-num,#ed-ins,#ed-nota,#ed-link){position:absolute;inset:auto 0 calc(100% + 5px);max-height:min(300px,var(--ed-note-room,230px));overflow:auto;padding:6px;margin:0;background:var(--sc141-solid,var(--sc128-paper,#fcfcff))!important;border:1px solid var(--sc128-border,#c6cfdf);border-radius:11px}
+ #sc138-inline #ed-dock.ed-note-dock :is(#ed-num,#ed-ins,#ed-nota,#ed-link){position:static;max-height:240px;overflow:auto;padding:6px;margin:5px 0 0;background:var(--sc141-solid,var(--sc128-paper,#fcfcff))!important;border:1px solid var(--sc128-border,#c6cfdf);border-radius:11px}
  #sc138-inline #ed-link{flex-wrap:wrap}
  #sc138-inline #ed-link #ed-url{flex:1 0 100%}
  #sc138-inline .ed-note-custom input,#sc138-inline #ed-url,#sc138-inline #ed-nota-q{font-size:16px}
- #np-document:has(#sc138-inline) #sc138-selection{bottom:190px}
+ #np-document:has(#sc138-inline) #sc138-selection{position:static}
 }
 @media(pointer:coarse){
  .ed-note-tools button{min-height:44px}
