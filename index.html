@@ -4604,6 +4604,14 @@ function ordenarChecklistMd(md,indiceAlterado){
   });
   return ordenarChecklist(itens,itens[indiceAlterado]);
 }
+function edLayoutLer(texto){
+  var m=/ \[layout-nota:(left|center|right|justify|auto),(1|1\.15|1\.5|2|auto)\]$/.exec(texto);
+  return m ? {x:texto.slice(0,m.index),align:m[1],spacing:m[2]} : {x:texto};
+}
+function edLayoutAplicar(t,align,spacing){
+  t.style.textAlign=align==='auto'?'':align||'';
+  t.style.lineHeight=spacing==='auto'?'':spacing||'';
+}
 function mdParaBlocos(md){
   var out = [];
   var emCod = false, numeros = [], contar = edContador();
@@ -4621,7 +4629,10 @@ function mdParaBlocos(md){
     else if((m = /^>\s?(.*)$/.exec(l))) out.push({ t:'q', x:m[1], i:0 });
     else out.push({ t:'p', x:l, i:0 });
   });
-  out.forEach(function(b,i){ contar(b,numeros[i]); });
+  out.forEach(function(b,i){
+    if(b.t!=='cod'&&b.t!=='hr') Object.assign(b,edLayoutLer(b.x));
+    contar(b,numeros[i]);
+  });
   if(!out.length) out.push({ t:'p', x:'', i:0 });
   return out;
 }
@@ -4631,6 +4642,7 @@ function blocosParaMd(bl){
     var numero = contar(b);
     var pre = '  '.repeat(b.i || 0), x = String(b.x == null ? '' : b.x).replace(/\n/g, ' ');
     if(b.t === 'cod'){ var oc = x; if(!bl[k-1] || bl[k-1].t !== 'cod') oc = '```\n' + oc; if(!bl[k+1] || bl[k+1].t !== 'cod') oc += '\n```'; return oc; }
+    if(b.t!=='hr'&&x.trim()&&(b.align||b.spacing)) x+=' [layout-nota:'+(b.align||'auto')+','+(b.spacing||'auto')+']';
     if(b.t === 'ol') return pre + numero + '. ' + x;
     if(b.t === 'todo') return pre + '- [' + (b.ok ? 'x' : ' ') + '] ' + x;
     if(b.t === 'ul') return pre + '- ' + x;
@@ -4650,7 +4662,7 @@ function edBlocos(){ var r = edRaiz(); return r ? Array.prototype.slice.call(r.q
 function edLer(){
   return edBlocos().map(function(d){
     var t = d.querySelector('.b-t'), tp = d.getAttribute('data-t');
-    return { t:tp, x:t ? (tp === 'cod' ? t.textContent.replace(/\n/g, ' ') : htmlParaMd(t)) : '', ok:d.getAttribute('data-ok') === '1', i:parseInt(d.getAttribute('data-i'), 10) || 0, num:d.getAttribute('data-num') };
+    return { t:tp, x:t ? (tp === 'cod' ? t.textContent.replace(/\n/g, ' ') : htmlParaMd(t)) : '', ok:d.getAttribute('data-ok') === '1', i:parseInt(d.getAttribute('data-i'), 10) || 0, num:d.getAttribute('data-num'), align:t?.style.textAlign, spacing:t?.style.lineHeight };
   });
 }
 // O mesmo editor serve a nota (f-cont) e a observação de tarefa/compromisso (f-not)
@@ -4677,7 +4689,7 @@ function edCriar(b){
   d.className = 'blk'; d.setAttribute('data-t', b.t); d.setAttribute('data-i', b.i || 0); if(b.ok) d.setAttribute('data-ok', '1'); if(b.num) d.setAttribute('data-num', b.num);
   d.innerHTML = '<span class="b-h" title="Arrastar para mover" aria-label="Mover bloco">⋮⋮</span><span class="b-m"' + (b.t === 'todo' ? ' role="checkbox" tabindex="-1"' : '') + '></span>' +
     (b.t === 'hr' ? '<hr class="b-hr">' : '<div class="b-t" contenteditable="true" spellcheck="true"></div>');
-  var t = d.querySelector('.b-t'); if(t){ if(b.t === 'cod') t.textContent = b.x || ''; else t.innerHTML = mdInline(b.x || ''); }
+  var t = d.querySelector('.b-t'); if(t){ if(b.t === 'cod') t.textContent = b.x || ''; else { t.innerHTML = mdInline(b.x || ''); edLayoutAplicar(t,b.align,b.spacing); } }
   return d;
 }
 function edIniciar(md){
@@ -4722,6 +4734,7 @@ function edFocar(d, fim){
 }
 function edTipo(d, tp){
   d.setAttribute('data-t', tp);
+  if(tp==='cod'&&d.querySelector('.b-t')) edLayoutAplicar(d.querySelector('.b-t'),'auto','auto');
   if(tp !== 'todo') d.removeAttribute('data-ok');
   if(tp !== 'ol') d.removeAttribute('data-num');
   if(tp === 'p' || tp.charAt(0) === 'h' || tp === 'q' || tp === 'dest' || tp === 'cod') d.setAttribute('data-i', 0);
@@ -4967,7 +4980,8 @@ function htmlParaMd(n){
 }
 function mdInline(s, linkNota){
   var tok = [], P = function(x){ tok.push(x); return '\u0001' + (tok.length - 1) + '\u0002'; };
-  s = h(String(s == null ? '' : s));
+  var layout=edLayoutLer(String(s == null ? '' : s));
+  s = h(layout.x);
   s = s.replace(/\\([\\*`~=])/g, function(m, c){ return P(c); });
   s = s.replace(/`([^`]+)`/g, function(m, c){ return P('<code>' + c + '</code>'); });
   s = s.replace(/\[\[([^\[\]\n]+)\]\]/g, function(m, t){ if(linkNota)return P(linkNota(t));var ref=SC167.noteLink(t),label=ref?(ref.n.id?h(ref.n.titulo):ref.label):t;return P('<a class="lnota" data-nota="'+t+'" contenteditable="false">')+label+P('</a>'); });
@@ -4985,6 +4999,9 @@ function mdInline(s, linkNota){
        .replace(/~~(?=\S)(.+?)(?<=\S)~~/g, '<s>$1</s>')
        .replace(/==(?=\S)(.+?)(?<=\S)==/g, '<mark>$1</mark>');
   for(var k = 0; k < 3; k++) s = s.replace(/\u0001(\d+)\u0002/g, function(m, i){ return tok[+i]; });
+  if(layout.align) return '<span style="display:block'+
+    (layout.align==='auto'?'':';text-align:'+layout.align)+
+    (layout.spacing==='auto'?'':';line-height:'+layout.spacing)+'">'+s+'</span>';
   return s;
 }
 function semInline(c){ var d = document.createElement('div'); d.innerHTML = mdInline(c); return d.textContent; }
@@ -5252,6 +5269,13 @@ var ED_NOTE_BLOCKS = [
 ];
 function edNoteIcon(name){
  var paths={
+  paragraph:'<path d="M4 5h16M4 10h10M4 15h16M4 20h10"/>',
+  left:'<path d="M3 5h18M3 10h12M3 15h18M3 20h12"/>',
+  center:'<path d="M3 5h18M6 10h12M3 15h18M6 20h12"/>',
+  right:'<path d="M3 5h18M9 10h12M3 15h18M9 20h12"/>',
+  justify:'<path d="M3 5h18M3 10h18M3 15h18M3 20h18"/>',
+  spacing:'<path d="M6 4v16m-3-13 3-3 3 3m-6 10 3 3 3-3M13 5h8m-8 7h8m-8 7h8"/>',
+  underline:'<path d="M6 4v8a6 6 0 0 0 12 0V4M4 21h16"/>',
   chevron:'<path d="m6 9 6 6 6-6"/>', bold:'<path d="M6 12h7a4 4 0 0 1 0 8H6V4h6a4 4 0 1 1 0 8H6"/>',
   italic:'<path d="M19 4h-9M14 20H5m11-16L8 20"/>', mark:'<path d="m9 15-3-3 8-8 5 5-8 8-2-2Zm-2-1-3 4 2 2 4-3M4 20h5"/>',
   link:'<path d="M10 13a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-2 2m2 6a4 4 0 0 0-6 0l-4 4a4 4 0 0 0 6 6l2-2"/>',
@@ -5278,7 +5302,7 @@ function edNoteFormatHtml(){
  var group=function(title,html){return '<div class="ed-note-category"><div class="ed-note-category-title">'+title+'</div><div class="ed-note-options">'+html+'</div></div>';};
  var commands=function(items){return items.map(function(b){return as(b[0],b[1],b[2],'command',b[3]);}).join('');};
  var format=commands([
-  ['U','Sublinhado','fmt:underline','underline'],['S','Riscado','fmt:strike','strike'],['Tₓ','Limpar formatação','fmt:limpar']
+  ['S','Riscado','fmt:strike','strike'],['Tₓ','Limpar formatação','fmt:limpar']
  ]);
  var insert=commands([
   ['link','Inserir ou editar link','fmt:link','link'],['[[ ]]','Link para outra nota','fmt:nota'],
@@ -5288,10 +5312,20 @@ function edNoteFormatHtml(){
   ['number','Opções de numeração','num'],['⇤','Diminuir recuo','block:rec'],
   ['⇥','Aumentar recuo','block:avanca'],['×','Fechar teclado e menus','close']
  ]);
+ var paragraph=commands([
+  ['left','À esquerda','align:left','align:left'],['center','Centralizar','align:center','align:center'],
+  ['right','À direita','align:right','align:right'],['justify','Justificar','align:justify','align:justify'],
+  ['↺','Alinhamento padrão','align:auto','align:auto']
+ ]);
+ var spacing=commands([
+  ['spacing','Padrão','spacing:auto','spacing:auto'],['1','Simples','spacing:1','spacing:1'],
+  ['1,15','1,15 linhas','spacing:1.15','spacing:1.15'],['1,5','1,5 linhas','spacing:1.5','spacing:1.5'],
+  ['2','Duplo','spacing:2','spacing:2']
+ ]);
  var contextual='<div class="ed-note-context" id="ed-note-context" role="group" aria-label="Formatar seleção" hidden>'+
   btn(edNoteIcon('bold'),'Negrito na seleção','fmt:bold','command','bold')+
   btn(edNoteIcon('italic'),'Itálico na seleção','fmt:italic','command','italic')+
-  btn('U','Sublinhado na seleção','fmt:underline','command','underline')+
+  btn(edNoteIcon('underline'),'Sublinhado na seleção','fmt:underline','command','underline')+
   btn('Cor','Cor da seleção','ink','goto')+
   btn(edNoteIcon('link'),'Link na seleção','fmt:link','command','link')+'</div>';
  var palette=function(kind,colors,custom){
@@ -5304,10 +5338,13 @@ function edNoteFormatHtml(){
   btn('<span id="ed-note-block-label">Texto</span>'+edNoteIcon('chevron'),'Tipo de bloco','blocks','menu')+
   btn(edNoteIcon('bold'),'Negrito (Ctrl+B)','fmt:bold','command','bold')+
   btn(edNoteIcon('italic'),'Itálico (Ctrl+I)','fmt:italic','command','italic')+
+  btn(edNoteIcon('underline'),'Sublinhado','fmt:underline','command','underline')+
+  btn(edNoteIcon('paragraph'),'Alinhamento e espaçamento','paragraph','menu')+
   btn('<span class="ed-note-color-icon" aria-hidden="true">A</span><span class="ed-note-touch-label" aria-hidden="true">Cor</span>','Cor do texto','ink','menu')+
   btn(edNoteIcon('mark')+'<span class="ed-note-touch-label" aria-hidden="true">Marcar</span>','Marca-texto','mark','menu')+
   btn('<span class="ed-note-more-label">Mais</span>'+edNoteIcon('more'),'Mais opções','more','menu')+'</div>'+
   panel('blocks','Tipo de bloco','<div class="ed-note-options">'+blocks+'</div>')+
+  panel('paragraph','Parágrafo',group('Alinhamento',paragraph)+group('Espaçamento entre linhas',spacing))+
   panel('more','Mais opções',group('Formatar',format)+group('Inserir',insert)+
     group('Layout',sizeMenu+columns+layout))+contextual+
   panel('ink','Cor do texto',palette('ink',[['Azul','#2563eb'],['Roxo','#7c3aed'],['Verde','#16835d'],['Vermelho','#c43c4e']],'#2563eb'))+
@@ -5384,6 +5421,13 @@ function edNoteBind(){
   else if(key==='insert')edPainel(true);
   else if(key==='close')edFechar();
   else if(key==='columns')edAlternarColunas();
+  else if(key.startsWith('align:')||key.startsWith('spacing:')){
+   var line=edTextoAtual(), value=key.split(':')[1];
+   if(!line || edDe(line)?.dataset.t==='cod'){toast('Posicione o cursor em um bloco de texto.');return;}
+   if(key.startsWith('align:'))edLayoutAplicar(line,value,line.style.lineHeight);
+   else edLayoutAplicar(line,line.style.textAlign,value);
+   edSync();edBarraAtualizar();
+  }
   else if(key==='block:hr')edDivisorAqui();
   else if(key.indexOf('block:')===0)edBloco(key.slice(6));
   else if(key.indexOf('fmt:')===0)edFmt(key.slice(4));
@@ -5499,6 +5543,10 @@ function edBarraAtualizar(){
   var bar = el('ed-bar'); if(!bar) return;
   var t = edTextoAtual(), tp = edUlt ? edUlt.getAttribute('data-t') : '';
   var on = {};
+  if(t){
+    on['align:'+(t.style.textAlign||'auto')]=true;
+    on['spacing:'+(t.style.lineHeight||'auto')]=true;
+  }
   if(t && document.activeElement === t){
     try { on.bold = document.queryCommandState('bold'); on.italic = document.queryCommandState('italic'); on.strike = document.queryCommandState('strikeThrough'); } catch(e){}
     on.underline = !!edAncora(t,'U');
@@ -12804,7 +12852,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-22d";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-22e";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
@@ -14943,7 +14991,7 @@ html body #ed-dock.ed-note-dock #ed-bar{display:block!important;overflow:visible
   max-width:480px!important;width:auto;margin-inline:auto;z-index:45;
   padding:0;background:transparent!important;box-shadow:0 4px 18px #0002;border-radius:11px
  }
- #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:3px;gap:1px}
+ #sc138-inline .ed-note-main{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));padding:3px;gap:1px}
  #sc138-inline .ed-note-main>button{padding:4px 1px;min-width:0;min-height:46px;flex-direction:column;gap:1px}
  #sc138-inline .ed-note-main>button[data-ed-note-menu=blocks]{min-width:0;margin:0;justify-content:center;font-size:11px}
  @media(pointer:coarse){.ed-note-context{display:none!important}}

@@ -165,10 +165,10 @@ test('links da web, links de notas e inserção de data e hora funcionam na posi
 });
 
 test('sublinhado afeta apenas a seleção e formatações antigas continuam legíveis',async t=>{
-  const {w,choose,selectNode,field,text}=await fixture(t);
+  const {w,q,tap,choose,selectNode,field,text}=await fixture(t);
   for(const [command,tag] of [['underline','u']]){
     selectNode(text().firstChild,6,12);
-    choose('more','command','fmt:'+command);
+    tap(q('.ed-note-main [data-ed-note-command="fmt:'+command+'"]'),true);
     assert.equal(field(),'Introdução\nantes ['+tag+']trecho[/'+tag+'] depois');
     assert.equal(text().querySelector(tag).textContent,'trecho');
     assert.equal(w.mdInline(field().split('\n')[1]),'antes <'+tag+'>trecho</'+tag+'> depois');
@@ -193,4 +193,28 @@ test('barra contextual no computador atua sobre o trecho e oculta formatos remov
   w.matchMedia=()=>({matches:false});
   d.dispatchEvent(new w.Event('selectionchange'));
   assert.equal(context.hidden,true);
+});
+
+test('alinhamento e espaçamento do bloco são salvos, reabertos e aplicados na leitura',async t=>{
+  const {w,q,choose,selectNode,text,field}=await fixture(t);
+  assert.equal(q('.ed-note-main [data-ed-note-command="fmt:italic"]').nextElementSibling.dataset.edNoteCommand,'fmt:underline');
+  selectNode(text().firstChild,5);
+  for(const align of ['left','center','right','justify']){
+    choose('paragraph','command','align:'+align);
+    assert.equal(text().style.textAlign,align);
+  }
+  for(const spacing of ['1','1.15','1.5','2']){
+    choose('paragraph','command','spacing:'+spacing);
+    assert.equal(text().style.lineHeight,spacing);
+  }
+  const saved=field();
+  assert.equal(saved,'Introdução\nantes trecho depois [layout-nota:justify,2]');
+  assert.match(w.mdInline(saved.split('\n')[1]),/text-align:justify;line-height:2/);
+  w.edIniciar(saved);
+  assert.equal(text().style.textAlign,'justify');
+  assert.equal(text().style.lineHeight,'2');
+  selectNode(text().firstChild,5);
+  choose('paragraph','command','align:auto');
+  choose('paragraph','command','spacing:auto');
+  assert.equal(field(),'Introdução\nantes trecho depois');
 });
