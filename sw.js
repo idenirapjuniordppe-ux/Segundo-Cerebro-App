@@ -1,7 +1,7 @@
 /* 2º Cérebro Studio 9.0 — cache isolado da interface; NUNCA armazena respostas Google. */
 const VERSION='2026-11-20d';
-const REVISION='2026-11-22e';
-const CACHE='segundo-cerebro-2026-11-21c-botoes-premium-dashboard-fiel-20261122b-paragrafo-'+encodeURIComponent(self.registration.scope);
+const REVISION='2026-11-22f';
+const CACHE='segundo-cerebro-2026-11-21c-botoes-premium-dashboard-fiel-20261122b-selecao-'+encodeURIComponent(self.registration.scope);
 const PREFIX='segundo-cerebro-';
 const ESSENCIAIS=['./hero-neural-11-21.webp','./hero-minimal-11-21.webp','./hero-glass-11-21.webp','./hero-executive-11-21.webp','./hero-editorial-11-21.webp','./aura-coral-mesa.webp','./lavanda-luminaria.webp','./wallpaper-neural-11-21.webp','./wallpaper-minimal-11-21.webp','./wallpaper-glass-11-21.webp','./wallpaper-executive-11-21.webp','./wallpaper-editorial-11-21.webp','./index.html','./sc-botoes-compactos.css?v=2026-11-21c','./sc-botoes-compactos.js?v=2026-11-21c','./sc-aura-dashboard.css?v=2026-11-22b','./sc-aura-dashboard.js?v=2026-11-22b','./sc-drive-projetos.js?v=2026-11-20d','./pwa-transport.js?v=2026-11-20d-sc1137151','./pwa-install.js?v=2026-11-22b'];
 const OPCIONAIS=['./offline.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];

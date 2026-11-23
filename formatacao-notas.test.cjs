@@ -218,3 +218,20 @@ test('alinhamento e espaçamento do bloco são salvos, reabertos e aplicados na 
   choose('paragraph','command','spacing:auto');
   assert.equal(field(),'Introdução\nantes trecho depois');
 });
+
+test('seleciona a nota inteira pelo menu e teclado, copia com quebras e alinha os blocos',async t=>{
+  const {w,q,text,selectNode,choose,field}=await fixture(t);
+  selectNode(text().firstChild,3);
+  text().dispatchEvent(new w.KeyboardEvent('keydown',{key:'a',ctrlKey:true,bubbles:true,cancelable:true}));
+  assert.equal(w.getSelection().getRangeAt(0).endContainer,text());
+  const copy=new w.Event('copy',{bubbles:true,cancelable:true});
+  let clipboard;
+  Object.defineProperty(copy,'clipboardData',{value:{setData(type,value){assert.equal(type,'text/plain');clipboard=value;}}});
+  text().dispatchEvent(copy);
+  assert.equal(clipboard,'Introdução\nantes trecho depois');
+  selectNode(text().firstChild,3);
+  choose('more','command','select-all');
+  assert.equal(w.getSelection().getRangeAt(0).startContainer,q('#ed .b-t'));
+  choose('paragraph','command','align:center');
+  assert.equal(field(),'Introdução [layout-nota:center,auto]\nantes trecho depois [layout-nota:center,auto]');
+});
