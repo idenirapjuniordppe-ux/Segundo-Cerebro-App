@@ -134,7 +134,7 @@ test('listas, numeração, níveis, citação, destaque, bloco de código, divis
   choose('blocks','block','dest');assert.match(field(),/\n> \[!\] antes/);
   choose('blocks','block','cod');assert.match(field(),/\n```\nantes trecho depois\n```/);
   choose('more','command','columns');assert.equal(w.edColunas(),'2');
-  choose('blocks','block','hr');assert.match(field(),/\n---$/);
+  choose('more','command','block:hr');assert.match(field(),/\n---$/);
   choose('more','command','close');assert.equal(d.activeElement,d.body);
 });
 
@@ -219,7 +219,7 @@ test('alinhamento e espaçamento do bloco são salvos, reabertos e aplicados na 
   assert.equal(field(),'Introdução\nantes trecho depois');
 });
 
-test('seleciona a nota inteira pelo menu e teclado, copia com quebras e alinha os blocos',async t=>{
+test('seleciona a nota inteira pelo teclado, copia com quebras e alinha os blocos',async t=>{
   const {w,q,text,selectNode,choose,field}=await fixture(t);
   selectNode(text().firstChild,3);
   text().dispatchEvent(new w.KeyboardEvent('keydown',{key:'a',ctrlKey:true,bubbles:true,cancelable:true}));
@@ -230,7 +230,7 @@ test('seleciona a nota inteira pelo menu e teclado, copia com quebras e alinha o
   text().dispatchEvent(copy);
   assert.equal(clipboard,'Introdução\nantes trecho depois');
   selectNode(text().firstChild,3);
-  choose('more','command','select-all');
+  text().dispatchEvent(new w.KeyboardEvent('keydown',{key:'a',ctrlKey:true,bubbles:true,cancelable:true}));
   assert.equal(w.getSelection().getRangeAt(0).startContainer,q('#ed .b-t'));
   choose('paragraph','command','align:center');
   assert.equal(field(),'Introdução [layout-nota:center,auto]\nantes trecho depois [layout-nota:center,auto]');
@@ -250,15 +250,13 @@ test('na edição móvel a barra e os menus ocupam espaço fora do texto',async 
   assert.equal(dock.classList.contains('fx'),false);
 });
 
-test('ações do trecho selecionam e copiam todo o texto da nota',async t=>{
+test('ações do trecho permitem copiar a nota inteira',async t=>{
   const {w,q,selectNode,text}=await fixture(t);
   let copied;
   Object.defineProperty(w.navigator,'clipboard',{value:{async writeText(value){copied=value;}}});
   selectNode(text().firstChild,0,5);
   await sleep(60);
-  q('[data-sc138-select-all]').click();
-  assert.equal(w.getSelection().getRangeAt(0).startContainer,q('#ed .b-t'));
-  assert.equal(w.getSelection().getRangeAt(0).endContainer,text());
+  assert.equal(w.document.querySelector('[data-sc138-select-all],[data-ed-note-command=select-all]'),null);
   q('[data-sc138-copy-all]').click();
   assert.equal(copied,'Introdução\nantes trecho depois');
 });
