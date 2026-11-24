@@ -186,8 +186,6 @@ function projectsPanel(m){
 }
 function markup(m){
   return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+
-    (window.SCFluxos?'<div class="sc-fluxos-actions">'+SCFluxos.button('Caixa de entrada','SCFluxos.inbox()')+
-      (m.d===currentDay()?SCFluxos.button('Replanejar hoje','SCFluxos.replan()')+' '+SCFluxos.button('Modo foco','alternarFoco()')+' '+SCFluxos.notice():'')+'</div>':'')+
     '<div class="sc190-layout"><div class="sc190-left">'+taskPanel(m)+projectsPanel(m)+'</div>'+
     '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>'+metrics(m);
 }
