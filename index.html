@@ -12980,7 +12980,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-24a";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-24b";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
@@ -15652,8 +15652,13 @@ document.addEventListener('click',function(e){
 <link rel="stylesheet" href="./sc-botoes-compactos.css?v=2026-11-21c">
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
 <link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-22b">
-<script src="./sc-aura-dashboard.js?v=2026-11-22b"></script>
+<script src="./sc-aura-dashboard.js?v=2026-11-24b"></script>
 <style>
+#sc190-dashboard .sc190-premium-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+#sc190-dashboard .sc190-premium-shortcuts button{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;min-height:52px;border:1px solid var(--sc128-border);border-radius:12px;background:var(--sc141-solid);color:var(--sc128-ink);font-weight:650;line-height:1.2}
+#sc190-dashboard .sc190-premium-shortcuts button:hover{background:var(--sc11-soft)}
+#sc190-dashboard .sc190-premium-shortcuts span{color:var(--sc11-accent);font-size:1.15em}
+@media(max-width:540px){#sc190-dashboard .sc190-premium-shortcuts button{flex-direction:column;font-size:12px}}
 .sc-premium-project,.sc-premium-compare,.sc-premium-study-list{display:grid;gap:8px;margin:10px 0}
 .sc-premium-project{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
 .sc-premium-project>div,.sc-premium-compare>span,.sc-premium-study-list>article{padding:10px;border:1px solid var(--sc128-border);border-radius:10px;overflow-wrap:anywhere}

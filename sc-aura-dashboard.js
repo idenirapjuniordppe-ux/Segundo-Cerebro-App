@@ -186,6 +186,11 @@ function projectsPanel(m){
 }
 function markup(m){
   return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+
+    '<nav class="sc190-premium-shortcuts" aria-label="Atalhos de planejamento e estudo">'+
+      '<button type="button" data-sc148="plan"><span aria-hidden="true">↔</span>Replanejar o dia</button>'+
+      '<button type="button" data-sc-premium-study="sources"><span aria-hidden="true">▤</span>Estudo com fontes</button>'+
+      '<button type="button" data-sc126-organize="projetos"><span aria-hidden="true">◇</span>Projetos</button>'+
+    '</nav>'+
     '<div class="sc190-layout"><div class="sc190-left">'+taskPanel(m)+projectsPanel(m)+'</div>'+
     '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>'+metrics(m);
 }
