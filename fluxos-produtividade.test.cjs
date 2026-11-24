@@ -210,3 +210,55 @@ test('falha na gravação mantém o formulário de nota e não cria registro par
  assert.equal(w.SC170.saveDayNote(),false);assert.equal(w.D.notas.length,0);
  assert.equal(q('#sc170-note-text').value,'Anotação não salva');assert.equal(q('#modal').classList.contains('hidden'),false);
 });
+
+test('fluxos pessoais reaproveitam histórico, notas e dados de projeto',async t=>{
+ const project={id:'p1',nome:'TCC',status:'ativo'};
+ const n={id:'n1',titulo:'Recursos do CPC',conteudo:'Resolver 10 questões'};
+ const routine={id:'r1',titulo:'Academia',dias:[5],inicio:'15:30',fim:'17:00'};
+ const {w,q,input,date}=await app(t,{projetos:[project],notas:[n],config:{
+  sc148_auto:'Não',rotina:JSON.stringify([routine]),rotina_exc:JSON.stringify({'2026-11-13':{r1:{detalhe:'Treino de costas'}}})
+ }});
+ w.eval(readFileSync('sc-fluxos-pessoais.js','utf8'));
+ w.abrirRotina(0,date);assert.match(q('#modal-corpo').textContent,/Treino de costas/);
+ q('button[onclick^="SCFluxos.reuse"]').click();
+ assert.equal(q('#rx-detalhe').value,'Treino de costas');assert.equal(w.rotExc()[date],undefined);
+ assert.equal(w.SCFluxos.taskFromNote(n,'Resolver 10 questões','p1'),true);
+ const task=w.D.tarefas[0];
+ assert.match(task.notas,/\[nota:n1\]/);
+ assert.equal(task.projeto,'p1');
+ assert.equal(w.SCFluxos.taskFromNote(n,'Resolver 10 questões','p1'),false);
+ w.SC126.projectDetail('p1','quadro');assert.match(q('.sc-fluxos-board').children[0].textContent,/Resolver 10 questões/);
+ w.SCFluxos.stage('p1',task.id,true);assert.match(q('.sc-fluxos-board').children[1].textContent,/Resolver 10 questões/);
+ w.SCFluxos.complete('p1',task.id);assert.match(q('.sc-fluxos-board').children[2].textContent,/Resolver 10 questões/);
+ w.SCFluxos.decision('p1');input('#sc-fluxos-decision','Delimitar o tema');w.SCFluxos.saveDecision('p1');
+ assert.match(q('#modal-corpo').textContent,/Delimitar o tema/);
+ assert.equal(w.SC126.related(project).notas.length,1);
+});
+
+test('a proposta e a triagem preservam horários fixos e exigem ação explícita',async t=>{
+ const tasks=[
+  record('fixed','Fixo',{data:'2026-11-20',hora:'13:00',duracao:'30'}),
+  record('flex','Flexível',{data:'2026-11-20',duracao:'40',area:'Estudos'}),
+  record('repeat','Recorrente',{data:'2026-11-20',recorrencia:'diaria',duracao:'45'})
+ ];
+ const {w,q,input,date}=await app(t,{tarefas:tasks});
+ w.eval(readFileSync('sc-fluxos-pessoais.js','utf8'));
+ await w.SCFluxos.replan();
+ assert.equal(w.obter('tarefas','flex').hora,undefined);
+ assert.match(q('#modal-corpo').textContent,/Flexível/);
+ assert.doesNotMatch(q('#modal-corpo').textContent,/Recorrente/);
+ w.SCFluxos.applyPlan();
+ assert.ok(w.obter('tarefas','flex').hora);
+ assert.equal(w.obter('tarefas','fixed').hora,'13:00');
+ w.SCFluxos.followUp('fixed');input('#sc-fluxos-return-date',date);w.SCFluxos.saveFollowUp('fixed');
+ assert.match(w.SCFluxos.notice(),/1 retorno/);
+ w.SCFluxos.received('fixed');assert.doesNotMatch(w.SCFluxos.notice(),/retorno/);
+ w.SCFluxos.inbox();input('#sc-fluxos-capture','https://example.org/artigo');w.SCFluxos.capture();
+ assert.equal(q('#modal-corpo a').href,'https://example.org/artigo');
+ [...q('#modal-corpo').querySelectorAll('button')].find(b=>b.textContent==='Guardar nota').click();
+ assert.equal(w.D.notas[0].conteudo,'https://example.org/artigo');
+ assert.equal(JSON.parse(w.D.config.sc_fluxos_inbox).length,0);
+ w.SCFluxos.setRule(true);w.alternarTarefa('flex',true);
+ w.SCFluxos.rules();assert.match(q('#modal-corpo').textContent,/Flexível/);
+ w.SCFluxos.review('flex');assert.equal(w.obter('tarefas','revisao-7d-flex').data,'2026-11-27');
+});
