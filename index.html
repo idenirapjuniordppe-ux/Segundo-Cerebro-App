@@ -3460,13 +3460,13 @@ function itensDoDia(dia, comTarefas){
   gcalDoDia(dia).forEach(function(g){ if(ligados[g.id]) return; out.push({ tipo:'google', titulo:g.titulo, inicio:g.inicio, fim:g.fim, local:g.local }); });
   var dow = deISO(dia).getDay();
   var excecoes = rotExc(), excDia = excecoes[dia] || {};
-  lista(D.config.rotina, []).forEach(function(r, ri){ if((r.dias||[]).indexOf(dow)>=0){ var ex = excDia[rotChave(r)]; if(ex && (ex.skip || ex.destino)) return; if(r.flexivel&&!(ex?.inicio&&ex?.fim))return; out.push({ tipo:'rotina', id:'rot'+ri, ri:ri, dia:dia, titulo:r.titulo, inicio:(ex && ex.inicio) || r.inicio, fim:(ex && ex.fim) || r.fim, area:r.area, alterada:!!(ex && (ex.inicio || ex.fim)), feito:!!(ex && ex.feito) }); } });
+  lista(D.config.rotina, []).forEach(function(r, ri){ if((r.dias||[]).indexOf(dow)>=0){ var ex = excDia[rotChave(r)]; if(ex && (ex.skip || ex.destino)) return; if(r.flexivel&&!(ex?.inicio&&ex?.fim))return; out.push({ tipo:'rotina', id:'rot'+ri, ri:ri, dia:dia, titulo:rotinaTitulo(r,ex), inicio:(ex && ex.inicio) || r.inicio, fim:(ex && ex.fim) || r.fim, area:r.area, alterada:!!(ex && (ex.inicio || ex.fim)), feito:!!(ex && ex.feito) }); } });
   lista(D.config.rotina, []).forEach(function(r, ri){
     Object.keys(excecoes).forEach(function(origem){
       var ex = (excecoes[origem] || {})[rotChave(r)];
       if(!ex || ex.skip || ex.destino !== dia) return;
       out.push({ tipo:'rotina', id:'rot'+ri+'-'+origem, ri:ri, dia:dia, origemRotina:origem,
-        titulo:r.titulo, inicio:ex.inicio||r.inicio, fim:ex.fim||r.fim, area:r.area, alterada:true, feito:!!ex.feito });
+        titulo:rotinaTitulo(r,ex), inicio:ex.inicio||r.inicio, fim:ex.fim||r.fim, area:r.area, alterada:true, feito:!!ex.feito });
     });
   });
   if(comTarefas) D.tarefas.forEach(function(t){
@@ -3495,7 +3495,7 @@ function obsResumo(txt){
 function htmlObs(txt, clique){ var r = obsResumo(txt); return r ? '<div class="obs-l"'+(clique ? ' onclick="'+clique+'"' : '')+'><i class="fa-regular fa-note-sticky"></i><span>'+h(r)+'</span></div>' : ''; }
 function htmlItemAgenda(it, destaque){
   var hora = it.inicio ? it.inicio + (it.fim ? '–'+it.fim : '') : 'dia todo';
-  var clic = it.tipo==='evento' ? ' onclick="'+C('abrirEvento',it.id)+'" style="cursor:pointer"' : (it.tipo==='tarefa' ? ' onclick="'+C('abrirTarefa',it.id)+'" style="cursor:pointer"' : (it.tipo==='rotina' ? ' onclick="'+(it.origemRotina?C('Planner.ocorrencia',it.ri,it.dia,it.inicio,it.fim,it.origemRotina):C('abrirRotina',it.ri,it.dia))+'" style="cursor:pointer" title="Editar este bloco da rotina"' : ''));
+  var clic = it.tipo==='evento' ? ' onclick="'+C('abrirEvento',it.id)+'" style="cursor:pointer"' : (it.tipo==='tarefa' ? ' onclick="'+C('abrirTarefa',it.id)+'" style="cursor:pointer"' : (it.tipo==='rotina' ? ' onclick="'+(rotinaClique(it))+'" style="cursor:pointer" title="Editar este bloco da rotina"' : ''));
   var cor = it.tipo==='rotina' ? '#94a3b8' : (it.tipo==='google' ? '#2563eb' : corArea(it.area));
   var tag = (simples() ? '' : (it.tipo==='google' ? ' · Google' : it.tipo==='rotina' ? ' · rotina' : it.tipo==='tarefa' ? ' · tarefa' : '')) + (it.feito ? ' · concluído' : '');
   return '<div class="ag-sw flex gap-2 items-start py-1.5 text-sm'+(it.tipo==='rotina'&&!destaque?' opacity-70':'')+(it.feito?' opacity-60':'')+(destaque?' bg-purple-50 dark:bg-purple-900/30 rounded-lg px-2':'')+'" data-ag="'+h(it.tipo+'|'+(it.id==null?'':it.id))+'"'+(it.tipo==='rotina' && it.dia ? ' data-dia="'+h(it.origemRotina||it.dia)+'"' : '')+clic+'><span class="w-1 self-stretch rounded" style="background:'+cor+'"></span><div class="min-w-0"><div class="text-[11px] text-slate-400">'+h(hora)+tag+(it.tipo==='evento' ? seloGoogle('eventos', obter('eventos', it.id)) : it.tipo==='tarefa' ? seloGoogle('tarefas', obter('tarefas', it.id)) : '')+(destaque?' · <b class="text-purple-700 dark:text-purple-300">agora</b>':'')+'</div><div class="font-medium break-words'+(it.feito?' line-through':'')+'">'+h(it.titulo)+'</div>'+(it.local?'<div class="text-[11px] text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i>'+linkLocal(it.local)+'</div>':'')+htmlObs(it.notas)+'</div></div>';
@@ -3540,7 +3540,7 @@ function renderProxima(){
   var cartao = function(icone, rotulo, titulo, sub, clique, botao){
     return '<div class="card p-4 flex items-center gap-3" style="border-left:4px solid #6d28d9"><i class="fa-solid '+icone+' text-purple-700 text-xl"></i><div class="min-w-0 flex-1"'+(clique?' onclick="'+clique+'" style="cursor:pointer"':'')+'><div class="rot !mb-0">'+rotulo+'</div><div class="font-bold break-words">'+h(titulo)+'</div>'+(sub?'<div class="subt">'+h(sub)+'</div>':'')+'</div>'+(botao||'')+'</div>';
   };
-  var clicEv = function(it){ return it.tipo==='evento' ? C('abrirEvento',it.id) : (it.tipo==='tarefa' ? C('abrirTarefa',it.id) : (it.tipo==='rotina' ? C('abrirRotina',it.ri,it.dia) : '')); };
+  var clicEv = function(it){ return it.tipo==='evento' ? C('abrirEvento',it.id) : (it.tipo==='tarefa' ? C('abrirTarefa',it.id) : (it.tipo==='rotina' ? rotinaClique(it) : '')); };
   var html = '';
   if(atual) html = cartao('fa-clock', 'Agora', atual.titulo, 'até ' + (atual.fim || hhmm(fimDe(atual))), clicEv(atual));
   else if(prox && (minutos(prox.inicio) - am) <= 120) html = cartao('fa-calendar', 'Próximo · ' + emTxt(minutos(prox.inicio) - am), prox.titulo, 'às ' + prox.inicio, clicEv(prox));
@@ -4460,7 +4460,7 @@ function renderAgendaGrade(){
     var linhas = ''; for(var m=ini; m<fim; m+=60) linhas += '<div class="absolute left-0 right-0 border-t border-slate-100 dark:border-slate-800" style="top:'+Math.round((m-ini)*PX)+'px"></div>';
     var bl = blocos.map(function(b){
       var it = b.it, cor = it.tipo==='rotina' ? '#94a3b8' : (it.tipo==='google' ? '#2563eb' : corArea(it.area));
-      var cl = it.tipo==='evento' ? C('abrirEvento',it.id) : (it.tipo==='tarefa' ? C('abrirTarefa',it.id) : (it.tipo==='rotina' ? C('abrirRotina',it.ri,it.dia) : ''));
+      var cl = it.tipo==='evento' ? C('abrirEvento',it.id) : (it.tipo==='tarefa' ? C('abrirTarefa',it.id) : (it.tipo==='rotina' ? rotinaClique(it) : ''));
       return '<div class="bloco'+(cl?' cursor-pointer':'')+'" style="top:'+Math.round((b.a-ini)*PX)+'px;height:'+Math.max(16, Math.round((b.b-b.a)*PX)-1)+'px;left:'+(b.faixa/b.faixas*100)+'%;width:calc('+(100/b.faixas)+'% - 2px);background:'+cor+(it.tipo==='rotina'?'26':'33')+';border-color:'+cor+';font-size:10.5px;padding:1px 3px;line-height:1.15;'+(it.tipo==='tarefa'?'border-style:dashed;':'')+'"'+(cl?' onclick="'+cl+'"':'')+' title="'+h(it.inicio+' '+it.titulo)+'">'+h(it.titulo)+'</div>';
     }).join('');
     var ag = new Date(), am = ag.getHours()*60+ag.getMinutes();
@@ -4509,7 +4509,7 @@ function renderAgendaDia(){
   blocos.forEach(function(bl){
     var it = bl.it, a = Math.max(bl.a, ini), b = Math.min(bl.b, fim);
     var cor = it.tipo==='rotina' ? '#94a3b8' : (it.tipo==='google' ? '#2563eb' : corArea(it.area));
-    var clic = it.tipo==='evento' ? C('abrirEvento',it.id) : (it.tipo==='tarefa' ? C('abrirTarefa',it.id) : (it.tipo==='rotina' ? C('abrirRotina',it.ri,it.dia) : ''));
+    var clic = it.tipo==='evento' ? C('abrirEvento',it.id) : (it.tipo==='tarefa' ? C('abrirTarefa',it.id) : (it.tipo==='rotina' ? rotinaClique(it) : ''));
     html += '<div class="bloco'+(clic?' cursor-pointer':'')+(it.tipo==='evento'?' movel':'')+'"'+(it.tipo==='evento'?' data-ev="'+h(it.id)+'" data-a="'+bl.a+'" data-b="'+bl.b+'"':'')+' style="top:'+Math.round((a-ini)*PX)+'px;height:'+Math.max(20, Math.round((b-a)*PX)-2)+'px;left:'+(bl.faixa/bl.faixas*100)+'%;width:calc('+(100/bl.faixas)+'% - 3px);background:'+cor+(it.tipo==='rotina'?'26':'33')+';border-color:'+cor+';'+(it.tipo==='tarefa'?'border-style:dashed;':'')+'"'+(clic?' onclick="'+(it.tipo==='evento'?'if(!arrastouAgora())':'')+clic+'"':'')+'><b>'+h(it.inicio)+'</b> '+h(it.titulo)+(it.tipo==='rotina'?' <i class="fa-solid fa-repeat text-[10px] opacity-60"></i>':'')+(it.tipo==='evento'?'<div class="bl-rs" title="Arraste para mudar o fim"></div>':'')+'</div>';
   });
   var agora = new Date(), am = agora.getHours()*60 + agora.getMinutes();
@@ -8062,7 +8062,7 @@ function concluidasPorDia(){
     var x=ex[d][ch]; if(!x||!x.feito||x.skip)return;
     var ri=rot.findIndex(function(r){return rotChave(r)===ch;}); if(ri<0)return;
     var r=rot[ri], dia=x.destino||d;
-    (m[dia]=m[dia]||[]).push({tipo:'rotina',ri:ri,dia:dia,origemRotina:x.destino?d:'',id:'rot'+ri,titulo:r.titulo,area:r.area,concluida_em:' '+(x.fim||r.fim||r.inicio||'')});
+    (m[dia]=m[dia]||[]).push({tipo:'rotina',ri:ri,dia:dia,origemRotina:x.destino?d:'',id:'rot'+ri,titulo:rotinaTitulo(r,x),area:r.area,concluida_em:' '+(x.fim||r.fim||r.inicio||'')});
   }); });
   Object.keys(m).forEach(function(d){ m[d].sort(function(a, b){ return horaConcl(b) < horaConcl(a) ? -1 : 1; }); });
   return m;
@@ -8083,7 +8083,7 @@ function msgRealizacoes(feitas, pend){
 }
 function itemFeito(t, mostrarDia){
   if(t.tipo === 'evento' || t.tipo === 'rotina'){
-    var reab = t.tipo === 'evento' ? C('reabrirEvento', t.id) : C('rotinaConcluir', t.ri, t.dia), abre = t.tipo === 'evento' ? C('abrirEvento', t.id) : C('abrirRotina', t.ri, t.dia);
+    var reab = t.tipo === 'evento' ? C('reabrirEvento', t.id) : C('rotinaConcluir', t.ri, t.origemRotina||t.dia), abre = t.tipo === 'evento' ? C('abrirEvento', t.id) : rotinaClique(t);
     return '<div class="feito-i"><span class="chk feito" title="Toque para reabrir" onclick="'+reab+'"><i class="fa-solid fa-check text-[12px]"></i></span><span class="feito-t" onclick="'+abre+'">'+h(t.titulo)+'</span><span class="feito-m">'+(t.tipo === 'evento' ? 'compromisso' : 'rotina')+'</span></div>';
   }
   return '<div class="feito-i"><span class="chk feito" title="Toque para reabrir" onclick="'+C('reabrirFeita', t.id)+'"><i class="fa-solid fa-check text-[12px]"></i></span><span class="feito-t" onclick="'+C('abrirTarefa', t.id)+'">'+h(t.titulo)+'</span><span class="feito-m">'+(mostrarDia ? h(dataBonita(dataConcl(t))) + ' ' : '')+h(horaConcl(t))+'</span>'+(t.area ? '<i class="feito-a" style="background:'+corArea(t.area)+'" title="'+h(t.area)+'"></i>' : '')+'</div>';
@@ -8753,6 +8753,10 @@ function encerrarTodas(){ var l = pendentesDeHoje(); if(!l.length) return; salva
 
 /* — rotina: mudar só um dia — */
 function rotChave(r){ return r.id || (r.titulo + '|' + r.inicio); }
+function rotinaTitulo(r, ex){ return ex?.detalhe ? r.titulo + ': ' + ex.detalhe : r.titulo; }
+function rotinaClique(it){
+  return C('abrirRotina',it.ri,it.dia,it.origemRotina||'');
+}
 function rotExc(){ try { return JSON.parse(D.config.rotina_exc || '{}') || {}; } catch(e){ return {}; } }
 function gravarRotExc(dia, chave, ex){
   var m = rotExc(), lim = somaDias(hojeISO(), -400);
@@ -8785,15 +8789,41 @@ function rotinaConcluir(ri, dia){
   renderTudo(); vibra(15);
   toast((nx.feito ? 'Concluído: ' : 'Reaberto: ') + r.titulo + (hb ? ' · ' + hb.nome + ' registrado' : ''), false, { rotulo:'Desfazer', fn:function(){ rotinaConcluir(ri, dia); } });
 }
-function abrirRotina(ri, dia){
+function rotinaDetalheCampo(ri, dia, ex){
+  return '<div><label class="rot" for="rx-detalhe">Detalhes deste dia</label>' +
+    inp('rx-detalhe',ex.detalhe,'text','maxlength="160" placeholder="Ex.: Treino de peito"') +
+    '<button type="button" class="btn btn-s mt-2" onclick="'+C('rotinaSalvarDetalhe',ri,dia)+'">Salvar detalhes</button></div>';
+}
+function rotinaComDetalhe(ex){
+  var campo = el('rx-detalhe');
+  if(campo){
+    var detalhe = campo.value.trim().slice(0,160);
+    if(detalhe) ex.detalhe = detalhe; else delete ex.detalhe;
+  }
+  return ex;
+}
+function rotinaSalvarDetalhe(ri, dia){
+  var r = rotinaDe(ri); if(!r || !el('rx-detalhe')) return;
+  var chave = rotChave(r), ex = rotinaComDetalhe(Object.assign({},(rotExc()[dia]||{})[chave]||{}));
+  if(!gravarRotExc(dia,chave,Object.keys(ex).length?ex:null))return false;
+  fecharModal(); toast('Detalhes salvos só nesta ocorrência.');
+  return true;
+}
+function abrirRotina(ri, dia, origem){
   var r = (ri!=null && ri!=='') ? lista(D.config.rotina, [])[ri] : null;
   if(!r){ editarRotinaCompleta(); return; }
   dia = dia || hojeISO();
+  if(origem && origem!==dia){
+    var movida = (rotExc()[origem]||{})[rotChave(r)]||{};
+    if(movida.destino===dia)return Planner.ocorrencia(ri,dia,movida.inicio||r.inicio,movida.fim||r.fim,origem);
+    return;
+  }
   if(r.flexivel&&window.SC170)return SC170.openRoutine(ri,dia);
   var ex = (rotExc()[dia] || {})[rotChave(r)] || {};
   abrirModal('Bloco de rotina · ' + h(r.titulo),
     '<p class="subt">Este bloco se repete toda semana. Mude só <b>' + h(dataBonita(dia)) + '</b> ou edite a rotina inteira.</p>' +
     linha2(campo('Início', inp('rx-ini', ex.inicio || r.inicio, 'time')), campo('Fim', inp('rx-fim', ex.fim || r.fim, 'time'))) +
+    rotinaDetalheCampo(ri,dia,ex) +
     '<button class="btn '+(ex.feito ? 'btn-s' : 'btn-p')+' w-full" onclick="'+C('rotinaConcluir',ri,dia)+'">'+(ex.feito ? '↩ Reabrir (desfazer conclusão)' : '✓ Concluir neste dia')+'</button>' +
     '<div class="grid grid-cols-2 gap-2"><button class="btn btn-s" onclick="'+C('rotinaSoHoje',ri,dia)+'">Só neste dia</button><button class="btn btn-s" onclick="'+C('rotinaPular',ri,dia)+'">Pular neste dia</button></div>' +
     (ex.inicio || ex.fim ? '<button class="btn btn-s w-full" onclick="'+C('rotinaRestaurar',ri,dia)+'">Voltar ao horário normal</button>' : '') +
@@ -8807,7 +8837,7 @@ function rotinaSoHoje(ri, dia){
   if(!ini){ toast('Informe o início.', true); return; }
   if(fim && minutos(fim) <= minutos(ini)){ toast('O fim precisa ser depois do início.', true); return; }
   var chave=rotChave(r), ex=(rotExc()[dia]||{})[chave]||{};
-  if(!gravarRotExc(dia,chave,Object.assign({},ex,{inicio:ini,fim:fim})))return false;fecharModal(); toast('Alterado só em ' + dataBonita(dia) + '.');
+  if(!gravarRotExc(dia,chave,rotinaComDetalhe(Object.assign({},ex,{inicio:ini,fim:fim}))))return false;fecharModal(); toast('Alterado só em ' + dataBonita(dia) + '.');
 }
 function rotinaPular(ri, dia){
   var r = rotinaDe(ri); if(!r) return; var ch = rotChave(r);
@@ -8816,7 +8846,9 @@ function rotinaPular(ri, dia){
   toast('"' + r.titulo + '" pulado em ' + dataBonita(diaReal) + '.', false, { rotulo:'Desfazer', fn:function(){
     var atual=(rotExc()[dia]||{})[ch]||{};
     if(!atual.skip || ['inicio','fim','destino','feito'].some(function(k){return atual[k]!==antes[k];})){ toast('A ocorrência mudou. Mantive a alteração mais recente.',true); return; }
-    gravarRotExc(dia,ch,Object.keys(antes).length?antes:null);
+    var reaberta=Object.assign({},atual); delete reaberta.skip;
+    if(antes.skip) reaberta.skip=antes.skip;
+    gravarRotExc(dia,ch,Object.keys(reaberta).length?reaberta:null);
   } });
 }
 function rotinaRestaurar(ri, dia){ var r = rotinaDe(ri); if(!r) return; var ch=rotChave(r),ex=Object.assign({},(rotExc()[dia]||{})[ch]||{}); delete ex.inicio; delete ex.fim; delete ex.skip; delete ex.destino;if(!gravarRotExc(dia,ch,Object.keys(ex).length?ex:null))return false;fecharModal();toast('Horário normal restaurado.');return true; }
@@ -10592,7 +10624,7 @@ html[data-sc-theme] :where(textarea):not(sc-nunca){border-color:ButtonText!impor
     abrirModal('Ocorrência da rotina','<p>'+h(r.titulo)+'</p>'+
       '<label class="pp-field">Dia<input type="date" class="input" id="pp-rot-dia" value="'+h(dia)+'"></label>'+
       '<label class="pp-field">Início<input type="time" class="input" id="pp-rot-inicio" value="'+h(inicio)+'"></label>'+
-      '<label class="pp-field">Fim<input type="time" class="input" id="pp-rot-fim" value="'+h(fim)+'"></label>',
+      '<label class="pp-field">Fim<input type="time" class="input" id="pp-rot-fim" value="'+h(fim)+'"></label>'+rotinaDetalheCampo(ri,origem,ex),
       botao(ex.feito?'Reabrir':'Concluir neste dia','rotinaConcluir',[ri,origem])+botao('Pular','rotinaPular',[ri,origem])+botao('Mover só esta ocorrência','Planner.mudarRotina',[ri,origem,false],true));
   }
   function mudarRotina(ri,origem,pular){
@@ -10601,7 +10633,7 @@ html[data-sc-theme] :where(textarea):not(sc-nunca){border-color:ButtonText!impor
     var destino=val('pp-rot-dia'), ini=val('pp-rot-inicio'), fim=val('pp-rot-fim');
     if(!pular&&(!diaValido(destino)||!ini||!fim||minutos(fim)<=minutos(ini))){toast('Confira o dia e os horários.',true);return;}
     var chave=rotChave(r), ex=(rotExc()[origem]||{})[chave]||{};
-    var mud=pular?{skip:1}:Object.assign({},ex,{skip:0,inicio:ini,fim:fim,destino:destino===origem?'':destino});
+    var mud=pular?Object.assign({},ex,{skip:1}):rotinaComDetalhe(Object.assign({},ex,{skip:0,inicio:ini,fim:fim,destino:destino===origem?'':destino}));
     if(!gravarRotExc(origem,chave,mud))return;abrirSemana(pular?origem:destino);toast(pular?'Ocorrência pulada.':'Ocorrência atualizada.');
   }
   function abrirRevisao(){
@@ -12980,7 +13012,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-23c";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-24a";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
@@ -14364,7 +14396,7 @@ function openRoutine(ri,d){
  const draft={ri:Number(ri),day:d,key:String(rotChave(r)),base:JSON.stringify(r),exception:JSON.stringify(ex),epoch:sc166Geracao};
  routineDraft=draft;
  abrirModal('Rotina flexível · '+esc(r.titulo),'<div class="sc170-form" id="sc170-routine-panel"><p>'+esc(dateText(d)+' · '+r.flexivel.minutos+' min entre '+r.inicio+' e '+r.fim)+'</p>'+
-  '<p id="sc170-routine-message" role="status"></p><div class="sc170-action-row">'+
+  '<p id="sc170-routine-message" role="status"></p>'+rotinaDetalheCampo(ri,d,ex)+'<div class="sc170-action-row">'+
   (ex.inicio&&!ex.skip?action(ex.feito?'Reabrir':'Concluir neste dia','complete-routine',d,ri):'')+
   (!ex.skip&&!ex.feito?action('Pular neste dia','skip-routine',d,ri):'')+
   action('Editar rotina semanal','edit-routine',d,ri)+'</div></div>',footer('Confirmar horário','accept-routine'));
@@ -14376,7 +14408,7 @@ function acceptRoutine(){
  const d=routineDraft;
  if(!d||!isShown('sc170-routine-panel')||!sameRoutine(d)||d.slot===undefined||routineSlots(d.ri,d.day)[0]!==d.slot){toast('A disponibilidade mudou. Confira a nova sugestão.',true);renderRoutine();return false;}
  const r=rotinaDe(d.ri),start=clock(d.slot),end=clock(d.slot+Number(r.flexivel.minutos));
- if(!gravarRotExc(d.day,d.key,{...routineException(r,d.day),inicio:start,fim:end}))return false;
+ if(!gravarRotExc(d.day,d.key,rotinaComDetalhe({...routineException(r,d.day),inicio:start,fim:end})))return false;
  routineDraft=null;fecharModal();toast('Rotina reservada às '+start+' só neste dia.');
  return true;
 }
@@ -15612,6 +15644,6 @@ document.addEventListener('click',function(e){
 <link rel="stylesheet" href="./sc-botoes-compactos.css?v=2026-11-21c">
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
 <link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-22b">
-<script src="./sc-aura-dashboard.js?v=2026-11-22b"></script>
+<script src="./sc-aura-dashboard.js?v=2026-11-24a"></script>
 </body></html>
 

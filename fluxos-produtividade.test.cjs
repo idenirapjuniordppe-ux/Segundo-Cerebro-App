@@ -66,13 +66,48 @@ test('Me ajude a começar usa um passo real e mantém tarefa, horário e dados i
  assert.equal(w.obter('tarefas','t1').status,'aberta');assert.equal(w.lerFila().length,0);
 });
 
+test('detalhes da rotina pertencem à ocorrência e acompanham seu reagendamento',async t=>{
+ const r={id:'r1',titulo:'Academia',dias:[5],inicio:'15:30',fim:'17:00'};
+ const {w,q,input,date}=await app(t,{config:{sc148_auto:'Não',rotina:JSON.stringify([r])}});
+ const next='2026-11-27', moved='2026-11-21';
+ const routine=day=>w.itensDoDia(day,false).find(x=>x.tipo==='rotina');
+ const saveDetails=()=>q('button[onclick^="rotinaSalvarDetalhe"]').click();
+
+ w.abrirRotina(0,date);
+ assert.equal(q('label[for="rx-detalhe"]').textContent,'Detalhes deste dia');
+ input('#rx-detalhe',' Treino de peito <leve> ');saveDetails();
+ assert.equal(routine(date).titulo,'Academia: Treino de peito <leve>');
+ assert.equal(routine(date).inicio,'15:30');
+ assert.equal(routine(next).titulo,'Academia');
+ assert.equal(w.D.config.rotina,JSON.stringify([r]));
+ assert.match(w.htmlItemAgenda(routine(date)),/&lt;leve&gt;/);
+
+ w.abrirRotina(0,date);assert.equal(q('#rx-detalhe').value,'Treino de peito <leve>');
+ input('#rx-ini','16:00');w.rotinaSoHoje(0,date);
+ assert.equal(routine(date).inicio,'16:00');
+ w.rotinaRestaurar(0,date);assert.equal(routine(date).inicio,'15:30');
+ w.rotinaConcluir(0,date);assert.equal(routine(date).feito,true);
+ w.Planner.ocorrencia(0,date,'15:30','17:00',date);
+ input('#pp-rot-dia',moved);w.Planner.mudarRotina(0,date,false);
+ assert.equal(routine(date),undefined);
+ assert.equal(routine(moved).titulo,'Academia: Treino de peito <leve>');
+ assert.equal(routine(moved).feito,true);
+
+ w.abrirRotina(0,moved,date);assert.equal(q('#rx-detalhe').value,'Treino de peito <leve>');
+ input('#rx-detalhe','');saveDetails();
+ assert.equal(routine(moved).titulo,'Academia');
+ assert.equal(routine(moved).feito,true);
+ assert.equal(routine(next).titulo,'Academia');
+});
+
 test('rotina flexível só ocupa horário aceito e reencaixa ao surgir conflito',async t=>{
  const fri={id:'r1',titulo:'Caminhada',dias:[5],inicio:'17:00',fim:'20:00',flexivel:{minutos:20}};
- const {w,click,q,date}=await app(t,{config:{sc148_auto:'Não',rotina:JSON.stringify([fri])},eventos:[{id:'e1',titulo:'Compromisso',data:'2026-11-20',inicio:'17:00',fim:'18:00'}]});
+ const {w,click,q,input,date}=await app(t,{config:{sc148_auto:'Não',rotina:JSON.stringify([fri])},eventos:[{id:'e1',titulo:'Compromisso',data:'2026-11-20',inicio:'17:00',fim:'18:00'}]});
  assert.equal(w.itensDoDia(date,false).some(x=>x.tipo==='rotina'),false);
  assert.ok(w.SC148.html().includes('Rotinas flexíveis'));
  assert.equal(w.SC170.openRoutine(0,date),true);
  assert.match(q('#sc170-routine-message').textContent,/18:00–18:20/);
+ input('#rx-detalhe','Rota pelo parque');
  click('[data-sc170="accept-routine"]');
  assert.equal(w.itensDoDia(date,false).find(x=>x.tipo==='rotina').inicio,'18:00');
  w.D.eventos.push({id:'e2',titulo:'Consulta',data:date,inicio:'18:00',fim:'19:00'});
@@ -81,6 +116,7 @@ test('rotina flexível só ocupa horário aceito e reencaixa ao surgir conflito'
  const before=w.lerFila().length;assert.equal(w.itensDoDia(date,false).find(x=>x.tipo==='rotina').inicio,'18:00');
  click('[data-sc170="accept-routine"]');
  assert.equal(w.itensDoDia(date,false).find(x=>x.tipo==='rotina').inicio,'19:00');
+ assert.equal(w.itensDoDia(date,false).find(x=>x.tipo==='rotina').titulo,'Caminhada: Rota pelo parque');
  assert.equal(w.obter('eventos','e2').inicio,'18:00');assert.equal(w.lerFila().length,before+1);
  w.irPara('config');w.renderRotinaEd();assert.ok(q('#sc170-flex-0').checked);
  assert.equal(q('#sc170-duration-0').value,'20');

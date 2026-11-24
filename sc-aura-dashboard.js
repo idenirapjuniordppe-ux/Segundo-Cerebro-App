@@ -296,6 +296,10 @@ function bind(){
     else if(act==='event'){const type=b.dataset.type,id=b.dataset.id;
       if(type==='tarefa'&&typeof abrirTarefa==='function')abrirTarefa(id);
       else if(type==='evento'&&id&&typeof abrirEvento==='function')abrirEvento(id);
+      else if(type==='rotina'&&typeof abrirRotina==='function'){
+        const occurrence=actualAgenda(day).find(x=>x.tipo===type&&x.id===id);
+        if(occurrence)abrirRotina(occurrence.ri,occurrence.dia,occurrence.origemRotina);
+      }
       else openDay('dia');
     }
   });
