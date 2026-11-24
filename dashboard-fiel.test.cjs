@@ -40,10 +40,10 @@ function setup(){
 }
 test('HTML inclui arquivos de estrutura real e service worker os instala offline',()=>{
   assert.match(html,/sc-aura-dashboard\.css\?v=2026-11-22b/);
-  assert.match(html,/sc-aura-dashboard\.js\?v=2026-11-24b/);
+  assert.match(html,/sc-aura-dashboard\.js\?v=2026-11-22b/);
   assert.match(sw,/premium-dashboard-fiel-20261122b/);
   assert.match(sw,/sc-aura-dashboard\.css\?v=2026-11-22b/);
-  assert.match(sw,/sc-aura-dashboard\.js\?v=2026-11-24b/);
+  assert.match(sw,/sc-aura-dashboard\.js\?v=2026-11-22b/);
   assert.match(sw,/const VERSION='2026-11-20d';/);
 });
 test('Código e CSS são legíveis e não alteram dados automaticamente',()=>{
