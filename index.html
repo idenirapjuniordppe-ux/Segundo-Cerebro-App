@@ -12980,7 +12980,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-23c";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-24a";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
@@ -13480,14 +13480,21 @@ function projectQueue(id){return ordenarTarefas(rows('tarefas').filter(t=>String
 function projectCard(p){const rel=related(p),{count:n,done:completed,percent}=SC167.project(p.id),pending=projectQueue(p.id);
  return '<article class="sc129-project"><div class="sc129-project-head"><button class="sc126-row-main" '+openAttr('projetos',p.id)+'><strong>'+esc(name(p))+'</strong></button>'+button('⋯','data-sc129-project-menu="'+esc(p.id)+'" aria-label="Opções do projeto '+esc(name(p))+'"')+'</div><div class="sc129-progress" role="progressbar" aria-label="Tarefas concluídas" aria-valuenow="'+percent+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+percent+'%"></span></div><p class="sc126-caption">'+completed+' de '+n+' tarefas concluídas</p><div class="sc129-relations">'+[['tarefas','Tarefas'],['notas','Notas'],['eventos','Agenda'],['metas','Metas'],...(window.SC160?[['mural','Mural']]:[]),['arquivos','Arquivos']].map(([k,title])=>button(title+((k==='mural'||k==='arquivos')?'':' '+rel[k].length),'data-sc129-project="'+esc(p.id)+'" data-pane="'+k+'"')).join('')+'</div>'+(pending.length?row('tarefas',pending[0],meta(pending[0]),true,true):'<p class="sc126-caption">Sem tarefas pendentes.</p>')+(completed.length?'<details class="sc126-details"><summary>Concluídas · '+completed.length+'</summary>'+completed.map(t=>row('tarefas',t,meta(t),true)).join('')+'</details>':'')+'</article>';
 }
-function projectDetail(id,pane){const p=rows('projetos').find(p=>String(p.id)===String(id));if(!p){toast('Projeto não encontrado.',true);return}const rel=related(p);pane=(Object.hasOwn(rel,pane)||(pane==='mural'&&window.SC160)||pane==='arquivos')?pane:'tarefas';
+function projectDetail(id,pane){const p=rows('projetos').find(p=>String(p.id)===String(id));if(!p){toast('Projeto não encontrado.',true);return}const rel=related(p);const queue=projectQueue(id),ready=queue.find(t=>!SC145.blocked(t).length),blocked=queue.find(t=>SC145.blocked(t).length);pane=(Object.hasOwn(rel,pane)||(pane==='mural'&&window.SC160)||pane==='arquivos')?pane:'tarefas';
  const items=(rel[pane]||[]).slice().sort((a,b)=>Number(done(a))-Number(done(b)));let content='';
  if(pane==='tarefas'){const pending=projectQueue(id),finished=items.filter(t=>sc155Lifecycle(t)==='done');content=list(pending.map((t,i)=>row('tarefas',t,meta(t),true,i===0)).join(''),'Sem tarefas pendentes.')+(finished.length?'<details class="sc126-details"><summary>Concluídas · '+finished.length+'</summary>'+list(finished.map(t=>row('tarefas',t,meta(t),true)).join(''),'')+'</details>':'')+button('Nova tarefa vinculada','data-sc126-linked="projetos" data-id="'+esc(id)+'"');}
  else if(pane==='mural'){content=SC160.board(id);}
  else if(pane==='arquivos'){content=window.SCDrive?SCDrive.shell(id):'<p>Arquivos não disponíveis nesta versão.</p>';}
  else {content=list(items.map(x=>row(pane,x,meta(x))).join(''),'Nenhum registro vinculado.');if(pane==='notas')content+=button('Nova nota vinculada','data-sc129-new-note="'+esc(id)+'"');if(pane==='eventos')content+=button('Novo compromisso vinculado','data-sc129-new-event="'+esc(id)+'"');if(pane==='metas')content+=button('Nova meta vinculada','data-sc129-new-goal="'+esc(id)+'"');}
  const tabs='<div class="sc129-relations">'+[['tarefas','Tarefas'],['notas','Notas'],['eventos','Agenda'],['metas','Metas'],...(window.SC160?[['mural','Mural']]:[]),['arquivos','Arquivos']].map(([k,t])=>button(t+((k==='mural'||k==='arquivos')?'':' '+rel[k].length),'data-sc129-project="'+esc(id)+'" data-pane="'+k+'" aria-pressed="'+(pane===k)+'"')).join('')+'</div>';
- abrirModal(name(p),'<div class="sc126-page">'+SC167.projectPanel(id)+tabs+content+'<div class="sc126-tools">'+button('Editar projeto','data-sc126-edit="projetos" data-id="'+esc(id)+'"')+'</div></div>','');const body=$('modal-corpo');body.dataset.sc126Detail='projetos';body.dataset.sc126Id=id;
+ const deadline=[p.prazo,...queue.map(t=>window.SC170?.deadline(t))].filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x))).sort()[0];
+ const dependencies=blocked?SC145.blocked(blocked).map(key=>rows('tarefas').find(t=>String(t.id)===key)?.titulo||'Tarefa indisponível'):[];
+ const overview='<div class="sc-premium-project">'+
+  '<div><small>Próxima ação</small>'+(ready?button(esc(name(ready)),openAttr('tarefas',ready.id)):'<strong>'+ (queue.length?'Aguardando dependências':'Sem pendências')+'</strong>')+'</div>'+
+  (deadline?'<div><small>Prazo mais próximo</small><strong>'+esc(deadline.split('-').reverse().join('/'))+'</strong></div>':'')+
+  (blocked?'<div><small>Bloqueio · '+esc(name(blocked))+'</small><strong>'+esc(dependencies.join(', '))+'</strong></div>':'')+
+  (ready&&!ready.hora?button('Sugerir horário','data-sc148="fit-project" data-id="'+esc(ready.id)+'"'):'')+'</div>';
+ abrirModal(name(p),'<div class="sc126-page">'+overview+SC167.projectPanel(id)+tabs+content+'<div class="sc126-tools">'+button('Editar projeto','data-sc126-edit="projetos" data-id="'+esc(id)+'"')+'</div></div>','');const body=$('modal-corpo');body.dataset.sc126Detail='projetos';body.dataset.sc126Id=id;
  if(pane==='arquivos'&&window.SCDrive)SCDrive.mount(id);
 }
 function archived(n){return /(?:^|[,;\s])#?arquivado(?:$|[,;\s])/i.test(String(n.etiquetas||''))}
@@ -13532,7 +13539,7 @@ function renderLibrary(){const host=$('v-biblioteca');if(!host)return;
  html+='<details class="sc126-details"><summary>Arquivadas · '+old.length+'</summary>'+list(old.map(noteRow).join(''),'Nenhuma nota arquivada.')+'</details>';
  }else if(library==='arquivos'){
  html+='<div class="sc182-section-heading"><h2>Links e arquivos</h2>'+button('＋','data-sc126-new="notas" aria-label="Adicionar link em uma nota" title="Adicionar link em uma nota"','sc182-inline-create')+'</div>';const files=links().filter(x=>match(x.note)||!q||x.url.toLowerCase().includes(q));html+=list(files.map(x=>'<div class="sc126-row"><a class="sc126-row-main" href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer"><strong>'+esc(x.host)+'</strong><small>'+esc(name(x.note))+'</small></a>'+button('Nota',openAttr('notas',x.note.id))+'</div>').join(''),'Nenhum link encontrado nas notas.');
- }else {html+='<div class="sc182-section-heading"><h2>'+(library==='estudos'?'Estudos':'Post-its')+'</h2>'+button('＋','data-sc126-tool="'+library+'" aria-label="'+(library==='estudos'?'Novo estudo e agenda':'Novo post-it')+'" title="'+(library==='estudos'?'Novo estudo e agenda':'Novo post-it')+'"','sc182-inline-create')+'</div>';const records=(library==='estudos'?rows('estudos'):rows('notas').filter(x=>x.tipo==='postit')).filter(match);html+=list(records.map(x=>row(library==='estudos'?'estudos':'notas',x,meta(x))).join(''),'Nenhum registro encontrado.')}
+ }else {html+='<div class="sc182-section-heading"><h2>'+(library==='estudos'?'Estudos':'Post-its')+'</h2>'+button('＋','data-sc126-tool="'+library+'" aria-label="'+(library==='estudos'?'Novo estudo e agenda':'Novo post-it')+'" title="'+(library==='estudos'?'Novo estudo e agenda':'Novo post-it')+'"','sc182-inline-create')+'</div>';const records=(library==='estudos'?rows('estudos'):rows('notas').filter(x=>x.tipo==='postit')).filter(match);if(library==='estudos')html+=button('Estudo com fontes','data-sc-premium-study="sources"');html+=list(records.map(x=>row(library==='estudos'?'estudos':'notas',x,meta(x))).join(''),'Nenhum registro encontrado.')}
  host.innerHTML=html;
 }
 
@@ -14549,23 +14556,56 @@ async function reloadCalendars(){
 }
 function fingerprint(t){return JSON.stringify([t.data||'',t.hora||'',t.duracao||'',t.notas||'',t.status||'']);}
 function apply(changes,reason){if(!changes.length)return false;const undo={at:Date.now(),changes:changes.map(c=>({id:c.id,before:clone(task(c.id)),after:Object.assign({},task(c.id),c.after),reason:c.reason||reason}))};const prevUndo=SC145.read('planner-undo',null);if(!SC145.write('planner-undo',undo))throw Error('Não consegui guardar o desfazer. Nada alterado.');busy=true;try{if(!salvar('tarefas',changes.map(c=>c.after),{sc148_base:undo.changes.map(c=>({id:c.id,fields:{data:c.before.data||'',hora:c.before.hora||'',duracao:c.before.duracao||'',notas:c.before.notas||'',status:c.before.status||''}}))})){SC145.write('planner-undo',prevUndo);return false;}SC145.write('planner-log',{at:Date.now(),reason,items:changes.map(c=>({id:c.id,reason:c.reason||reason}))});}finally{busy=false;}refresh();return true;}
+function reviewProposal(mark){
+ const grouped=window.SC170?.groupedIds(D,hojeISO())||new Set();
+ const eligible=mark?rows('tarefas').filter(t=>!grouped.has(String(t.id))&&active(t)&&!managed(t)&&!t.hora&&!SC145.blocked(t).length&&!/\[planner:fixo\]|aguardando/.test(String(t.notas||'')+' '+String(t.etiquetas||''))).slice(0,50):[];
+ const ids=new Set(eligible.map(t=>t.id));
+ const virtual={...D,tarefas:rows('tarefas').map(t=>ids.has(t.id)?{...t,notas:String(t.notas||'')+'\n[planner:auto]'}:t)};
+ const p=sc148Plan(virtual,options());
+ p.changes.forEach(c=>{if(ids.has(c.id))c.after.notas=virtual.tarefas.find(t=>t.id===c.id).notas;});
+ return p;
+}
+let planDraft=null;
+function planSignature(p){return JSON.stringify(p.changes.map(c=>[c.id,c.after,fingerprint(task(c.id))]));}
 async function plan(mark=false){
  if(busy)return;
- const epoch=sc166Geracao;let calendarResult;
- busy=true;try{calendarResult=await loadCalendars();}finally{busy=false;}
- if(epoch!==sc166Geracao)return;
- if(D.config.google_agenda==='Sim'&&(!Array.isArray(calendarResult)||calendarResult[0]!==true)){
-  toast('Não consegui conferir o Google Agenda. Nenhum horário foi alterado.',true);return;
- }
- if(mark){
-  const grouped=window.SC170?.groupedIds(D,hojeISO())||new Set();
-  const eligible=rows('tarefas').filter(t=>!grouped.has(String(t.id))&&active(t)&&!managed(t)&&!t.hora&&!SC145.blocked(t).length&&!/\[planner:fixo\]|aguardando/.test(String(t.notas||'')+' '+String(t.etiquetas||''))).slice(0,50);
-  if(eligible.length&&!apply(eligible.map(t=>({id:t.id,after:{id:t.id,notas:String(t.notas||'')+'\n[planner:auto]'}})),'Tarefas sem horário liberadas para planejamento'))return;
- }
- const p=proposed();
- if(p.changes.length){if(!apply(p.changes,'Planejamento automático'))return;toast(p.changes.length+' tarefa(s) distribuída(s). Pode desfazer.');}
- else toast(p.reasons.length?'Algumas tarefas precisam de duração ou espaço livre. Veja os detalhes.':'Nenhum horário precisou ser alterado.');
- refresh();
+ const epoch=sc166Geracao;
+ busy=true;try{
+  const calendarResult=await loadCalendars(false,true);
+  if(epoch!==sc166Geracao)return;
+  if(D.config.google_agenda==='Sim'&&(!Array.isArray(calendarResult)||calendarResult[0]!==true)){
+   toast('Não consegui conferir o Google Agenda. Nenhum horário foi alterado.',true);return;
+  }
+  const p=reviewProposal(mark);
+  planDraft={epoch,mark,signature:planSignature(p)};
+  const caption=(date,time)=>date?short(date)+(time?' · '+time:' · sem horário'):'Sem data';
+  const changes=p.changes.map(c=>'<article class="sc148-card"><strong>'+esc(task(c.id).titulo)+'</strong><div class="sc-premium-compare"><span>Antes<strong>'+esc(caption(c.before.data,c.before.hora))+'</strong></span><span>Proposto<strong>'+esc(caption(c.after.data,c.after.hora))+'</strong></span></div><small>'+esc(c.reason)+'</small></article>').join('');
+  const changed=new Set(p.changes.map(c=>String(c.id)));
+  const kept=timelineEntries(day).filter(e=>!e.done&&e.state!=='cancel'&&!changed.has(String(e.id))).slice(0,4);
+  abrirModal('Replanejar o dia','<div id="sc-premium-plan">'+
+   (changes||'<p>Nenhum horário precisa ser alterado.</p>')+
+   (kept.length?'<details><summary>Horários mantidos</summary>'+kept.map(e=>'<p>'+esc(hh(e.start)+' · '+e.title)+'</p>').join('')+'</details>':'')+
+   (p.reasons.length?'<h3>Precisam de atenção</h3>'+p.reasons.map(e=>'<p>'+esc((task(e.id)?.titulo||'Tarefa')+' · '+e.reason)+'</p>').join(''):'')+'</div>',
+   changes?button('Aplicar plano','apply-preview'):'');
+ }finally{busy=false;}
+}
+async function applyPreview(){
+ if(busy||!planDraft||!$('sc-premium-plan'))return;
+ const draft=planDraft;
+ await planCheck(draft);
+}
+async function planCheck(draft){
+ busy=true;
+ try{
+  const calendarResult=await loadCalendars(false,true);
+  if(draft!==planDraft||draft.epoch!==sc166Geracao||!$('sc-premium-plan')||$('modal').classList.contains('hidden'))return;
+  if(D.config.google_agenda==='Sim'&&(!Array.isArray(calendarResult)||calendarResult[0]!==true)){
+   toast('Não foi possível conferir o Google Agenda. Nenhuma alteração aplicada.',true);return;
+  }
+  const p=reviewProposal(draft.mark);
+  if(planSignature(p)!==draft.signature){toast('O plano mudou. Gere uma nova prévia antes de aplicar.',true);return;}
+  if(apply(p.changes,'Plano revisado e confirmado')){planDraft=null;fecharModal();toast('Plano aplicado. Você pode desfazer no Planner.');}
+ }finally{busy=false;}
 }
 function undo(){const u=SC145.read('planner-undo',null);if(!u||Date.now()-u.at>7*86400000)throw Error('Nenhum planejamento recente para desfazer.');for(const c of u.changes)if(!task(c.id)||fingerprint(task(c.id))!==fingerprint(c.after))throw Error('Uma tarefa mudou depois. Não desfiz para preservar sua edição.');pauseUntil=Date.now()+30*60000;busy=true;try{if(!salvar('tarefas',u.changes.map(c=>({id:c.id,data:c.before.data||'',hora:c.before.hora||'',duracao:c.before.duracao||'',notas:c.before.notas||''}))))return false;SC145.write('planner-undo',null);SC145.write('planner-pause',pauseUntil);}finally{busy=false;}toast('Desfeito. Automação pausada por 30 minutos.');refresh();}
 function setView(v){view=v;if(typeof agDia==='string')agDia=day;refresh();loadCalendars().then(refresh);}
@@ -14789,9 +14829,9 @@ function external(id,d,kind){
  if(kind==='routine')return e.origemRotina?Planner.ocorrencia(e.ri,d,e.inicio,e.fim,e.origemRotina):abrirRotina(e.ri,d);
  abrirModal(e.titulo,'<p>'+esc(short(d)+' · '+eventHours(e))+'</p><p>Compromisso da agenda conectada. Altere na agenda de origem.</p>','');
 }
-function fitOptions(id,d){const t=task(id);if(!t||!active(t)||t.hora||!sc120Date_(d)||window.SC170?.groupedIds(D,hojeISO()).has(String(id))||window.SC170?.afterDeadline(t,d))return [];const duration=Number(t.duracao);if(!Number.isInteger(duration)||duration<15||duration>240)return [];if(!SC144.loaded(d))return [];if(SC145.blocked(t).length)return [];const data=clone(D),p=prefs();data.config.dia_inicio=p.start||D.config.dia_inicio||'08:00';data.config.dia_fim=p.end||D.config.dia_fim||'20:00';data.tarefas=data.tarefas.filter(x=>String(x.id)!==String(id));const routines=events(d).filter(e=>e.rotina);return SC144.available(d,duration,Number.isInteger(p.buffer)?p.buffer:15,data,imported().concat(routines),new Date(),3);}
+function fitOptions(id,d){const t=task(id);if(!t||!active(t)||t.hora||!sc120Date_(d)||window.SC170?.groupedIds(D,hojeISO()).has(String(id))||window.SC170?.afterDeadline(t,d))return [];const duration=Number(t.duracao);if(!Number.isInteger(duration)||duration<15||duration>240)return [];if(D.config.google_agenda==='Sim'&&!SC144.loaded(d))return [];if(SC145.blocked(t).length)return [];const data=clone(D),p=prefs();data.config.dia_inicio=p.start||D.config.dia_inicio||'08:00';data.config.dia_fim=p.end||D.config.dia_fim||'20:00';data.tarefas=data.tarefas.filter(x=>String(x.id)!==String(id));const routines=events(d).filter(e=>e.rotina);return SC144.available(d,duration,Number.isInteger(p.buffer)?p.buffer:15,data,imported().concat(routines),new Date(),3);}
 let fitDraft=null;
-async function fit(id){const t=task(id),d=day;if(!t||!active(t)||t.hora)return;if(!(Number(t.duracao)>=15&&Number(t.duracao)<=240)){toast('Informe a duração da tarefa para encontrar um encaixe.',true);abrirTarefa(t);return;}await loadCalendars();const times=fitOptions(id,d);if(!times.length){toast('Não encontrei um encaixe com a duração e os intervalos atuais. Confira a agenda carregada.',true);return;}fitDraft={id,d,base:fingerprint(t)};abrirModal('Encaixar tarefa','<p>'+esc(t.titulo)+'</p><p class="sc148-sub">'+esc(short(d)+' · '+t.duracao+' min · intervalos preservados')+'</p>'+times.map(time=>button(time+'–'+hh(min(time)+Number(t.duracao)),'accept-fit','data-time="'+time+'"')).join('')+'<p class="sc148-sub">Escolha um horário para agendar. Pode desfazer em Planejamento e ferramentas.</p>','');}
+async function fit(id,d=day){const t=task(id);if(!t||!active(t)||t.hora)return;if(!(Number(t.duracao)>=15&&Number(t.duracao)<=240)){toast('Informe a duração da tarefa para encontrar um encaixe.',true);abrirTarefa(t);return;}await loadCalendars();const times=fitOptions(id,d);if(!times.length){toast('Não encontrei um encaixe com a duração e os intervalos atuais. Confira a agenda carregada.',true);return;}fitDraft={id,d,base:fingerprint(t)};abrirModal('Encaixar tarefa','<p>'+esc(t.titulo)+'</p><p class="sc148-sub">'+esc(short(d)+' · '+t.duracao+' min · intervalos preservados')+'</p>'+times.map(time=>button(time+'–'+hh(min(time)+Number(t.duracao)),'accept-fit','data-time="'+time+'"')).join('')+'<p class="sc148-sub">Escolha um horário para agendar. Pode desfazer em Planejamento e ferramentas.</p>','');}
 function acceptFit(time){const f=fitDraft,t=f&&task(f.id);if(!t||fingerprint(t)!==f.base||!fitOptions(f.id,f.d).includes(time)){toast('A tarefa ou a agenda mudou. Consulte o encaixe novamente.',true);return;}if(!apply([{id:t.id,after:{id:t.id,data:f.d,hora:time,notas:String(t.notas||'').replace(/\s*\[planner:auto\]/g,'')+'\n[planner:fixo]'}}],'Encaixe escolhido manualmente'))return;fitDraft=null;fecharModal();toast('Tarefa agendada. Você pode desfazer.');}
 
 function weekly(){const start=monday(day);return '<section class="sc148-card">'+Array.from({length:7},(_,i)=>{const d=somaDias(start,i),ts=rows('tarefas').filter(t=>t.data===d&&active(t)),ev=events(d).filter(e=>sc155Lifecycle(e)==='open'),count=ts.length+ev.length;return '<button type="button" class="sc149-week" data-sc148="date" data-day="'+d+'" aria-label="Abrir horários de '+esc(short(d))+'"><strong>'+esc(short(d))+'</strong><span>'+esc(count?count+' item(ns)':'Sem compromissos')+'</span><span aria-hidden="true">›</span></button>';}).join('')+'</section>';}
@@ -14801,7 +14841,7 @@ function eventWarning(id){const host=$('modal-corpo');if(!host||!$('f-ini')||!$(
 function newSlot(d,time){if(!sc120Date_(d)||min(time)===null)return;abrirEvento({data:d,inicio:time,fim:hh(Math.min(1439,min(time)+60))});}
 
 function monthly(){const first=day.slice(0,7)+'-01',last=new Date(deISO(first).getFullYear(),deISO(first).getMonth()+1,0).getDate(),pad=(deISO(first).getDay()+6)%7;let html='<div class="sc148-days">'+['S','T','Q','Q','S','S','D'].map(x=>'<span>'+x+'</span>').join('')+'<span style="grid-column:span '+Math.max(1,pad)+';'+(!pad?'display:none':'')+'"></span>';for(let i=1;i<=last;i++){const d=first.slice(0,8)+String(i).padStart(2,'0'),n=rows('tarefas').filter(t=>t.data===d&&active(t)).length+events(d).filter(e=>sc155Lifecycle(e)==='open').length;html+='<button data-sc148="date" data-day="'+d+'" data-selected="'+(d===day)+'" aria-label="'+esc(short(d))+', '+n+' itens">'+i+(n?'<small>'+n+' itens</small>':'')+'</button>';}return html+'</div>';}
-function html(){const p=detailsOpen?proposed():{reasons:[]},log=detailsOpen?SC145.read('planner-log',null):null;return '<section class="sc148-root"><div class="sc148-head"><h2>'+esc(day===hojeISO()?'Hoje':short(day))+'</h2><details class="sc182-utilities sc182-planner-tools"><summary title="Mais ações do planejamento" aria-label="Mais ações do planejamento">⋯</summary><div class="sc182-utilities-menu">'+button('Novo compromisso','new-event')+'<button type="button" class="sc160-new" data-sc160="new">Novo post-it</button>'+(view==='dia'?(window.SC170?.action('Anotar neste dia','day-note',day)||''):'')+'</div></details></div><div class="sc148-tabs" role="group" aria-label="Visualização do planner">'+[['dia','Dia'],['semana','Semana'],['mes','Mês']].map(([v,t])=>'<button data-sc148="view" data-view="'+v+'" aria-pressed="'+(v===view)+'">'+t+'</button>').join('')+'</div><div class="sc148-date">'+button('‹','prev','aria-label="Período anterior"')+'<input type="date" data-sc148-date value="'+day+'" aria-label="Dia selecionado">'+(day===hojeISO()?'':button('Hoje','today'))+button('›','next','aria-label="Próximo período"')+'</div>'+(view==='painel'?summary():view==='dia'?daily():view==='semana'?weekly():monthly())+'<details class="sc148-tools sc148-card" data-sc167-planner-tools><summary>Planejamento e ferramentas</summary><div class="sc148-actions"><button class="btn btn-p" data-sc148="plan">Planejar pendências</button>'+button('+ Tarefa','new')+button('+ Compromisso','new-event')+(window.SC170?.action('+ Bloco de tarefas','new-block',day)||'')+(SC145.read('planner-undo',null)?button('Desfazer plano','undo'):'')+'</div><div class="sc148-tools"><p class="sc148-sub">'+esc(cloudState)+' · Automação no app: '+(auto()?'ativa para tarefas flexíveis':'pausada')+'</p>'+button('Inteligência','settings')+button('Painel completo','view','data-view="painel" aria-pressed="'+(view==='painel')+'"')+button('Todas as tarefas','tasks')+button('Sessões de metas','goals')+button('Rotinas','routines')+button('Progresso dos projetos','projects')+button('Revisão semanal','review')+button('Atualizar Google Agenda','reload')+(D.config.sc148_cloud_undo?button('Desfazer plano do servidor','cloud-undo'):'')+(log?'<p class="sc148-sub">'+esc(log.reason)+' · '+log.items.length+' alteração(ões). Pode desfazer se não houver edição posterior.</p>':'')+p.reasons.map(r=>'<p class="sc148-sub">'+esc(task(r.id)?.titulo||'Tarefa')+': '+esc(r.reason)+'</p>').join('')+'</div></details></section>';}
+function html(){const p=detailsOpen?proposed():{reasons:[]},log=detailsOpen?SC145.read('planner-log',null):null;return '<section class="sc148-root"><div class="sc148-head"><h2>'+esc(day===hojeISO()?'Hoje':short(day))+'</h2><details class="sc182-utilities sc182-planner-tools"><summary title="Mais ações do planejamento" aria-label="Mais ações do planejamento">⋯</summary><div class="sc182-utilities-menu">'+button('Novo compromisso','new-event')+'<button type="button" class="sc160-new" data-sc160="new">Novo post-it</button>'+(view==='dia'?(window.SC170?.action('Anotar neste dia','day-note',day)||''):'')+'</div></details></div><div class="sc148-tabs" role="group" aria-label="Visualização do planner">'+[['dia','Dia'],['semana','Semana'],['mes','Mês']].map(([v,t])=>'<button data-sc148="view" data-view="'+v+'" aria-pressed="'+(v===view)+'">'+t+'</button>').join('')+'</div><div class="sc148-date">'+button('‹','prev','aria-label="Período anterior"')+'<input type="date" data-sc148-date value="'+day+'" aria-label="Dia selecionado">'+(day===hojeISO()?'':button('Hoje','today'))+button('›','next','aria-label="Próximo período"')+'</div>'+(view==='painel'?summary():view==='dia'?daily():view==='semana'?weekly():monthly())+'<details class="sc148-tools sc148-card" data-sc167-planner-tools><summary>Planejamento e ferramentas</summary><div class="sc148-actions"><button class="btn btn-p" data-sc148="plan">Replanejar o dia</button>'+button('+ Tarefa','new')+button('+ Compromisso','new-event')+(window.SC170?.action('+ Bloco de tarefas','new-block',day)||'')+(SC145.read('planner-undo',null)?button('Desfazer plano','undo'):'')+'</div><div class="sc148-tools"><p class="sc148-sub">'+esc(cloudState)+' · Automação no app: '+(auto()?'ativa para tarefas flexíveis':'pausada')+'</p>'+button('Inteligência','settings')+button('Painel completo','view','data-view="painel" aria-pressed="'+(view==='painel')+'"')+button('Todas as tarefas','tasks')+button('Sessões de metas','goals')+button('Rotinas','routines')+button('Progresso dos projetos','projects')+button('Revisão semanal','review')+button('Atualizar Google Agenda','reload')+(D.config.sc148_cloud_undo?button('Desfazer plano do servidor','cloud-undo'):'')+(log?'<p class="sc148-sub">'+esc(log.reason)+' · '+log.items.length+' alteração(ões). Pode desfazer se não houver edição posterior.</p>':'')+p.reasons.map(r=>'<p class="sc148-sub">'+esc(task(r.id)?.titulo||'Tarefa')+': '+esc(r.reason)+'</p>').join('')+'</div></details></section>';}
 let detailsOpen=false;const rendered=new WeakMap();
 function refresh(){
  let markup=null;
@@ -14832,8 +14872,8 @@ function move(id,d){const t=task(id);if(!t||!sc120Date_(d))return;if(window.SC17
 function cloudUndo(){google.script.run.withSuccessHandler(()=>{recarregar(true);toast('Plano do servidor desfeito.');}).withFailureHandler(e=>toast(e.message,true)).planner148Undo();}
 function cloud(){cloudBusy=true;google.script.run.withSuccessHandler(r=>{cloudBusy=false;cloudState=r.enabled?'Servidor automático ativo':'Servidor automático pausado';toast(cloudState);refresh();}).withFailureHandler(()=>{cloudBusy=false;cloudState='Atualize Codigo.gs e publique o servidor para ativar';toast(cloudState,true);refresh();}).planner148Configure(true);}
 function review(){const recent=rows('tarefas').filter(t=>sc155Lifecycle(t)==='done'&&dataConcl(t)>=somaDias(hojeISO(),-6)&&dataConcl(t)<=hojeISO()),pending=rows('tarefas').filter(active);abrirModal('Revisão semanal','<p>'+recent.length+' tarefa(s) concluída(s) nos últimos 7 dias.</p><p>'+pending.filter(t=>t.data&&t.data<hojeISO()).length+' pendência(s) com data passada · '+pending.filter(t=>!t.data).length+' sem data.</p><h3>Próximos passos</h3>'+proposed().reasons.slice(0,12).map(r=>'<p>'+esc(task(r.id)?.titulo||'')+' · '+esc(r.reason)+'</p>').join('')+'<h3>Rotinas</h3>'+habits().map(hb=>{const count=rows('registros').filter(r=>r.habito_id===hb.id&&r.data>=somaDias(hojeISO(),-6)).length;return '<p>'+esc(hb.nome)+': '+count+' registro(s) em 7 dias. '+(count<2?'Experimente uma sessão menor, sem alterar a rotina automaticamente.':'Mantenha um ritmo sustentável.')+'</p>';}).join(''),button('Revisão completa','legacy-review'));}
-function schedule(){clearTimeout(timer);if(busy||!auto()||Date.now()<Math.max(pauseUntil,SC145.read('planner-pause',0),Number(D.config.sc148_pause_until||0)))return;timer=setTimeout(()=>{if(busy||!auto()||navigator.onLine===false||fila.length||enviando||document.visibilityState==='hidden')return;try{const p=proposed();if(p.changes.length)apply(p.changes,'Agenda mudou: blocos flexíveis reorganizados');}catch(e){console.warn('Planner:',e.message);}},1200);}
-function init(){Planner.menu=open;const oldEvent=window.abrirEvento;window.abrirEvento=function(x){const e=obter('eventos',x);if(window.SC170?.isBlock(e))return SC170.openBlock(e.id);const result=oldEvent.apply(this,arguments);eventWarning(e.id||'');return result;};const oldSaveEvent=window.salvarEventoModal;window.salvarEventoModal=function(id){if($('sc150-conflict')){const hits=eventConflicts($('f-data').value,$('f-ini').value,$('f-fim').value,id);if(hits.length){$('sc150-conflict').textContent='Há sobreposição com '+hits.map(e=>e.title).join(' · ')+'. Escolha outro horário.';if(window.SC151FX)SC151FX.warning(hits);toast('Confira o conflito de horários antes de salvar.',true);return;}}return oldSaveEvent.apply(this,arguments);};const oldSave=window.salvar;window.salvar=function(tab,items,extra,exigirPersistencia){if(tab==='tarefas'&&!busy){items=(Array.isArray(items)?items:[items]).map(o=>{const t=task(o.id);if(t&&managed(t)&&(['data','hora'].some(k=>Object.hasOwn(o,k)&&String(o[k])!==String(t[k]||''))))return Object.assign({},o,{notas:String(o.notas??t.notas??'').replace(/\s*\[planner:auto\]/g,'')+'\n[planner:fixo]'});return o;});}return oldSave.call(this,tab,items,extra,exigirPersistencia);};const oldLocal=SC145.local;SC145.local=function(text){const n=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();if(/^(planeje|organize|replaneje) (meu dia|minha semana|o meu dia)[.!]?$/.test(n)){plan(true).catch(e=>toast(e.message,true));return 'Estou conferindo a agenda e distribuindo as tarefas flexíveis. O resultado aparece no Planner e pode ser desfeito.';}if(/^(desfaca|desfazer) (o )?(plano|planejamento)[.!]?$/.test(n)){undo();return 'Planejamento desfeito; a automação está pausada por 30 minutos.';}return oldLocal.apply(this,arguments);};const oldAgenda=window.renderAgenda;window.renderAgenda=function(){if(typeof agDia==='string'&&sc120Date_(agDia))day=agDia;const r=oldAgenda.apply(this,arguments);render();return r;};const old=window.renderTudo;window.renderTudo=function(){const r=old.apply(this,arguments);refresh();schedule();return r;};document.addEventListener('click',e=>{const b=e.target.closest('[data-sc148]');if(!b)return;e.preventDefault();const k=b.dataset.sc148;try{const map={'jump-next':()=>jumpNext(b),'day-gap':()=>chooseDayGap(b.dataset.day,Number(b.dataset.start),Number(b.dataset.end)),'gap-select':()=>pickDayGap(b.dataset.id),'gap-save':()=>saveDayGap(),'gap-cancel':()=>{dayGap=null;fecharModal();},view:()=>setView(b.dataset.view),'save-idea':()=>ideaClick(b.dataset.day,b),plan:()=>plan(true).catch(e=>toast(e.message,true)),undo,settings,'save-settings':saveSettings,cloud,'cloud-undo':cloudUndo,prev:()=>{day=view==='mes'?SC146.addMonths(day,-1):somaDias(day,view==='semana'?-7:-1);setView(view);},next:()=>{day=view==='mes'?SC146.addMonths(day,1):somaDias(day,view==='semana'?7:1);setView(view);},today:()=>{day=hojeISO();setView('dia');},date:()=>{day=b.dataset.day;setView('dia');},slot:()=>newSlot(b.dataset.day,b.dataset.time),external:()=>external(b.dataset.id,b.dataset.day,'external'),routine:()=>external(b.dataset.id,b.dataset.day,'routine'),fit:()=>fit(b.dataset.id).catch(e=>toast(e.message,true)),'accept-fit':()=>acceptFit(b.dataset.time),edit:()=>SC126.detail('tarefas',b.dataset.id),event:()=>{const x=rows('eventos').find(x=>x.id===b.dataset.id);if(window.SC170?.isBlock(x))SC170.openBlock(x.id);else abrirEvento(x);},'new-event':()=>abrirEvento({data:day}),new:()=>abrirTarefa({data:b.dataset.day||day}),tasks:()=>{fecharModal();SC126.openTasks();},inbox:()=>Planner.entrada(),goals:()=>Planner.metas(),routines:()=>Planner.rotinas(),projects:projectProgress,review,'legacy-review':()=>Planner.revisao(),reload:()=>reloadCalendars().catch(()=>toast('Não foi possível atualizar o Google Agenda.',true))};map[k]?.();}catch(e){toast(e.message,true);}});document.addEventListener('change',e=>{if(e.target.matches('[data-sc148-task]')){alternarTarefa(e.target.dataset.sc148Task);refresh();}if(e.target.matches('[data-sc148-habit]')){marcarHabito(e.target.dataset.sc148Habit,day);refresh();}if(e.target.matches('[data-sc148-move]'))move(e.target.dataset.sc148Move,e.target.value);if(e.target.matches('[data-sc148-date]')&&sc120Date_(e.target.value)){day=e.target.value;setView('dia');}});document.addEventListener('input',e=>{if(e.target.matches('[data-sc148-note]'))ideaInput(e.target);});window.addEventListener('pagehide',()=>{for(const d of ideaDrafts.keys())ideaSave(d,false);});window.addEventListener('online',()=>loadCalendars().then(schedule));window.addEventListener('focus',()=>loadCalendars().then(schedule));setInterval(()=>{if(document.visibilityState!=='hidden')loadCalendars().then(()=>{if(['hoje','agenda'].includes(vistaAtual)&&!document.activeElement?.matches('input,textarea,select')&&$('modal')?.classList.contains('hidden'))refresh();schedule();});},60000);refresh();}
+function schedule(){clearTimeout(timer);if(busy||!auto()||Date.now()<Math.max(pauseUntil,SC145.read('planner-pause',0),Number(D.config.sc148_pause_until||0)))return;timer=setTimeout(()=>{if(busy||!auto()||navigator.onLine===false||fila.length||enviando||document.visibilityState==='hidden'||($('sc-premium-plan')&&!$('modal').classList.contains('hidden')))return;try{const p=proposed();if(p.changes.length)apply(p.changes,'Agenda mudou: blocos flexíveis reorganizados');}catch(e){console.warn('Planner:',e.message);}},1200);}
+function init(){Planner.menu=open;const oldEvent=window.abrirEvento;window.abrirEvento=function(x){const e=obter('eventos',x);if(window.SC170?.isBlock(e))return SC170.openBlock(e.id);const result=oldEvent.apply(this,arguments);eventWarning(e.id||'');return result;};const oldSaveEvent=window.salvarEventoModal;window.salvarEventoModal=function(id){if($('sc150-conflict')){const hits=eventConflicts($('f-data').value,$('f-ini').value,$('f-fim').value,id);if(hits.length){$('sc150-conflict').textContent='Há sobreposição com '+hits.map(e=>e.title).join(' · ')+'. Escolha outro horário.';if(window.SC151FX)SC151FX.warning(hits);toast('Confira o conflito de horários antes de salvar.',true);return;}}return oldSaveEvent.apply(this,arguments);};const oldSave=window.salvar;window.salvar=function(tab,items,extra,exigirPersistencia){if(tab==='tarefas'&&!busy){items=(Array.isArray(items)?items:[items]).map(o=>{const t=task(o.id);if(t&&managed(t)&&(['data','hora'].some(k=>Object.hasOwn(o,k)&&String(o[k])!==String(t[k]||''))))return Object.assign({},o,{notas:String(o.notas??t.notas??'').replace(/\s*\[planner:auto\]/g,'')+'\n[planner:fixo]'});return o;});}return oldSave.call(this,tab,items,extra,exigirPersistencia);};const oldLocal=SC145.local;SC145.local=function(text){const n=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();if(/^(planeje|organize|replaneje) (meu dia|minha semana|o meu dia)[.!]?$/.test(n)){plan(true).catch(e=>toast(e.message,true));return 'Estou conferindo a agenda e preparando uma prévia. Revise antes de aplicar.';}if(/^(desfaca|desfazer) (o )?(plano|planejamento)[.!]?$/.test(n)){undo();return 'Planejamento desfeito; a automação está pausada por 30 minutos.';}return oldLocal.apply(this,arguments);};const oldAgenda=window.renderAgenda;window.renderAgenda=function(){if(typeof agDia==='string'&&sc120Date_(agDia))day=agDia;const r=oldAgenda.apply(this,arguments);render();return r;};const old=window.renderTudo;window.renderTudo=function(){const r=old.apply(this,arguments);refresh();schedule();return r;};document.addEventListener('click',e=>{const b=e.target.closest('[data-sc148]');if(!b)return;e.preventDefault();const k=b.dataset.sc148;try{const map={'jump-next':()=>jumpNext(b),'day-gap':()=>chooseDayGap(b.dataset.day,Number(b.dataset.start),Number(b.dataset.end)),'gap-select':()=>pickDayGap(b.dataset.id),'gap-save':()=>saveDayGap(),'gap-cancel':()=>{dayGap=null;fecharModal();},view:()=>setView(b.dataset.view),'save-idea':()=>ideaClick(b.dataset.day,b),plan:()=>plan(true).catch(e=>toast(e.message,true)),'apply-preview':()=>applyPreview().catch(e=>toast(e.message,true)),undo,settings,'save-settings':saveSettings,cloud,'cloud-undo':cloudUndo,prev:()=>{day=view==='mes'?SC146.addMonths(day,-1):somaDias(day,view==='semana'?-7:-1);setView(view);},next:()=>{day=view==='mes'?SC146.addMonths(day,1):somaDias(day,view==='semana'?7:1);setView(view);},today:()=>{day=hojeISO();setView('dia');},date:()=>{day=b.dataset.day;setView('dia');},slot:()=>newSlot(b.dataset.day,b.dataset.time),external:()=>external(b.dataset.id,b.dataset.day,'external'),routine:()=>external(b.dataset.id,b.dataset.day,'routine'),fit:()=>fit(b.dataset.id).catch(e=>toast(e.message,true)),'fit-project':()=>fit(b.dataset.id,hojeISO()).catch(e=>toast(e.message,true)),'accept-fit':()=>acceptFit(b.dataset.time),edit:()=>SC126.detail('tarefas',b.dataset.id),event:()=>{const x=rows('eventos').find(x=>x.id===b.dataset.id);if(window.SC170?.isBlock(x))SC170.openBlock(x.id);else abrirEvento(x);},'new-event':()=>abrirEvento({data:day}),new:()=>abrirTarefa({data:b.dataset.day||day}),tasks:()=>{fecharModal();SC126.openTasks();},inbox:()=>Planner.entrada(),goals:()=>Planner.metas(),routines:()=>Planner.rotinas(),projects:projectProgress,review,'legacy-review':()=>Planner.revisao(),reload:()=>reloadCalendars().catch(()=>toast('Não foi possível atualizar o Google Agenda.',true))};map[k]?.();}catch(e){toast(e.message,true);}});document.addEventListener('change',e=>{if(e.target.matches('[data-sc148-task]')){alternarTarefa(e.target.dataset.sc148Task);refresh();}if(e.target.matches('[data-sc148-habit]')){marcarHabito(e.target.dataset.sc148Habit,day);refresh();}if(e.target.matches('[data-sc148-move]'))move(e.target.dataset.sc148Move,e.target.value);if(e.target.matches('[data-sc148-date]')&&sc120Date_(e.target.value)){day=e.target.value;setView('dia');}});document.addEventListener('input',e=>{if(e.target.matches('[data-sc148-note]'))ideaInput(e.target);});window.addEventListener('pagehide',()=>{for(const d of ideaDrafts.keys())ideaSave(d,false);});window.addEventListener('online',()=>loadCalendars().then(schedule));window.addEventListener('focus',()=>loadCalendars().then(schedule));setInterval(()=>{if(document.visibilityState!=='hidden')loadCalendars().then(()=>{if(['hoje','agenda'].includes(vistaAtual)&&!document.activeElement?.matches('input,textarea,select')&&$('modal')?.classList.contains('hidden'))refresh();schedule();});},60000);refresh();}
 window.SC148={open,render,refresh,plan,proposed,apply,undo,settings,saveSettings,move,review,cloud,schedule,options,html,newSlot,fitOptions,timelineEntries,segment,taskConflicts,taskMinutes,gapRanges,busyBlocks,ideaId,ideaSave,ideaSaved};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();</script>
 
@@ -15613,5 +15653,78 @@ document.addEventListener('click',function(e){
 <script src="./sc-botoes-compactos.js?v=2026-11-21c"></script>
 <link rel="stylesheet" href="./sc-aura-dashboard.css?v=2026-11-22b">
 <script src="./sc-aura-dashboard.js?v=2026-11-22b"></script>
+<style>
+.sc-premium-project,.sc-premium-compare,.sc-premium-study-list{display:grid;gap:8px;margin:10px 0}
+.sc-premium-project{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+.sc-premium-project>div,.sc-premium-compare>span,.sc-premium-study-list>article{padding:10px;border:1px solid var(--sc128-border);border-radius:10px;overflow-wrap:anywhere}
+.sc-premium-project small,.sc-premium-compare strong{display:block}
+.sc-premium-project .btn{white-space:normal;text-align:left}
+.sc-premium-compare{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sc-premium-compare>span:last-child{background:var(--sc11-soft);color:var(--sc11-accent)}
+.sc-premium-study-nav,.sc-premium-study-actions{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.sc-premium-study-nav [aria-current=true]{background:var(--sc11-soft);color:var(--sc11-accent)}
+.sc-premium-study-list textarea{min-height:80px}
+.sc-premium-study-list article>p{white-space:pre-wrap}
+</style>
+<script id="sc-premium-study">
+(function(){
+ const prefix='sc_premium_study_';
+ const button=(label,action,id='',attr='')=>'<button type="button" class="btn" data-sc-premium-study="'+action+'" data-key="'+h(id)+'" '+attr+'>'+label+'</button>';
+ function cards(){
+  return Object.entries(D.config||{}).filter(([key])=>key.startsWith(prefix)).flatMap(([key,value])=>{
+   try{const item=JSON.parse(value);return item?.question&&item.url?[{...item,key}]:[];}catch(_){return [];}
+  });
+ }
+ function url(value){
+  try{const link=new URL(value);return link.protocol==='https:'&&!link.username&&!link.password?link:null;}catch(_){return null;}
+ }
+ function source(item){
+  const link=url(item.url);if(!link)return '';
+  if(item.page)link.hash='page='+item.page;
+  return '<a href="'+h(link.href)+'" target="_blank" rel="noopener noreferrer">'+h(item.source)+(item.page?' · p. '+h(item.page):'')+'</a>';
+ }
+ function render(tab='sources'){
+  const all=cards();
+  const list=(tab==='sources'?all:tab==='questions'?all:all.filter(item=>item.due<=hojeISO())).sort((a,b)=>a.due.localeCompare(b.due));
+  const nav='<nav class="sc-premium-study-nav" aria-label="Estudo com fontes">'+[['sources','Fontes'],['questions','Questões'],['review','Revisão']].map(([key,label])=>button(label,key,'','aria-current="'+(key===tab)+'"')).join('')+'</nav>';
+  const content=list.map(item=>{
+   if(tab==='sources')return '<article><strong>'+h(item.topic)+'</strong><p>'+source(item)+'</p>'+button('Editar questão','edit',item.key)+'</article>';
+   return '<article><small>'+h(item.topic)+'</small><h3>'+h(item.question)+'</h3>'+(item.history?.length?'<small>Última revisão · '+h(item.history.at(-1).day.split('-').reverse().join('/'))+' · '+(item.history.at(-1).correct?'Acertei':'Precisa revisar')+'</small>':'')+
+    '<label>Minha resposta<textarea class="input" placeholder="Escreva antes de abrir a correção"></textarea></label>'+
+    '<details><summary>Ver correção</summary><p>'+h(item.answer)+'</p><p>'+source(item)+'</p>'+
+    '<div class="sc-premium-study-actions">'+button('Revisar amanhã','again',item.key)+button('Acertei','ok',item.key)+'</div></details>'+
+    '<div class="sc-premium-study-actions">'+button('Agendar revisão','schedule',item.key)+'</div></article>';
+  }).join('');
+  abrirModal('Estudo com fontes',nav+'<div class="sc-premium-study-list">'+(content||'<p>'+(tab==='review'?'Nenhuma revisão pendente para hoje.':'Adicione uma questão com a página ou o link da fonte.')+'</p>')+'</div>',button('Nova questão','edit'));
+ }
+ function edit(item){
+  const fields=[['topic','Assunto',120],['source','Nome da fonte',120],['url','Link HTTPS da fonte',1000],['page','Página (opcional)',6],['question','Questão',500],['answer','Correção',1500]];
+  abrirModal(item?'Editar questão':'Nova questão','<div class="sc-premium-study-list">'+fields.map(([key,label,max])=>'<label>'+label+'<'+(key==='question'||key==='answer'?'textarea class="input" id="sc-study-'+key+'" maxlength="'+max+'">'+h(item?.[key]||'')+'</textarea>':'input class="input" id="sc-study-'+key+'" maxlength="'+max+'" value="'+h(item?.[key]||'')+'">')+'</label>').join('')+'</div>',button('Salvar questão','save',item?.key));
+ }
+ function save(item){
+  const values=Object.fromEntries(['topic','source','url','page','question','answer'].map(key=>[key,el('sc-study-'+key)?.value.trim()||'']));
+  if(!values.topic||!values.source||!url(values.url)||!values.question||!values.answer||(values.page&&!/^[1-9]\d{0,5}$/.test(values.page))){
+   toast('Preencha a questão, a correção e uma fonte com link HTTPS. A página é opcional.',true);return;
+  }
+  const key=item?.key||prefix+crypto.randomUUID();
+  if(salvarConfig({[key]:JSON.stringify({...values,due:item?.due||hojeISO(),step:item?.step||0,history:item?.history||[]})}))render('questions');
+ }
+ document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-sc-premium-study]');if(!b)return;
+  const action=b.dataset.scPremiumStudy,item=cards().find(x=>x.key===b.dataset.key);
+  if(['sources','questions','review'].includes(action))render(action);
+  if(action==='edit')edit(item);
+  if(action==='save')save(item);
+  if(item&&action==='schedule')abrirTarefa({titulo:'Revisar: '+item.topic,data:item.due<hojeISO()?hojeISO():item.due,duracao:'15',notas:item.question+'\n'+item.source+(item.page?' · p. '+item.page:'')+'\n'+item.url});
+  if(item&&['again','ok'].includes(action)){
+   const step=action==='again'?0:Math.min(4,Number(item.step||0)+1);
+   const {key,...value}=item;
+   const response=b.closest('article')?.querySelector('textarea')?.value.trim().slice(0,1000)||'';
+   const history=[...(Array.isArray(value.history)?value.history:[]),{day:hojeISO(),correct:action==='ok',response}].slice(-10);
+   if(salvarConfig({[key]:JSON.stringify({...value,history,step,due:somaDias(hojeISO(),[1,3,7,14,30][step])})}))render('review');
+  }
+ });
+})();
+</script>
 </body></html>
 
