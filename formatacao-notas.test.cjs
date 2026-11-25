@@ -139,7 +139,7 @@ test('listas, numeração, níveis, citação, destaque, bloco de código, divis
   choose('more','command','close');assert.equal(d.activeElement,d.body);
 });
 
-test('links da web, links de notas e inserção de data e hora funcionam na posição escolhida',async t=>{
+test('links funcionam na posição escolhida e o menu omite data e hora',async t=>{
   const {w,d,q,selectNode,tap,choose,field,text}=await fixture(t);
   selectNode(text().firstChild,6,12);
   choose('insert','command','fmt:link');
@@ -158,11 +158,10 @@ test('links da web, links de notas e inserção de data e hora funcionam na posi
   tap(q('#ed-nota-l button'),true);
   assert.equal(q('#ed a.lnota').textContent,'Outra nota');
   assert.match(field(),/\[\[.*Outra nota\]\]/);
-  for(const [label,pattern] of [['Data de hoje',/\d{2}\/\d{2}\/\d{4}/],['Hora agora',/\d{2}:\d{2}/]]){
-    choose('insert','command','insert');
-    tap([...q('#ed-ins').querySelectorAll('button')].find(b=>b.textContent.includes(label)),true);
-    assert.match(field(),pattern);
-  }
+  choose('insert','command','insert');
+  assert.doesNotMatch(q('#ed-ins').textContent,/Data de hoje|Hora agora/);
+  assert.match(q('#ed-ins').textContent,/Link para nota/);
+  assert.match(q('#ed-ins').textContent,/Link da web/);
 });
 
 test('sublinhado afeta apenas a seleção e formatações antigas continuam legíveis',async t=>{

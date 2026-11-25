@@ -5627,7 +5627,7 @@ function edBarraHtml(nota){
 }
 function edPainelHtml(){
   var bas = [['p','Aa','Texto'],['h1','H1','Título 1'],['h2','H2','Título 2'],['h3','H3','Título 3'],['h4','H4','Título 4'],['ul','•','Lista com marcadores'],['ol','1.','Lista numerada'],['todo','☑','Lista de tarefas'],['q','❝','Citação'],['dest','💡','Frase de destaque'],['cod','</>','Código'],['hr','—','Divisor']];
-  var ins = [['nota','[[ ]]','Link para nota'],['link','🔗','Link da web'],['data','📅','Data de hoje'],['hora','🕒','Hora agora']];
+  var ins = [['nota','[[ ]]','Link para nota'],['link','🔗','Link da web']];
   var t = function(x){ return '<button type="button" class="ed-t" onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()" onclick="edPainelEsc(\'' + x[0] + '\')"><span class="ed-ti">' + h(x[1]) + '</span>' + h(x[2]) + '</button>'; };
   return '<div id="ed-ins" class="ed-ins" style="display:none"><p class="ed-tt">Blocos básicos</p><div class="ed-tg">' + bas.map(t).join('') + '</div><p class="ed-tt">Inserir</p><div class="ed-tg">' + ins.map(t).join('') + '</div></div>';
 }
@@ -5642,13 +5642,6 @@ function edPainel(abrir){
 function edPainelEsc(k){
   edRestaurarSelecao(edBarSel);
   if(k === 'nota' || k === 'link'){ edPainel(false); edFmt(k); return; }
-  if(k === 'data' || k === 'hora'){
-    var t = edTextoAtual(); if(!t){ toast('Toque dentro de um bloco primeiro.'); return; }
-    var n = new Date(), r = edFaixaAtual(t);
-    var texto = k === 'data' ? pad2(n.getDate()) + '/' + pad2(n.getMonth() + 1) + '/' + n.getFullYear() : pad2(n.getHours()) + ':' + pad2(n.getMinutes());
-    if(!edNativo('insertText',texto)) edInserirNoRange(r,document.createTextNode(texto));
-    edSync(); edPainel(false); edGuardarSelecao(); edNoteSignalChange(); return;
-  }
   if(k === 'hr'){ edDivisorAqui(); edPainel(false); return; }
   edBloco(k); edPainel(false);
 }
@@ -13029,7 +13022,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-25b";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-25c";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
