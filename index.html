@@ -2159,7 +2159,7 @@ html.sem-mov #toasts .sc114-toast,html.sem-mov #modal:not(.hidden) #modal-caixa{
   </form>
 </dialog>
 <div id="toasts" class="fixed bottom-36 lg:bottom-6 right-4 z-[60] flex flex-col gap-2 items-end"></div>
-<script src="./pwa-transport.js?v=2026-11-20d-sc1137151"></script>
+<script src="./pwa-transport.js?v=2026-11-25b"></script>
 <script>
 var VERSAO_TELA = '2026-11-20d';
 function sc123VersoesCompativeis(tela,servidor){if(typeof tela!=='string'||typeof servidor!=='string')return false;if(tela===servidor)return true;return ['2026-11-13a','2026-11-13d','2026-11-13e','2026-11-13f','2026-11-13g','2026-11-13h','2026-11-13i','2026-11-13j','2026-11-13k','2026-11-13l','2026-11-13m','2026-11-13n','2026-11-13o','2026-11-13p','2026-11-13q','2026-11-13r','2026-11-13s','2026-11-13t','2026-11-13u','2026-11-13v','2026-11-13w','2026-11-13x','2026-11-13y','2026-11-13z','2026-11-14a','2026-11-14b','2026-11-14c','2026-11-15e','2026-11-15f','2026-11-15g','2026-11-15h','2026-11-16a','2026-11-16b','2026-11-16c','2026-11-16d','2026-11-16e','2026-11-16f','2026-11-17a','2026-11-17b','2026-11-17c','2026-11-17d','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i','2026-11-17j','2026-11-17k','2026-11-18a','2026-11-18b','2026-11-19a','2026-11-19b','2026-11-20a','2026-11-20b','2026-11-20c'].indexOf(tela)>=0&&['2026-11-13a','2026-11-13b','2026-11-13c','2026-11-13d','2026-11-14a','2026-11-14c','2026-11-14d','2026-11-15e','2026-11-15f','2026-11-17e','2026-11-17f','2026-11-17g','2026-11-17h','2026-11-17i'].indexOf(servidor)>=0;}
@@ -2425,7 +2425,7 @@ function sc166LimparTela(){
   sc166Geracao++;sc166Conta='';sc166Escopo='';sc166Confirmado=false;
   CHAVE_CACHE=CHAVE_FILA=PREFIXO_FILA='';
   fila=[];pendentes=0;seqAplicado=0;ultimaSync=0;ultimoErroFila='';enviando=false;falhasSeguidas=0;atualizando=false;
-  clearTimeout(timerFila);gcalCache={};
+  cancelarEsperaFila();gcalCache={};
   try{
     var prova=JSON.parse(localStorage.getItem('sc166_marcador_sessao')||'null');
     if(!prova||prova.marcador===marcadorAnterior)localStorage.removeItem('sc166_marcador_sessao');
@@ -2951,7 +2951,7 @@ function statusNuvem(){
   }
   if(!fila.length && !enviando && !atualizando) t += ' <span class="rotulo-sync"></span>';
   var e = el('status-nuvem'); e.innerHTML = t; e.style.cursor = fila.length ? 'pointer' : '';
-  e.onclick = fila.length ? function(){ falhasSeguidas = 0; drenarFila(); } : null;
+  e.onclick = fila.length ? function(){ falhasSeguidas = 0; cancelarEsperaFila(); drenarFila(); } : null;
   atualizarRotuloSync();
 }
 
@@ -3108,16 +3108,18 @@ function reintegrarQuarentena(){
     if(restantes.length) localStorage.setItem(sc166QuarentenaKey(), JSON.stringify(restantes));
     else localStorage.removeItem(sc166QuarentenaKey());
   }catch(e){}
-  falhasSeguidas=0;drenarFila();toast(restantes.length?'Parte das alterações continua em quarentena.':'Alterações reinseridas na fila.',!!restantes.length);
+  falhasSeguidas=0;cancelarEsperaFila();drenarFila();toast(restantes.length?'Parte das alterações continua em quarentena.':'Alterações reinseridas na fila.',!!restantes.length);
 }
 function retentarFila(){
   toast(fila.length + ' alteração(ões) ainda não chegaram ao Google/planilha.' + (ultimoErroFila ? ' Último erro: ' + ultimoErroFila : ' Tentando enviar…'), !!ultimoErroFila);
-  falhasSeguidas = 0; drenarFila();
+  falhasSeguidas = 0; cancelarEsperaFila(); drenarFila();
+}
+function cancelarEsperaFila(){
+  clearTimeout(timerFila);timerFila=null;
 }
 function drenarFila(){
-  if(!sc166Confirmado||enviando||!fila.length){ statusNuvem(); return; }
+  if(!sc166Confirmado||enviando||timerFila!==null||!fila.length){ statusNuvem(); return; }
   if(navigator.onLine === false){ statusNuvem(); return; }   // espera o evento "online"
-  clearTimeout(timerFila);
   var cmd=fila[0],geracao=sc166Geracao;
   if(cmd.sc166_owner!==sc166Escopo)return;
   enviando=true;statusNuvem();
@@ -3125,7 +3127,18 @@ function drenarFila(){
       if(geracao!==sc166Geracao)return;
       enviando = false; falhasSeguidas++;
       var msg = erroHumano(e); ultimoErroFila = msg;
+      SC167.renderAfterAck();
       if(navigator.onLine === false){ statusNuvem(); return; }
+      if(e?.codigo==='login_pendente'||e?.codigo==='sessao_encerrada'||e?.codigo==='nao_autenticado'||e?.codigo==='expirado'){
+        statusNuvem();
+        return; // o login confirma novamente a conta antes de retomar a fila
+      }
+      if(['rede','timeout','muitas_tentativas','verificacao_indisponivel'].includes(e?.codigo)){
+        statusNuvem();
+        var pausa=e.codigo==='muitas_tentativas'?60000:[1000,3000,10000,30000,60000][Math.min(falhasSeguidas-1,4)];
+        timerFila=setTimeout(function(){timerFila=null;drenarFila();},pausa);
+        return;
+      }
       cmd.tentativas = (cmd.tentativas||0) + 1;
       // O servidor guardou INICIADO em _Operacoes: repetir pode duplicar efeitos Google.
       // Mantém a operação na fila sem reenvio automático, para conferência manual.
@@ -3147,7 +3160,7 @@ function drenarFila(){
       salvarFila(cmd); statusNuvem();
       var espera = [2000, 5000, 15000, 30000, 60000][Math.min(cmd.tentativas-1, 4)];
       if(cmd.tentativas === 1) toast('Falha ao gravar; tentarei novamente: '+msg,true);
-      timerFila = setTimeout(drenarFila,espera);
+      timerFila = setTimeout(function(){timerFila=null;drenarFila();},espera);
   }
   function preservarConflito(r){
       if(!Array.isArray(r.notas)||!SC167.noteKeepConflict(cmd,r.notas)||!salvarFila(cmd,true)){
@@ -3181,9 +3194,9 @@ function drenarFila(){
       if(r && r.aviso) toast(r.aviso, true); else if(r && r.info) toast(r.info);
       if(cmd.tabela==='eventos') gcalCache = {};
       aplicarDados(r);          // descarta sozinho se for mais velha que a já aplicada; reaplica o que ainda está na fila
-      SC167.renderAfterAck();
       if(window.SC151FX)SC151FX.ack(cmd,r);
       if(fila.length) drenarFila();
+      else { statusNuvem(); SC167.renderAfterAck(); }
     })
     .withFailureHandler(falhaGravacao)
     .enviarComando(sc166ComandoServidor(cmd));}
@@ -3203,8 +3216,11 @@ function sc166ComandoServidor(cmd){
   delete payload.sc166_owner;delete payload.sc166_conversao_tarefa;delete payload.sc166_conversao_evento;delete payload.sc120_group;if(!D.sc167NotasCAS)delete payload.sc167_note_base;
   return payload;
 }
-window.addEventListener('online', function(){falhasSeguidas=0;if(!sc166Confirmado)recarregar(true);else drenarFila();statusNuvem();});
+window.addEventListener('online', function(){falhasSeguidas=0;cancelarEsperaFila();if(!sc166Confirmado)recarregar(true);else drenarFila();statusNuvem();});
 window.addEventListener('offline', statusNuvem);
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&fila.length)drenarFila();
+});
 
 function salvar(tabela, itens, extra, exigirPersistencia){
   itens = [].concat(itens);
@@ -13013,7 +13029,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-25a";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-25b";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */

@@ -240,18 +240,26 @@ function enviarApi(corpo){
   return Promise.resolve().then(function(){
     etapa='servidor';
     var ac=window.AbortController?new AbortController():null, tm=ac?setTimeout(function(){ ac.abort(); },40000):0;
-    return fetch(url,{method:'POST',redirect:'follow',signal:ac?ac.signal:undefined,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo)}).then(function(r){ clearTimeout(tm); return r; },function(e){ clearTimeout(tm); throw new Error(e&&e.name==='AbortError'?'O servidor não respondeu em 40 s.':'Sem conexão com o servidor (possível bloqueio CORS ou redirecionamento do Apps Script).'); });
-  }).then(function(r){ etapa='resposta'; return r.text(); }).then(function(t){
+    return fetch(url,{method:'POST',redirect:'follow',signal:ac?ac.signal:undefined,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo)})
+      .then(function(r){etapa='resposta';return r.text();})
+      .catch(function(e){
+        var timeout=e&&e.name==='AbortError';
+        throw Object.assign(new Error(timeout?'O servidor não respondeu em 40 s.':'Sem conexão com o servidor.'),{codigo:timeout?'timeout':'rede'});
+      }).finally(function(){clearTimeout(tm);});
+  }).then(function(t){
     var j; try{ j=JSON.parse(t); }catch(e){ throw new Error('Resposta inesperada do servidor (confira se a implantação pública está na versão nova).'); }
     if(j&&j.ok) return j.r;
     var e=j&&j.erro;
-    var m={nao_autenticado:'Login recusado: use a conta Google dona do sistema.',expirado:'Sessão expirada.',api_nao_configurada:'Servidor sem OAUTH_CLIENT_ID / ALLOWED_EMAIL. Veja o guia de instalação.',muitas_tentativas:'Muitas tentativas. Espere 1 minuto.',funcao_invalida:'Função não permitida.',verificacao_indisponivel:'Google indisponível para validar o login. Tente de novo.',operacao_indeterminada:(j&&j.msg)||'Operação exige conferência manual no Apps Script antes de reenviar.',falha:(j&&j.msg)||'Falha no servidor.'}[e]||'Erro no servidor.';
+    var m={nao_autenticado:'Login recusado: use a conta Google dona do sistema.',expirado:'Sessão expirada.',sessao_encerrada:'Sessão encerrada. Reconecte a conta Google.',api_nao_configurada:'Servidor sem OAUTH_CLIENT_ID / ALLOWED_EMAIL. Veja o guia de instalação.',muitas_tentativas:'Muitas tentativas. Espere 1 minuto.',funcao_invalida:'Função não permitida.',verificacao_indisponivel:'Google indisponível para validar o login. Tente de novo.',operacao_indeterminada:(j&&j.msg)||'Operação exige conferência manual no Apps Script antes de reenviar.',falha:(j&&j.msg)||'Falha no servidor.'}[e]||'Erro no servidor.';
     var err=new Error(m);err.codigo=e;throw err;
   });
 }
 function chamar(fn,args){
   // Gravações da conta anterior nunca esperam um novo login para serem reenviadas.
-  if(fn==='enviarComando'&&!tokenValido())return Promise.reject(new Error('Reconecte a conta para sincronizar as alterações pendentes.'));
+  if(fn==='enviarComando'&&!tokenValido()){
+    mostrarLoginSeNecessario();
+    return Promise.reject(Object.assign(new Error('Reconecte a conta para sincronizar as alterações pendentes.'),{codigo:'login_pendente'}));
+  }
   return garantirToken().then(function(){
     if(encerrando)throw new Error('Sessão em encerramento.');
     var usada=sessao,googleUsado=tok,origem=window.scPwaStorageScope();

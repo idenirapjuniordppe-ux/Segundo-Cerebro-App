@@ -750,3 +750,43 @@ test('telas principais abrem com dados de amostra sem disparar gravações',asyn
   w.irPara('config');assert.ok(d.getElementById('sc134-settings'));
   assert.equal(w.lerFila().length,0);
 });
+
+test('fila envia em ordem e atualiza a interface uma vez ao concluir',t=>{
+  const {w,sent,online}=app(t);
+  w.aplicarDados(snapshot(A));
+  online(false);
+  for(let i=0;i<6;i++)assert(w.enviar({tipo:'SALVAR_CONFIG',dados:{teste:String(i)}}));
+  const ids=Array.from(w.fila,c=>c.cid);
+  let renders=0;w.SC167.renderAfterAck=()=>renders++;
+  online(true);w.dispatchEvent(new w.Event('online'));
+  for(let i=0;i<6;i++){
+    assert.equal(sent.length,i+1);
+    assert.equal(sent[i].cmd.cid,ids[i]);
+    sent[i].ok(snapshot(A,{seq:i+2,config:{teste:String(i)}}));
+  }
+  assert.equal(renders,1);
+  assert.equal(w.lerFila().length,0);
+  assert(w.document.getElementById('status-mini').classList.contains('hidden'));
+});
+
+test('rede indisponível mantém alterações na fila e reconexão retoma o mesmo comando',t=>{
+  const {w,sent}=app(t);
+  w.aplicarDados(snapshot(A));
+  assert(w.enviar({tipo:'SALVAR_CONFIG',dados:{teste:'primeiro'}}));
+  const id=sent[0].cmd.cid;
+  sent[0].fail(Object.assign(Error('sem rede'),{codigo:'rede'}));
+  assert(w.enviar({tipo:'SALVAR_CONFIG',dados:{teste:'segundo'}}));
+  assert.equal(sent.length,1,'gravações novas não ignoram o intervalo de espera');
+  for(let i=0;i<7;i++){
+    w.retentarFila();
+    sent.at(-1).fail(Object.assign(Error('sem rede'),{codigo:'rede'}));
+  }
+  assert.equal(w.lerFila().length,2);
+  assert.equal(w.localStorage.getItem(w.sc166QuarentenaKey()),null);
+  w.dispatchEvent(new w.Event('online'));
+  assert.equal(sent.at(-1).cmd.cid,id);
+  sent.at(-1).ok(snapshot(A,{seq:2}));
+  assert.notEqual(sent.at(-1).cmd.cid,id);
+  sent.at(-1).ok(snapshot(A,{seq:3}));
+  assert.equal(w.lerFila().length,0);
+});
