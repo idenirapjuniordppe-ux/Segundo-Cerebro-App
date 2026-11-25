@@ -185,7 +185,7 @@ function projectsPanel(m){
     }).join('')+'</div>':'<div class="sc190-empty">Nenhum projeto em andamento.</div>')+'</section>';
 }
 function markup(m){
-  return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+
+  return hero(m)+'<div class="sc190-toolbar">'+header(m)+'</div>'+(m.d===currentDay()?(window.SCAutomacoes?.home()||''):'')+
     '<div class="sc190-layout"><div class="sc190-left">'+taskPanel(m)+projectsPanel(m)+'</div>'+
     '<div class="sc190-right">'+agendaPanel(m)+habitsPanel(m)+goalsPanel(m)+'</div></div>'+metrics(m);
 }

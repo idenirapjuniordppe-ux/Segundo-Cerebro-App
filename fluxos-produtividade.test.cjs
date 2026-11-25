@@ -210,3 +210,47 @@ test('falha na gravação mantém o formulário de nota e não cria registro par
  assert.equal(w.SC170.saveDayNote(),false);assert.equal(w.D.notas.length,0);
  assert.equal(q('#sc170-note-text').value,'Anotação não salva');assert.equal(q('#modal').classList.contains('hidden'),false);
 });
+
+test('automação só confirma o plano explícito e protege tarefas fixas, recorrentes e com prazo',async t=>{
+ const {w,q,date}=await app(t,{config:{sc148_auto:'Não',dia_fim:'13:00'},tarefas:[
+  record('fixed','Compromisso',{data:'2026-11-20',hora:'12:50',duracao:'10'}),
+  record('small','Questões',{data:'2026-11-20',duracao:'25',prioridade:'alta'}),
+  record('large','Corrigir',{data:'2026-11-20',duracao:'90'}),
+  record('deadline','Entrega',{data:'2026-11-20',duracao:'90',notas:'[prazo:2026-11-20]'}),
+  record('repeat','Repetição',{data:'2026-11-20',duracao:'90',recorrencia:'diaria'})
+ ]});
+ w.eval(readFileSync('sc-automacoes.js','utf8'));
+ await w.SCAutomacoes.reviewPlan();
+ assert.match(q('#modal-corpo').textContent,/Entrega/);
+ assert.equal(w.lerFila().length,0);
+ q('input[value="large"]').checked=true;
+ w.SCAutomacoes.applyPlan();
+ assert.equal(w.obter('tarefas','small').data,date);
+ assert.ok(w.obter('tarefas','small').hora);
+ assert.equal(w.obter('tarefas','large').data,w.somaDias(date,1));
+ assert.equal(w.obter('tarefas','deadline').data,date);
+ assert.equal(w.obter('tarefas','repeat').data,date);
+ assert.equal(w.obter('tarefas','fixed').hora,'12:50');
+});
+
+test('ações de tarefa adiada, retorno e revisão registram apenas escolhas confirmadas',async t=>{
+ const {w,q,input,date}=await app(t,{notas:[{id:'n1',titulo:'Estudo',conteudo:'Trecho de estudo'}],tarefas:[
+  record('t1','Orçamento da gráfica',{data:'2026-11-20',adiamentos:3})
+ ]});
+ w.eval(readFileSync('sc-automacoes.js','utf8'));
+ const a=w.SCAutomacoes;
+ a.unblock('t1');
+ assert.match(q('#modal-corpo').textContent,/Adiada 3 vezes/);
+ a.focus('t1');assert.equal(w.foco.id,'t1');assert.equal(w.foco.resta,600);w.alternarFoco();
+ a.split('t1');input('#sc-auto-steps','Separar materiais\nRevisar texto');input('#sc-auto-first',date);a.saveSteps('t1');
+ assert.equal(w.D.tarefas.filter(x=>x.pai==='t1').length,2);
+ a.waiting('t1');input('#sc-auto-return-day',date);input('#sc-auto-return-url','https://example.org/conversa');a.saveWaiting('t1');
+ assert.match(a.home(),/1 retorno pendente/);
+ a.message('t1');assert.match(q('#sc-auto-message').value,/Orçamento da gráfica/);
+ a.receive('t1');assert.doesNotMatch(a.home(),/retorno pendente/);
+ a.newReview('n1','Trecho de estudo');input('#sc-auto-question','Qual é a regra?');a.saveReview('n1');
+ const entry=()=>JSON.parse(w.D.config.sc_auto_revisoes)[0];
+ a.study(entry().id,'show');assert.match(q('#modal-corpo').textContent,/Trecho de estudo/);
+ a.grade(entry().id,'yes');assert.equal(entry().day,w.somaDias(date,3));
+ a.grade(entry().id,'no');assert.equal(entry().day,w.somaDias(date,1));
+});
