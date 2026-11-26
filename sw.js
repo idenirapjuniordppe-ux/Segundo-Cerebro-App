@@ -1,7 +1,7 @@
 /* 2º Cérebro Studio 9.0 — cache isolado da interface; NUNCA armazena respostas Google. */
 const VERSION='2026-11-20d';
-const REVISION='2026-11-25c';
-const CACHE='segundo-cerebro-2026-11-21c-botoes-premium-dashboard-fiel-20261122b-20261125c-editor-'+encodeURIComponent(self.registration.scope);
+const REVISION='2026-11-26a';
+const CACHE='segundo-cerebro-2026-11-21c-botoes-premium-dashboard-fiel-20261122b-20261126a-offline-'+encodeURIComponent(self.registration.scope);
 const PREFIX='segundo-cerebro-';
 const ESSENCIAIS=['./hero-neural-11-21.webp','./hero-minimal-11-21.webp','./hero-glass-11-21.webp','./hero-executive-11-21.webp','./hero-editorial-11-21.webp','./aura-coral-mesa.webp','./lavanda-luminaria.webp','./wallpaper-neural-11-21.webp','./wallpaper-minimal-11-21.webp','./wallpaper-glass-11-21.webp','./wallpaper-executive-11-21.webp','./wallpaper-editorial-11-21.webp','./index.html','./sc-botoes-compactos.css?v=2026-11-21c','./sc-botoes-compactos.js?v=2026-11-21c','./sc-aura-dashboard.css?v=2026-11-22b','./sc-aura-dashboard.js?v=2026-11-25a','./sc-automacoes.js?v=2026-11-25a','./sc-drive-projetos.js?v=2026-11-20d','./pwa-transport.js?v=2026-11-25b','./pwa-install.js?v=2026-11-22b'];
 const OPCIONAIS=['./offline.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./segundo-cerebro-fundo.webp','./fundo-minimal.webp','./fundo-glass.webp','./fundo-executive.webp','./fundo-editorial.webp'];
@@ -34,10 +34,12 @@ self.addEventListener('fetch',event=>{
  const r=event.request;if(r.method!=='GET')return;
  const url=new URL(r.url);if(url.origin!==self.location.origin)return;
  if(r.mode==='navigate'){
+  const start=new URL('./',self.registration.scope);
+  if(url.pathname!==start.pathname&&url.pathname!==start.pathname+'index.html')return;
   event.respondWith((async()=>{try{
     const response=await fetch(new Request(r,{cache:'no-store'}));
-    const start=new URL('./',self.registration.scope);
-    if(response.ok && response.url && new URL(response.url).origin===self.location.origin && new URL(response.url).pathname===url.pathname && (url.pathname===start.pathname || url.pathname===start.pathname+'index.html') && (response.headers.get('Content-Type')||'').includes('text/html')){const cache=await caches.open(CACHE);if((await response.clone().text()).includes('window.SC_SHELL_REVISION = "'+REVISION+'"'))cache.put('./index.html',response.clone()).catch(()=>{});}
+    if(response.status>=500)throw new Error('Hospedagem temporariamente indisponível');
+    if(response.ok && response.url && new URL(response.url).origin===self.location.origin && new URL(response.url).pathname===url.pathname && (response.headers.get('Content-Type')||'').includes('text/html')){const cache=await caches.open(CACHE);if((await response.clone().text()).includes('window.SC_SHELL_REVISION = "'+REVISION+'"'))cache.put('./index.html',response.clone()).catch(()=>{});}
     return response;
    }catch(e){const cache=await caches.open(CACHE);return (await cache.match('./index.html'))||(await cache.match('./offline.html'))||Response.error();}})());return;
  }
