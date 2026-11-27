@@ -790,3 +790,25 @@ test('rede indisponível mantém alterações na fila e reconexão retoma o mesm
   sent.at(-1).ok(snapshot(A,{seq:3}));
   assert.equal(w.lerFila().length,0);
 });
+
+test('voltar ao app busca as mudanças do outro aparelho sem competir com uma edição',async t=>{
+  const {w,reads,online}=app(t);
+  await ready(w);
+  w.aplicarDados(snapshot(A,{tarefas:[{id:'local',titulo:'Versão anterior'}]}));
+  const inicial=reads.length;
+  w.dispatchEvent(new w.Event('focus'));
+  w.document.dispatchEvent(new w.Event('visibilitychange'));
+  assert.equal(reads.length,inicial+1);
+  assert.equal(reads.at(-1).force,true);
+  reads.at(-1).ok(snapshot(A,{seq:2,tarefas:[{id:'remota',titulo:'Outro aparelho'}]}));
+  assert.equal(w.D.tarefas[0].id,'remota');
+
+  w.ultimaConsultaEntreAparelhos=0;
+  w.dispatchEvent(new w.Event('focus'));
+  assert.equal(reads.length,inicial+2);
+  online(false);
+  assert(w.salvar('tarefas',{id:'remota',titulo:'Editada aqui'}));
+  reads.at(-1).ok(snapshot(A,{seq:3,tarefas:[{id:'remota',titulo:'Mudança tardia'}]}));
+  assert.equal(w.D.tarefas[0].titulo,'Editada aqui');
+  assert.equal(w.lerFila().length,1);
+});

@@ -3282,11 +3282,31 @@ function salvarConfig(dados){
   if(window.SC151FX)SC151FX.track(cmd);
   efeitoLocal(cmd);renderTudo();drenarFila();return true;
 }
-function recarregar(forcar, aviso){
+var consultaEntreAparelhos=null, ultimaConsultaEntreAparelhos=0;
+function podeConsultarEntreAparelhos(){
+  var a=document.activeElement;
+  return sc166Confirmado && navigator.onLine!==false && document.visibilityState!=='hidden' &&
+    !fila.length && !enviando && el('modal').classList.contains('hidden') &&
+    !(window.SC138Notes?.isEditing()) &&
+    !(a && (a.matches('input,textarea,select') || a.isContentEditable));
+}
+function consultarEntreAparelhos(){
+  if(!podeConsultarEntreAparelhos() || consultaEntreAparelhos===sc166Geracao ||
+     Date.now()-ultimaConsultaEntreAparelhos<5000)return;
+  ultimaConsultaEntreAparelhos=Date.now();
+  consultaEntreAparelhos=sc166Geracao;
+  recarregar(false,false,true);
+}
+function recarregar(forcar, aviso, entreAparelhos){
   if(aviso&&navigator.onLine===false){toast('Sem conexão. Mantive os dados deste aparelho.',true);return;}
   var geracao=sc166Geracao;
+  function concluirConsulta(){
+    if(entreAparelhos&&consultaEntreAparelhos===geracao)consultaEntreAparelhos=null;
+  }
   google.script.run.withSuccessHandler(function(r){
-    if(geracao!==sc166Geracao||!(forcar||el('modal').classList.contains('hidden')))return;
+    concluirConsulta();
+    if(geracao!==sc166Geracao||!(forcar||el('modal').classList.contains('hidden'))||
+       (entreAparelhos&&!podeConsultarEntreAparelhos()))return;
     if(!r||r.erro||!sc166Nome(r.usuario)){
       if(aviso)toast('Não foi possível atualizar. Mantive os dados deste aparelho.',true);
       return;
@@ -3295,7 +3315,7 @@ function recarregar(forcar, aviso){
     el('carregando').classList.add('hidden');SC167.readyMark();renderTudo();processarVoz();
     if(aviso)toast('Atualizado.');
     if(fila.length)drenarFila();
-  }).withFailureHandler(function(){if(geracao===sc166Geracao&&aviso)toast('Sem resposta do servidor. Mantive os dados deste aparelho.',true);}).getDados(!!aviso);
+  }).withFailureHandler(function(){concluirConsulta();if(geracao===sc166Geracao&&aviso)toast('Sem resposta do servidor. Mantive os dados deste aparelho.',true);}).getDados(!!(aviso||entreAparelhos));
 }
 
 /* ───────── navegação / tema ───────── */
@@ -9025,11 +9045,10 @@ function iniciar(){
     else if(vistaAtual==='agenda' && agModo==='dia' && agDia===hojeISO()) renderAgenda();
   }, 60000);
   if(fila.length) drenarFila();   // gravações que ficaram pendentes na última sessão
-  setInterval(function(){   // a cada 2 min: busca mudanças feitas em outro aparelho
-    var a = document.activeElement, tag = a ? a.tagName : '';
-    if(pendentes || !el('modal').classList.contains('hidden') || document.visibilityState==='hidden' || tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || (a && a.isContentEditable)) return;
-    recarregar();
-  }, 120000);
+  setInterval(consultarEntreAparelhos,60000);
+  document.addEventListener('visibilitychange',consultarEntreAparelhos);
+  window.addEventListener('focus',consultarEntreAparelhos);
+  window.addEventListener('online',consultarEntreAparelhos);
 }
 
 /* Studio 11.4: diálogos centralizados em abrirModal/fecharModal, sem wrappers de foco duplicados. */
@@ -13022,7 +13041,7 @@ window.SC1113={copy};
 })();
 
 </script>
-<script>window.SC_SHELL_REVISION = "2026-11-26a";</script>
+<script>window.SC_SHELL_REVISION = "2026-11-27a";</script>
 <script src="./pwa-install.js?v=2026-11-22b"></script>
 <script id="sc114-capture">
 /* Captura 11.14: análise, esclarecimento e confirmação no mesmo contexto. */
